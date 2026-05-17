@@ -1,0 +1,58 @@
+﻿[
+    {
+        "subject":  "语文",
+        "title":  "义务教育教科书语文五年级上册",
+        "thumb":  "https://jc.pep.com.cn/xsys/yw/202210/W020240906406038052683.jpg",
+        "local":  "D:\\project\\步步原型设计\\学生端\\pep_covers\\语文.jpg",
+        "pdfurl":  "https://book.pep.com.cn/1211001501191/"
+    },
+    {
+        "subject":  "数学",
+        "title":  "义务教育教科书数学五年级上册",
+        "thumb":  "https://jc.pep.com.cn/xsys/sx/202210/W020240906462981805494.jpg",
+        "local":  "D:\\project\\步步原型设计\\学生端\\pep_covers\\数学.jpg",
+        "pdfurl":  "https://book.pep.com.cn/1221001501141/"
+    },
+    {
+        "subject":  "英语",
+        "title":  "义务教育教科书 英语（PEP） （三年级起点）五年级上册",
+        "thumb":  "https://jc.pep.com.cn/xsys/english/202603/W020260309558645699415.jpg",
+        "local":  "D:\\project\\步步原型设计\\学生端\\pep_covers\\英语_PEP_三年级起点.jpg",
+        "pdfurl":  "https://book.pep.com.cn/1212001501255/"
+    },
+    {
+        "subject":  "科学",
+        "title":  "义务教育教科书科学五年级上册",
+        "thumb":  "https://jc.pep.com.cn/xsys/kx/202210/W020240906471578158259.jpg",
+        "local":  "D:\\project\\步步原型设计\\学生端\\pep_covers\\科学.jpg",
+        "pdfurl":  "https://book.pep.com.cn/1244001501201/"
+    },
+    {
+        "subject":  "道德与法治",
+        "title":  "义务教育教科书道德与法治五年级上册",
+        "thumb":  "https://jc.pep.com.cn/xsys/df/202209/W020240906396065358652.jpg",
+        "local":  "D:\\project\\步步原型设计\\学生端\\pep_covers\\道德与法治.jpg",
+        "pdfurl":  "https://book.pep.com.cn/1284001501191/"
+    },
+    {
+        "subject":  "美术",
+        "title":  "义务教育教科书美术五年级上册",
+        "thumb":  "https://jc.pep.com.cn/xsys/ms/202210/W020240906476380660460.jpg",
+        "local":  "D:\\project\\步步原型设计\\学生端\\pep_covers\\美术.jpg",
+        "pdfurl":  "https://book.pep.com.cn/1263001501141/"
+    },
+    {
+        "subject":  "音乐",
+        "title":  "义务教育教科书音乐五年级上册（简谱）",
+        "thumb":  "https://jc.pep.com.cn/xsys/yy/202210/W020240906473686745633.jpg",
+        "local":  "D:\\project\\步步原型设计\\学生端\\pep_covers\\音乐_简谱.jpg",
+        "pdfurl":  "https://book.pep.com.cn/1262001501141/"
+    },
+    {
+        "subject":  "习近平新时代中国特色社会主义思想学生读本",
+        "title":  "习近平新时代中国特色社会主义思想学生读本小学高年级",
+        "thumb":  "https://jc.pep.com.cn/xsys/db/202210/W020240906403839617502.jpg",
+        "local":  "D:\\project\\步步原型设计\\学生端\\pep_covers\\习近平读本_小学高年级.jpg",
+        "pdfurl":  "https://book.pep.com.cn/1291001403221/"
+    }
+]
