@@ -1,0 +1,2129 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1280" />
+<title>步步优化白板端（教室大屏）</title>
+<style>
+:root{
+  --seewo-green:#07c783;
+  --seewo-green-dark:#06a86f;
+  --seewo-orange:#ff9f1c;
+  --seewo-orange-soft:#fff1d8;
+  --ink:#111827;
+  --muted:#6b7280;
+  --line:#d9dee8;
+  --chrome:#eef1f6;
+  --paper:#ffffff;
+  --toolbar:#f7f9fc;
+  --shadow:0 18px 46px rgba(15,23,42,.18);
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
+  color:var(--ink);
+  background:#dfe4ec;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit}
+.sr-only{
+  position:absolute;
+  width:1px;
+  height:1px;
+  padding:0;
+  margin:-1px;
+  overflow:hidden;
+  clip:rect(0,0,0,0);
+  white-space:nowrap;
+  border:0;
+}
+.seewo-app{
+  position:relative;
+  width:100vw;
+  height:100vh;
+  min-width:1180px;
+  min-height:660px;
+  overflow:hidden;
+  background:#edf0f5;
+}
+.window-strip{
+  position:absolute;
+  left:0;
+  right:0;
+  top:0;
+  height:32px;
+  background:#e9edf3;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 14px 0 0;
+  color:#1f2937;
+  z-index:30;
+}
+.brand-tab{
+  height:32px;
+  min-width:118px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 14px;
+  background:#dde2eb;
+  font-size:16px;
+  font-weight:900;
+}
+.logo-mark{
+  width:22px;
+  height:22px;
+  border-radius:5px;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  background:var(--seewo-green);
+  font-size:11px;
+  font-weight:900;
+}
+.doc-tabs{
+  position:absolute;
+  left:128px;
+  top:0;
+  height:32px;
+  display:flex;
+  align-items:center;
+  gap:4px;
+}
+.doc-tab{
+  height:32px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:0 16px;
+  border-radius:8px 8px 0 0;
+  background:#fff;
+  font-size:14px;
+  font-weight:800;
+  color:#1f2937;
+}
+.doc-tab.muted{
+  background:#dfe3eb;
+  color:#5b6473;
+}
+.window-actions{
+  margin-left:auto;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  color:#111827;
+  font-weight:800;
+}
+.edit-ribbon{
+  position:absolute;
+  left:0;
+  right:0;
+  top:32px;
+  height:74px;
+  background:#fff;
+  border-bottom:1px solid #cfd6e2;
+  display:grid;
+  grid-template-columns:340px 1fr 110px;
+  align-items:center;
+  z-index:25;
+}
+.ribbon-left,
+.ribbon-tools,
+.ribbon-share{
+  display:flex;
+  align-items:center;
+}
+.ribbon-left{
+  height:100%;
+  gap:18px;
+  padding-left:14px;
+}
+.ribbon-tool{
+  min-width:46px;
+  height:58px;
+  border:0;
+  background:transparent;
+  color:#1f2937;
+  display:grid;
+  place-items:center;
+  gap:2px;
+  cursor:pointer;
+  font-weight:800;
+}
+.ribbon-tool .ico{
+  font-size:22px;
+  line-height:1;
+  color:#4b5563;
+}
+.ribbon-tool.small .ico{font-size:19px}
+.ribbon-tool.disabled{opacity:.36}
+.ribbon-divider{
+  width:1px;
+  height:38px;
+  background:#dce1ea;
+}
+.teach-button{
+  height:38px;
+  min-width:98px;
+  border:0;
+  border-radius:6px;
+  background:var(--seewo-green);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  cursor:pointer;
+  font-size:17px;
+  font-weight:900;
+}
+.teach-button .play{
+  width:0;
+  height:0;
+  border-top:8px solid transparent;
+  border-bottom:8px solid transparent;
+  border-left:13px solid #fff;
+}
+.ribbon-tools{
+  justify-content:center;
+  gap:clamp(10px,1.7vw,26px);
+}
+.feature-tool{
+  min-width:50px;
+  border:0;
+  background:transparent;
+  display:grid;
+  place-items:center;
+  gap:4px;
+  cursor:pointer;
+  color:#111827;
+  font-size:14px;
+  font-weight:800;
+}
+.feature-tool .symbol{
+  font-size:25px;
+  color:#5b6473;
+  line-height:1;
+}
+.feature-tool.green .symbol{color:var(--seewo-green)}
+.feature-tool.blue .symbol{color:#3b82f6}
+.feature-tool.orange .symbol{color:#f59e0b}
+.ribbon-share{
+  justify-content:center;
+}
+.share-button{
+  height:38px;
+  border:1px solid #d7dde8;
+  border-radius:7px;
+  background:#fff;
+  padding:0 16px;
+  cursor:pointer;
+  color:#111827;
+  font-weight:800;
+}
+.editor-shell{
+  position:absolute;
+  left:0;
+  right:0;
+  top:106px;
+  bottom:32px;
+  display:grid;
+  grid-template-columns:122px 1fr 246px 46px;
+  background:#e7ebf2;
+}
+.page-strip{
+  position:relative;
+  border-right:1px solid #d3d9e5;
+  background:#f8fafc;
+  padding:10px 10px 38px;
+  overflow:hidden;
+}
+.new-page{
+  height:36px;
+  width:100%;
+  border:1px solid #d6dce7;
+  border-radius:4px;
+  background:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:6px;
+  cursor:pointer;
+  color:#111827;
+  font-weight:800;
+}
+.thumb-list{
+  position:absolute;
+  left:10px;
+  right:10px;
+  top:58px;
+  bottom:36px;
+  overflow:hidden;
+}
+.thumb-row{
+  display:grid;
+  grid-template-columns:18px 1fr;
+  align-items:center;
+  gap:6px;
+  margin-bottom:12px;
+  color:#6b7280;
+  font-weight:800;
+}
+.thumb-row.active{color:var(--seewo-green-dark)}
+.thumb{
+  height:56px;
+  border:1px solid #d9dee8;
+  border-radius:4px;
+  background:#fff;
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  cursor:pointer;
+}
+.thumb.active{
+  border:3px solid var(--seewo-green);
+}
+.thumb-mini{
+  width:82%;
+  height:70%;
+  border-radius:2px;
+  background:
+    linear-gradient(90deg,transparent 0 20%,#0f172a 20% 24%,transparent 24% 100%),
+    linear-gradient(#cbd5e1 0 0) 0 20%/100% 2px no-repeat,
+    linear-gradient(#cbd5e1 0 0) 0 48%/72% 2px no-repeat,
+    linear-gradient(#cbd5e1 0 0) 0 76%/84% 2px no-repeat;
+}
+.thumb-mini.cover{
+  background:
+    linear-gradient(135deg,transparent 58%,#37aee2 58% 72%,#f97316 72%),
+    radial-gradient(circle at 28% 42%,#047b92 0 16%,transparent 17%),
+    #fff;
+}
+.thumb-mini.result{
+  background:
+    linear-gradient(#94a3b8 0 0) 18% 78%/13% 32% no-repeat,
+    linear-gradient(#22c55e 0 0) 42% 78%/13% 58% no-repeat,
+    linear-gradient(#e5e7eb 0 0) 66% 78%/13% 45% no-repeat,
+    linear-gradient(#e5e7eb 0 0) 88% 78%/13% 20% no-repeat,
+    #fff;
+}
+.strip-footer{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:32px;
+  display:flex;
+  align-items:center;
+  padding-left:12px;
+  border-top:1px solid #d9dee8;
+  color:#5f6878;
+  font-size:13px;
+  font-weight:800;
+}
+.workbench{
+  position:relative;
+  overflow:hidden;
+  background:#e6eaf1;
+  display:grid;
+  place-items:center;
+}
+.slide-page{
+  position:relative;
+  width:min(100%, calc((100vh - 218px) * 1.777));
+  max-width:1180px;
+  aspect-ratio:16/9;
+  background:var(--paper);
+  box-shadow:0 1px 0 #d8dde7;
+  overflow:hidden;
+}
+.slide-inner{
+  position:absolute;
+  inset:0;
+  padding:58px 78px;
+  background:#fff;
+}
+.slide-inner.cover{
+  background:
+    linear-gradient(135deg,transparent 64%,rgba(125,166,197,.36) 64% 75%,#33a8da 75% 85%,#f97316 85% 96%,#fed7aa 96%),
+    #fff;
+}
+.course-logo{
+  position:absolute;
+  left:126px;
+  top:150px;
+  width:170px;
+  height:120px;
+  color:#047b92;
+  font-size:56px;
+  font-weight:900;
+}
+.cover-box{
+  position:absolute;
+  left:42%;
+  top:52%;
+  width:430px;
+  height:64px;
+  transform:translate(-50%,-50%);
+  border:3px solid #fb8c00;
+  border-radius:12px;
+  display:grid;
+  place-items:center;
+  color:#fb8c00;
+  font-size:28px;
+  font-family:"KaiTi","STKaiti",serif;
+}
+.cover-title{
+  position:absolute;
+  left:36%;
+  top:65%;
+  transform:translateX(-50%);
+  font-size:42px;
+  font-family:"KaiTi","STKaiti",serif;
+  letter-spacing:0;
+}
+.lesson-question{
+  font-family:"Times New Roman","SimSun",serif;
+  font-size:38px;
+  line-height:1.65;
+  color:#050505;
+  font-weight:800;
+  letter-spacing:0;
+}
+.lesson-question .blue{
+  color:#0000cc;
+  font-style:italic;
+}
+.answer-blank{
+  display:inline-block;
+  min-width:340px;
+  border-bottom:3px solid #111;
+  transform:translateY(-6px);
+}
+.teacher-note{
+  position:absolute;
+  left:74px;
+  right:74px;
+  bottom:46px;
+  min-height:44px;
+  border:1px solid #fed7aa;
+  border-radius:9px;
+  background:#fff8eb;
+  color:#9a3412;
+  display:flex;
+  align-items:center;
+  padding:8px 14px;
+  font-size:16px;
+  font-weight:900;
+}
+.worksheet{
+  display:grid;
+  grid-template-columns:1.15fr .85fr;
+  gap:42px;
+  height:100%;
+  align-items:center;
+}
+.worksheet h1{
+  margin:0 0 22px;
+  font-size:34px;
+}
+.fraction-card{
+  border:2px solid #111827;
+  border-radius:6px;
+  padding:24px 26px;
+}
+.fraction-line{
+  display:flex;
+  justify-content:space-between;
+  font-size:42px;
+  font-weight:900;
+  margin:18px 0;
+}
+.answer-options{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:10px;
+}
+.answer-options div{
+  border:1px solid #cbd5e1;
+  border-radius:4px;
+  padding:10px 12px;
+  font-size:18px;
+  font-weight:900;
+}
+.pie-sketch{
+  position:relative;
+  width:260px;
+  height:260px;
+  border:5px solid #fb923c;
+  border-radius:50%;
+  background:conic-gradient(#fed7aa 0 44%,#fff 44% 100%);
+}
+.pie-sketch:before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:-8px;
+  width:5px;
+  height:276px;
+  transform:translateX(-50%) rotate(-17deg);
+  border-radius:4px;
+  background:#fb923c;
+}
+.red-mark{
+  position:absolute;
+  left:52%;
+  top:54%;
+  width:280px;
+  height:112px;
+  border:4px solid #e11d48;
+  border-radius:50%;
+  transform:rotate(-10deg);
+}
+.red-mark span{
+  position:absolute;
+  right:-142px;
+  bottom:-18px;
+  color:#e11d48;
+  font-size:20px;
+  font-weight:900;
+  white-space:nowrap;
+  transform:rotate(10deg);
+}
+.mini-result{
+  height:100%;
+  display:grid;
+  grid-template-columns:.9fr 1.1fr;
+  gap:40px;
+  align-items:center;
+}
+.rate{
+  color:#333;
+  font-size:28px;
+  font-weight:900;
+}
+.rate strong{
+  margin-left:16px;
+  font-size:76px;
+}
+.chart{
+  height:320px;
+  display:flex;
+  align-items:flex-end;
+  gap:46px;
+  padding:20px 30px 36px;
+}
+.bar{
+  width:54px;
+  background:#edf0f4;
+  position:relative;
+}
+.bar:after{
+  content:attr(data-label);
+  position:absolute;
+  left:50%;
+  bottom:-34px;
+  transform:translateX(-50%);
+  color:#555;
+  font-size:24px;
+}
+.bar.correct{background:#68c87a}
+.property-pane{
+  border-left:1px solid #d3d9e5;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+}
+.property-title{
+  height:48px;
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:18px;
+  font-weight:900;
+}
+.property-body{
+  padding:18px 16px;
+  display:grid;
+  gap:22px;
+  color:#111827;
+}
+.layout-preview,
+.bg-preview{
+  width:100%;
+  height:74px;
+  border:1px solid #d8dee9;
+  border-radius:4px;
+  background:#fff;
+}
+.bg-preview{
+  background:
+    linear-gradient(135deg,transparent 62%,#bae6fd 62% 78%,#38bdf8 78% 90%,#f97316 90%),
+    #fff;
+}
+.pane-row{
+  display:grid;
+  grid-template-columns:82px 1fr;
+  gap:12px;
+  align-items:center;
+}
+.pane-button{
+  height:34px;
+  border:0;
+  border-radius:4px;
+  background:#f0f2f6;
+  font-weight:800;
+  cursor:pointer;
+}
+.side-tabs{
+  background:#fff;
+  border-left:1px solid #d3d9e5;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:22px;
+  padding-top:24px;
+  color:#111827;
+  font-weight:900;
+}
+.side-tab{
+  writing-mode:vertical-rl;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  color:#111827;
+}
+.side-tab.active{color:var(--seewo-green)}
+.runtime-mask{
+  position:absolute;
+  inset:0;
+  background:rgba(255,255,255,0);
+  pointer-events:none;
+  z-index:45;
+}
+.ink-canvas{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:55;
+  pointer-events:none;
+  cursor:crosshair;
+}
+.ink-canvas.active{
+  pointer-events:auto;
+  touch-action:none;
+}
+.easy-controller{
+  position:absolute;
+  right:24px;
+  top:126px;
+  z-index:90;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  touch-action:none;
+  user-select:none;
+}
+.float-main{
+  width:72px;
+  min-height:78px;
+  border:0;
+  border-radius:38px 38px 22px 22px;
+  background:#fff;
+  color:#1f2937;
+  display:grid;
+  place-items:center;
+  gap:2px;
+  padding:7px 8px;
+  box-shadow:0 10px 28px rgba(15,23,42,.17);
+  cursor:grab;
+  font-weight:900;
+}
+.float-main strong{
+  color:#e6a000;
+  font-size:22px;
+  line-height:1;
+}
+.float-main span{
+  font-size:19px;
+  color:#111827;
+}
+.float-main small{
+  color:#6b7280;
+  font-size:11px;
+}
+.dock{
+  display:none;
+  width:72px;
+  margin-top:10px;
+  padding:8px 0;
+  border-radius:32px;
+  background:#fff;
+  box-shadow:0 12px 32px rgba(15,23,42,.18);
+  border:1px solid #edf0f5;
+  overflow:hidden;
+}
+.easy-controller.open .dock{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.dock button{
+  width:62px;
+  min-height:56px;
+  border:0;
+  background:#fff;
+  display:grid;
+  place-items:center;
+  gap:2px;
+  cursor:pointer;
+  color:#4b5563;
+  font-size:12px;
+  font-weight:900;
+}
+.dock button span{
+  width:32px;
+  height:32px;
+  border-radius:9px;
+  display:grid;
+  place-items:center;
+  font-size:20px;
+}
+.dock button.active span,
+.dock button:hover span{
+  background:#fff4df;
+  color:#f59e0b;
+}
+.dock button[data-action="answer"] span{color:#16a34a}
+.dock button[data-action="clear"] span{color:#2563eb}
+.dock button[data-action="students"] span{color:#ef4444}
+.dock-divider{
+  width:42px;
+  height:1px;
+  background:#e5e7eb;
+  margin:5px 0;
+}
+.bottom-toolbar{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:84px;
+  z-index:82;
+  pointer-events:none;
+}
+.toolbar-group{
+  position:absolute;
+  bottom:12px;
+  height:58px;
+  border-radius:6px;
+  background:rgba(248,250,252,.92);
+  box-shadow:0 8px 22px rgba(15,23,42,.12);
+  display:flex;
+  align-items:stretch;
+  overflow:hidden;
+  pointer-events:auto;
+}
+.toolbar-group.left{left:0}
+.toolbar-group.center{left:50%;transform:translateX(-50%)}
+.toolbar-group.right{right:224px}
+.toolbar-button{
+  min-width:74px;
+  border:0;
+  background:transparent;
+  color:#4b5563;
+  display:grid;
+  place-items:center;
+  gap:2px;
+  cursor:pointer;
+  font-weight:900;
+  font-size:12px;
+}
+.toolbar-button .ico{
+  font-size:24px;
+  line-height:1;
+}
+.toolbar-button.active{
+  min-width:82px;
+  background:var(--seewo-green);
+  color:#fff;
+}
+.toolbar-separator{
+  width:1px;
+  margin:12px 0;
+  background:#d9dee8;
+}
+.page-nav{
+  position:absolute;
+  right:10px;
+  bottom:12px;
+  z-index:83;
+  height:58px;
+  border-radius:6px;
+  background:rgba(248,250,252,.94);
+  box-shadow:0 8px 22px rgba(15,23,42,.12);
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+}
+.page-nav button{
+  height:58px;
+  width:58px;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  color:#4b5563;
+  font-size:32px;
+  font-weight:900;
+}
+.page-nav button:disabled{
+  opacity:.38;
+  cursor:default;
+}
+.page-counter{
+  width:88px;
+  text-align:center;
+  font-weight:900;
+  color:#5f6878;
+}
+.page-counter small{
+  display:block;
+  font-size:12px;
+  margin-top:2px;
+}
+.pen-palette{
+  position:absolute;
+  left:50%;
+  bottom:84px;
+  transform:translateX(-50%);
+  min-width:460px;
+  padding:12px 14px;
+  border-radius:9px;
+  background:#fff;
+  border:1px solid #dbe1eb;
+  box-shadow:var(--shadow);
+  display:none;
+  grid-template-columns:auto auto auto auto;
+  gap:14px;
+  align-items:center;
+  z-index:88;
+}
+.pen-palette.show{display:grid}
+.palette-group{
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.palette-label{
+  color:#6b7280;
+  font-size:12px;
+  font-weight:900;
+}
+.swatch{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  border:2px solid #e5e7eb;
+  cursor:pointer;
+}
+.swatch.active{outline:3px solid rgba(7,199,131,.22);border-color:var(--seewo-green)}
+.size-dot{
+  border:0;
+  background:#f1f5f9;
+  border-radius:20px;
+  min-width:32px;
+  height:28px;
+  cursor:pointer;
+  font-weight:900;
+}
+.size-dot.active{background:var(--seewo-green);color:#fff}
+.mode-button{
+  height:28px;
+  padding:0 10px;
+  border:0;
+  border-radius:5px;
+  background:#f1f5f9;
+  cursor:pointer;
+  font-weight:900;
+}
+.mode-button.active{background:#111827;color:#fff}
+.floating-panel{
+  position:absolute;
+  left:50%;
+  bottom:88px;
+  transform:translateX(-50%);
+  width:560px;
+  max-height:calc(100vh - 160px);
+  overflow:auto;
+  border-radius:6px;
+  border:1px solid #d9dee8;
+  background:#fff;
+  box-shadow:var(--shadow);
+  padding:28px 32px;
+  z-index:86;
+  display:none;
+}
+.floating-panel.show{display:block}
+.floating-panel h3{
+  margin:0 0 20px;
+  font-size:19px;
+}
+.tool-grid{
+  display:grid;
+  grid-template-columns:repeat(6,1fr);
+  gap:24px 22px;
+  margin-bottom:32px;
+}
+.tile{
+  position:relative;
+  min-height:68px;
+  border:0;
+  background:transparent;
+  color:#5b6473;
+  display:grid;
+  place-items:center;
+  gap:8px;
+  cursor:pointer;
+  font-size:14px;
+  font-weight:800;
+}
+.tile span{
+  font-size:31px;
+  line-height:1;
+  color:#636b78;
+}
+.tile.plus:after{
+  content:"+";
+  position:absolute;
+  right:10px;
+  top:2px;
+  width:16px;
+  height:16px;
+  border-radius:50%;
+  background:var(--seewo-green);
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-size:13px;
+  font-weight:900;
+}
+.answer-panel,
+.cast-wall,
+.mini-board,
+.student-drawer,
+.side-pages{
+  position:absolute;
+  z-index:87;
+  display:none;
+}
+.answer-panel.show,
+.cast-wall.show,
+.mini-board.show,
+.student-drawer.show,
+.side-pages.show{display:block}
+.answer-panel{
+  left:16%;
+  right:7%;
+  top:112px;
+  bottom:104px;
+  border-radius:2px;
+  overflow:hidden;
+  background:#fff;
+  border:1px solid #d9dee8;
+  box-shadow:var(--shadow);
+}
+.panel-titlebar{
+  height:54px;
+  background:var(--seewo-orange);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  font-size:20px;
+  font-weight:900;
+}
+.panel-close{
+  width:34px;
+  height:34px;
+  border:0;
+  border-radius:50%;
+  background:rgba(255,255,255,.18);
+  color:#fff;
+  cursor:pointer;
+  font-size:25px;
+}
+.answer-body{
+  position:absolute;
+  inset:54px 0 0;
+  display:grid;
+  grid-template-columns:1fr 180px;
+}
+.answer-main{
+  padding:52px 60px;
+}
+.answer-rate{
+  display:flex;
+  align-items:baseline;
+  gap:18px;
+  color:#3f3f46;
+  font-size:20px;
+  font-weight:800;
+}
+.answer-rate strong{
+  font-size:66px;
+  line-height:1;
+}
+.answer-chart{
+  height:330px;
+  display:flex;
+  align-items:flex-end;
+  justify-content:center;
+  gap:54px;
+  padding:20px 20px 42px;
+}
+.answer-chart .bar{
+  width:58px;
+  background:#eff1f5;
+}
+.answer-chart .bar.correct{
+  background:#61c576;
+}
+.correct-row{
+  position:absolute;
+  left:60px;
+  bottom:28px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  color:#3f3f46;
+  font-size:20px;
+  font-weight:900;
+}
+.answer-choice{
+  width:46px;
+  height:46px;
+  border:2px solid #f3c5c5;
+  border-radius:4px;
+  color:#e45c5c;
+  display:grid;
+  place-items:center;
+}
+.answer-choice.correct{
+  border-color:var(--seewo-green);
+  color:var(--seewo-green);
+  background:#ecfdf5;
+}
+.answer-side{
+  border-left:1px solid #eef0f4;
+  padding:58px 20px;
+  color:#7a8190;
+  font-weight:900;
+}
+.question-chip{
+  height:78px;
+  border-radius:8px;
+  display:grid;
+  place-items:center;
+  margin-bottom:18px;
+  background:#f7f7f8;
+}
+.question-chip.active{
+  background:#ffad2e;
+  color:#fff;
+}
+.cast-wall{
+  left:14%;
+  right:9%;
+  top:112px;
+  bottom:104px;
+  border-radius:2px;
+  overflow:hidden;
+  background:#fff;
+  border:1px solid #d9dee8;
+  box-shadow:var(--shadow);
+}
+.cast-grid{
+  position:absolute;
+  inset:54px 0 0;
+  padding:32px;
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  grid-template-rows:repeat(2,1fr);
+  gap:18px;
+}
+.cast-card{
+  border:1px solid #e3e7ef;
+  border-radius:6px;
+  background:#101827;
+  color:#fff;
+  padding:20px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  font-weight:900;
+}
+.cast-card:nth-child(2){background:#f8fafc;color:#111827}
+.cast-card:nth-child(3){background:#0f172a}
+.cast-card:nth-child(4){background:#fff;color:#111827}
+.chalk{
+  font-family:"Comic Sans MS","KaiTi",cursive;
+  font-size:46px;
+  color:#f87171;
+}
+.mini-board{
+  left:7%;
+  right:7%;
+  top:48px;
+  bottom:52px;
+  border-radius:8px;
+  background:#fff;
+  border:1px solid #cfd6df;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.mini-head{
+  height:52px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 20px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:20px;
+  font-weight:900;
+}
+.mini-body{
+  position:absolute;
+  inset:52px 0 0;
+  display:grid;
+  grid-template-columns:50px 1fr 252px;
+}
+.shape-rail{
+  border-right:1px solid #d9dee8;
+  background:#f8fafc;
+  padding-top:10px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
+.shape-tool{
+  width:42px;
+  height:42px;
+  border:0;
+  background:transparent;
+  display:grid;
+  place-items:center;
+  font-size:28px;
+  cursor:pointer;
+}
+.shape-tool.active{
+  outline:2px solid #6bbd69;
+  background:#fff;
+}
+.math-canvas{
+  position:relative;
+  background:#fff;
+  border-top:28px solid #777;
+  border-bottom:24px solid #777;
+}
+.math-bottom{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:24px;
+  height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:28px;
+  color:#c9c9c9;
+  font-size:30px;
+}
+.math-inspector{
+  border-left:1px solid #d9dee8;
+  background:#fff;
+  display:flex;
+  flex-direction:column;
+}
+.object-title{
+  height:48px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:0 12px;
+  border-bottom:1px solid #d9dee8;
+  font-weight:900;
+}
+.inspector-section{
+  border-bottom:1px solid #e5e7eb;
+  padding:14px 12px;
+  display:grid;
+  gap:10px;
+  font-size:15px;
+}
+.green-cta{
+  position:absolute;
+  right:22px;
+  bottom:18px;
+  height:42px;
+  border:0;
+  border-radius:6px;
+  background:#58c88d;
+  color:#fff;
+  padding:0 26px;
+  cursor:pointer;
+  font-size:17px;
+  font-weight:900;
+}
+.student-drawer{
+  right:110px;
+  top:148px;
+  width:360px;
+  border-radius:8px;
+  background:#fff;
+  border:1px solid #d9dee8;
+  box-shadow:var(--shadow);
+  overflow:hidden;
+}
+.drawer-head{
+  height:46px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  background:#f8fafc;
+  border-bottom:1px solid #e5e7eb;
+  font-weight:900;
+}
+.student-list{
+  padding:14px;
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+}
+.student-seat{
+  height:44px;
+  border:1px solid #d9dee8;
+  border-radius:5px;
+  display:grid;
+  place-items:center;
+  font-weight:900;
+  background:#fff;
+}
+.student-seat.online{
+  color:var(--seewo-green-dark);
+  background:#effdf7;
+}
+.side-pages{
+  left:12px;
+  bottom:92px;
+  width:304px;
+  max-height:520px;
+  border-radius:8px;
+  background:#fff;
+  border:1px solid #d9dee8;
+  box-shadow:var(--shadow);
+  padding:14px;
+}
+.side-pages h3{
+  margin:0 0 12px;
+  font-size:16px;
+}
+.page-gallery{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+.gallery-card{
+  height:78px;
+  border:1px solid #d9dee8;
+  border-radius:5px;
+  background:#fff;
+  cursor:pointer;
+}
+.gallery-card.active{
+  border:3px solid var(--seewo-green);
+}
+.toast{
+  position:absolute;
+  left:50%;
+  top:128px;
+  transform:translateX(-50%) translateY(-10px);
+  min-width:240px;
+  padding:12px 18px;
+  border-radius:6px;
+  color:#fff;
+  background:rgba(17,24,39,.86);
+  box-shadow:0 12px 30px rgba(15,23,42,.22);
+  text-align:center;
+  font-weight:900;
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease,transform .18s ease;
+  z-index:110;
+}
+.toast.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.foot-status{
+  position:absolute;
+  left:0;
+  right:0;
+  bottom:0;
+  height:32px;
+  background:#fff;
+  border-top:1px solid #d4d9e3;
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:22px;
+  padding:0 18px;
+  color:#4b5563;
+  font-weight:800;
+  z-index:24;
+}
+.seewo-app.teaching .window-strip,
+.seewo-app.teaching .edit-ribbon,
+.seewo-app.teaching .page-strip,
+.seewo-app.teaching .property-pane,
+.seewo-app.teaching .side-tabs,
+.seewo-app.teaching .foot-status{
+  display:none;
+}
+.seewo-app.teaching .editor-shell{
+  top:0;
+  bottom:0;
+  grid-template-columns:1fr;
+  background:#fff;
+}
+.seewo-app.teaching .workbench{
+  grid-column:1/-1;
+  width:100%;
+  height:100%;
+  background:#fff;
+  place-items:stretch;
+}
+.seewo-app.teaching .slide-page{
+  width:100vw;
+  height:100vh;
+  max-width:none;
+  aspect-ratio:auto;
+  box-shadow:none;
+}
+.seewo-app.teaching .slide-inner{
+  padding:76px 92px 122px;
+}
+.seewo-app.teaching .lesson-question{
+  max-width:1120px;
+  font-size:46px;
+}
+.seewo-app.teaching .teacher-note{
+  left:92px;
+  right:92px;
+  bottom:104px;
+}
+.seewo-app.teaching .easy-controller{
+  top:72px;
+  right:22px;
+}
+.seewo-app.teaching .floating-panel{
+  bottom:94px;
+}
+@media (max-height:720px){
+  .edit-ribbon{height:64px}
+  .editor-shell{top:96px}
+  .slide-inner{padding:42px 66px}
+  .lesson-question{font-size:32px}
+  .bottom-toolbar{height:76px}
+  .seewo-app.teaching .slide-inner{padding:52px 78px 104px}
+  .seewo-app.teaching .lesson-question{font-size:38px}
+}
+</style>
+</head>
+<body>
+<main class="seewo-app teaching" id="boardApp">
+  <div class="sr-only">步步优化白板端 板中板 答题结果 学生投屏四宫格 底部工具栏 函数 几何 尺规 题库 仿真实验</div>
+
+  <header class="window-strip" aria-label="编辑窗口标题栏">
+    <div class="brand-tab"><span class="logo-mark">BB</span>步步白板</div>
+    <div class="doc-tabs">
+      <div class="doc-tab"><span class="logo-mark" style="width:18px;height:18px;background:#111827;font-size:9px">EN</span> 1 集合的含义与表示 seewo_...</div>
+      <div class="doc-tab muted">未命名教案</div>
+    </div>
+    <div class="window-actions"><span>?</span><span>信</span><span>一</span><span>□</span><span>×</span></div>
+  </header>
+
+  <section class="edit-ribbon" aria-label="顶部功能区">
+    <div class="ribbon-left">
+      <button class="ribbon-tool small" type="button"><span class="ico">☁</span>文件</button>
+      <button class="ribbon-tool small" type="button"><span class="ico">↻</span>同步</button>
+      <div class="ribbon-divider"></div>
+      <button class="ribbon-tool small disabled" type="button"><span class="ico">↶</span>撤销</button>
+      <button class="ribbon-tool small disabled" type="button"><span class="ico">↷</span>恢复</button>
+      <button class="teach-button" type="button" id="teachMode"><span class="play"></span>授课</button>
+    </div>
+    <div class="ribbon-tools">
+      <button class="feature-tool" type="button"><span class="symbol">T</span>文本</button>
+      <button class="feature-tool blue" type="button"><span class="symbol">●</span>形状</button>
+      <button class="feature-tool orange" type="button"><span class="symbol">▧</span>多媒体</button>
+      <button class="feature-tool green" type="button"><span class="symbol">▦</span>表格</button>
+      <button class="feature-tool orange" type="button"><span class="symbol">◕</span>课堂活动</button>
+      <button class="feature-tool blue" type="button"><span class="symbol">⌘</span>思维导图</button>
+      <button class="feature-tool blue" type="button"><span class="symbol">△</span>几何</button>
+      <button class="feature-tool blue" type="button"><span class="symbol">π</span>公式</button>
+      <button class="feature-tool green" type="button"><span class="symbol">ƒx</span>函数</button>
+      <button class="feature-tool green" type="button"><span class="symbol">▥</span>统计图表</button>
+      <button class="feature-tool orange" type="button"><span class="symbol">▤</span>学科工具</button>
+    </div>
+    <div class="ribbon-share">
+      <button class="share-button" type="button">分享</button>
+    </div>
+  </section>
+
+  <section class="editor-shell" aria-label="授课工作区">
+    <aside class="page-strip" aria-label="课件页缩略图">
+      <button class="new-page" type="button"><span style="font-size:22px">＋</span>新建页面</button>
+      <div class="thumb-list" id="filmstrip"></div>
+      <div class="strip-footer" id="stripFooter">课件 第 1 页，共 98 页</div>
+    </aside>
+
+    <section class="workbench" id="workbench">
+      <article class="slide-page" id="slidePage">
+        <div class="slide-inner" id="slideInner"></div>
+        <canvas class="ink-canvas" id="inkCanvas" data-canvas="annotationCanvas"></canvas>
+      </article>
+    </section>
+
+    <aside class="property-pane" aria-label="右侧属性面板">
+      <div class="property-title">布局与背景</div>
+      <div class="property-body">
+        <div class="pane-row">
+          <div class="layout-preview"></div>
+          <button class="pane-button" type="button">更改布局</button>
+        </div>
+        <div class="pane-row">
+          <div class="bg-preview"></div>
+          <button class="pane-button" type="button">更多背景</button>
+        </div>
+        <button class="pane-button" type="button">应用主题</button>
+        <div class="pane-row">
+          <div class="layout-preview" style="height:48px"></div>
+          <button class="pane-button" type="button">替换</button>
+        </div>
+        <div class="pane-row">
+          <div class="layout-preview" style="height:48px;background:linear-gradient(135deg,#fff 48%,#ef4444 49% 51%,#fff 52%)"></div>
+          <button class="pane-button" type="button">去背景</button>
+        </div>
+      </div>
+    </aside>
+
+    <aside class="side-tabs" aria-label="右侧面板切换">
+      <div class="side-tab active">属性</div>
+      <div class="side-tab">动画</div>
+      <div class="side-tab">关联</div>
+    </aside>
+  </section>
+
+  <section class="easy-controller open" id="floatController" style="right:22px;top:72px" aria-label="易课堂悬浮控制条">
+    <button class="float-main" id="floatMain" type="button" aria-label="拖动或展开易课堂控制条">
+      <span><strong id="onlineCount">3</strong>/24</span>
+      <small>上课学生</small>
+    </button>
+    <div class="dock" id="dock">
+      <button type="button" data-action="cast"><span>▣</span>互动</button>
+      <button type="button" data-action="answer"><span>?</span>答题</button>
+      <button type="button" data-action="clear"><span>▣</span>清空</button>
+      <button type="button" data-action="students"><span>▤</span>学生</button>
+      <button type="button" data-action="miniBoard"><span>▢</span>板中板</button>
+      <div class="dock-divider"></div>
+      <button type="button" data-action="pen"><span>✎</span>笔</button>
+      <button type="button" data-action="more"><span>☰</span>菜单</button>
+    </div>
+  </section>
+
+  <section class="bottom-toolbar" aria-label="底部工具栏">
+    <div class="toolbar-group left">
+      <button class="toolbar-button" type="button" data-action="pages"><span class="ico">☰</span>菜单</button>
+      <div class="toolbar-separator"></div>
+      <button class="toolbar-button" type="button"><span class="ico">↙</span>最小化</button>
+      <div class="toolbar-separator"></div>
+      <button class="toolbar-button" type="button"><span class="ico">师</span>教师</button>
+    </div>
+    <div class="toolbar-group center">
+      <button class="toolbar-button active" type="button" data-action="select"><span class="ico">➤</span>选择</button>
+      <button class="toolbar-button" type="button" data-action="pen"><span class="ico">✎</span>笔</button>
+      <button class="toolbar-button" type="button" data-action="eraser"><span class="ico">◆</span>橡皮</button>
+      <button class="toolbar-button" type="button" data-action="undo"><span class="ico">↶</span>撤销</button>
+      <button class="toolbar-button" type="button" data-action="more"><span class="ico">…</span>更多</button>
+    </div>
+    <div class="toolbar-group right">
+      <button class="toolbar-button" type="button" data-action="snapshot"><span class="ico">▣</span>截图</button>
+      <button class="toolbar-button" type="button"><span class="ico">◎</span>录制胶囊</button>
+      <button class="toolbar-button" type="button"><span class="ico">▯</span>手机投屏</button>
+    </div>
+  </section>
+
+  <nav class="page-nav" aria-label="底部翻页">
+    <button type="button" id="prevBtn" aria-label="上一页">‹</button>
+    <div class="page-counter"><span id="pageLabel">22/98</span><small>页码</small></div>
+    <button type="button" id="nextBtn" aria-label="下一页">›</button>
+  </nav>
+
+  <section class="pen-palette" id="penPalette" aria-label="白板笔设置">
+    <div class="palette-group">
+      <span class="palette-label">颜色</span>
+      <button class="swatch active" type="button" data-pen-color="#111827" style="background:#111827" aria-label="黑笔"></button>
+      <button class="swatch" type="button" data-pen-color="#e11d48" style="background:#e11d48" aria-label="红笔"></button>
+      <button class="swatch" type="button" data-pen-color="#2563eb" style="background:#2563eb" aria-label="蓝笔"></button>
+    </div>
+    <div class="palette-group">
+      <span class="palette-label">粗细</span>
+      <button class="size-dot" type="button" data-pen-size="4">4</button>
+      <button class="size-dot active" type="button" data-pen-size="8">8</button>
+      <button class="size-dot" type="button" data-pen-size="13">13</button>
+    </div>
+    <div class="palette-group">
+      <span class="palette-label">线型</span>
+      <button class="mode-button active" type="button" data-pen-mode="curve">曲线</button>
+      <button class="mode-button" type="button" data-pen-mode="line">直线</button>
+    </div>
+    <div class="palette-group">
+      <button class="mode-button" type="button" data-action="clear">清空批注</button>
+    </div>
+  </section>
+
+  <section class="floating-panel" id="morePanel" aria-label="更多工具">
+    <h3>通用</h3>
+    <div class="tool-grid">
+      <button class="tile" type="button"><span>●</span>形状</button>
+      <button class="tile" type="button"><span>⌕</span>放大镜</button>
+      <button class="tile" type="button" data-action="miniBoard"><span>▣</span>板中板</button>
+      <button class="tile" type="button" data-action="snapshot"><span>✂</span>截图</button>
+      <button class="tile" type="button"><span>♟</span>计时</button>
+      <button class="tile" type="button"><span>↷</span>恢复</button>
+    </div>
+    <h3>学科工具</h3>
+    <div class="tool-grid">
+      <button class="tile plus" type="button"><span>字</span>汉字</button>
+      <button class="tile plus" type="button"><span>ā</span>拼音</button>
+      <button class="tile plus" type="button"><span>诗</span>古诗词</button>
+      <button class="tile" type="button" data-action="function"><span>ƒx</span>函数</button>
+      <button class="tile" type="button"><span>△</span>几何</button>
+      <button class="tile" type="button"><span>▭</span>尺规</button>
+      <button class="tile" type="button"><span>◠</span>听写</button>
+      <button class="tile plus" type="button"><span>A</span>英汉字典</button>
+      <button class="tile" type="button"><span>☰</span>四线三格</button>
+      <button class="tile" type="button"><span>✕</span>画板</button>
+      <button class="tile" type="button"><span>▵</span>化学方程</button>
+      <button class="tile plus" type="button"><span>◌</span>星球</button>
+      <button class="tile" type="button"><span>▤</span>乐器</button>
+    </div>
+    <h3>在线资源</h3>
+    <div class="tool-grid">
+      <button class="tile" type="button"><span>☯</span>洋葱微课</button>
+      <button class="tile" type="button"><span>▶</span>课程视频</button>
+      <button class="tile" type="button"><span>▣</span>题库</button>
+      <button class="tile" type="button" data-action="miniBoard"><span>∿</span>数学画板</button>
+      <button class="tile" type="button"><span>⚛</span>仿真实验</button>
+      <button class="tile" type="button"><span>◉</span>NB实验</button>
+    </div>
+  </section>
+
+  <section class="answer-panel" id="answerPanel" aria-label="答题结果">
+    <div class="panel-titlebar"><span>多选题</span><button class="panel-close" type="button" data-close="answerPanel">×</button></div>
+    <div class="answer-body">
+      <div class="answer-main">
+        <div class="answer-rate">正确率 <strong>66.7</strong>%</div>
+        <div class="answer-chart">
+          <div class="bar" data-label="A" style="height:35%"></div>
+          <div class="bar correct" data-label="B" style="height:72%"></div>
+          <div class="bar" data-label="C" style="height:8%"></div>
+          <div class="bar" data-label="D" style="height:16%"></div>
+        </div>
+        <div class="correct-row">
+          <span>正确答案：</span>
+          <span class="answer-choice">A</span>
+          <span class="answer-choice correct">B</span>
+          <span class="answer-choice">C</span>
+          <span class="answer-choice">D</span>
+          <button class="pane-button" type="button">播放解析</button>
+        </div>
+      </div>
+      <aside class="answer-side">
+        <div class="question-chip active">第1题<br>66.7%</div>
+        <div class="question-chip">第2题<br>33.3%</div>
+        <div style="margin-top:28px;color:#374151">0人未答题 »</div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="cast-wall" id="castPanel" aria-label="学生投屏四宫格">
+    <div class="panel-titlebar"><span>学生投屏四宫格</span><button class="panel-close" type="button" data-close="castPanel">×</button></div>
+    <div class="cast-grid">
+      <div class="cast-card"><span>小蓝</span><div class="chalk">456</div><small>实时同步学生草稿</small></div>
+      <div class="cast-card"><span>小黄</span><div class="chalk" style="color:#e879f9">789</div><small>已提交答案 B</small></div>
+      <div class="cast-card"><span>小林</span><div class="chalk" style="color:#5eead4">a b c</div><small>需要老师点拨</small></div>
+      <div class="cast-card"><span>小陈</span><div class="chalk" style="color:#facc15">1 2 3</div><small>推到大屏讲解</small></div>
+    </div>
+  </section>
+
+  <section class="mini-board" id="miniBoard" aria-label="板中板">
+    <div class="mini-head">
+      <div><span class="logo-mark" style="display:inline-grid;margin-right:8px">∿</span>数学画板</div>
+      <button class="pane-button" type="button" data-close="miniBoard">保存</button>
+    </div>
+    <div class="mini-body">
+      <aside class="shape-rail">
+        <button class="shape-tool active" type="button">➤</button>
+        <button class="shape-tool" type="button">•</button>
+        <button class="shape-tool" type="button">╱</button>
+        <button class="shape-tool" type="button">○</button>
+        <button class="shape-tool" type="button">✎</button>
+        <button class="shape-tool" type="button">A</button>
+      </aside>
+      <section class="math-canvas">
+        <div class="math-bottom">•  ╱  △  ×  ⊙  ⟲  a−2  🗑  …</div>
+      </section>
+      <aside class="math-inspector">
+        <div class="object-title">对象 <span style="margin-left:auto">▶</span></div>
+        <div class="inspector-section">
+          <strong>全局</strong>
+          <span>基础　网格　x轴　y轴</span>
+          <label>新点自动命名 <input type="checkbox" checked /></label>
+          <label>画布尺寸 <select><option>16:9 默认</option></select></label>
+          <label>显示精度 <select><option>0.00</option></select></label>
+        </div>
+      </aside>
+    </div>
+    <button class="green-cta" type="button" data-close="miniBoard">插入画板</button>
+  </section>
+
+  <section class="student-drawer" id="studentDrawer" aria-label="学生平板状态">
+    <div class="drawer-head"><span>24 个学生平板</span><button class="pane-button" type="button" data-close="studentDrawer">收起</button></div>
+    <div class="student-list">
+      <div class="student-seat online">小蓝</div><div class="student-seat online">小黄</div><div class="student-seat online">小林</div><div class="student-seat">小陈</div>
+      <div class="student-seat online">5</div><div class="student-seat">6</div><div class="student-seat online">7</div><div class="student-seat">8</div>
+      <div class="student-seat">9</div><div class="student-seat online">10</div><div class="student-seat">11</div><div class="student-seat">12</div>
+      <div class="student-seat">13</div><div class="student-seat">14</div><div class="student-seat">15</div><div class="student-seat">16</div>
+    </div>
+  </section>
+
+  <section class="side-pages" id="sidePages" aria-label="页面导航">
+    <h3>课件页面</h3>
+    <div class="page-gallery" id="pageGallery"></div>
+  </section>
+
+  <div class="toast" id="toast"></div>
+  <footer class="foot-status"><span>备课助手 <strong style="color:#fff;background:#15bd74;border-radius:10px;padding:1px 6px">new</strong></span><span>截图</span><span>备注</span><span style="color:#fb8c00;font-size:20px">S</span><span>中</span><span>AI</span></footer>
+</main>
+
+<script>
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => Array.from(root.querySelectorAll(selector));
+
+const pages = [
+  {
+    kind: "cover",
+    thumb: "cover",
+    footer: "课件 第 1 页，共 98 页",
+    label: "1/98",
+    html: `
+      <div class="course-logo">bb</div>
+      <div class="cover-box">专题六　解析几何</div>
+      <div class="cover-title">第1讲　直线、圆、圆锥曲线</div>
+      <div class="teacher-note">课前留言：老师课前发的一段话留在白板角落，开始授课后自动缩成便签。</div>
+    `
+  },
+  {
+    kind: "question",
+    thumb: "normal",
+    footer: "课件 第 22 页，共 98 页",
+    label: "22/98",
+    html: `
+      <div class="lesson-question">
+        3．已知圆心在直线 <i>x-y-1=0</i> 上的圆与 <i>y</i> 轴的两个交点的坐标分别为<br>
+        (0,4)，(0，−2)，则该圆的方程为 <span class="answer-blank"></span>。
+        <br><span class="blue">(x−2)<sup>2</sup>+(y−1)<sup>2</sup>=13</span>
+      </div>
+      <div class="teacher-note">授课提示：先让学生找圆心，再用半径相等推出方程。</div>
+    `
+  },
+  {
+    kind: "worksheet",
+    thumb: "normal",
+    footer: "课件 第 23 页，共 98 页",
+    label: "23/98",
+    html: `
+      <div class="worksheet">
+        <div class="fraction-card">
+          <h1>随堂讲解：哪个分数最接近 1/2?</h1>
+          <strong>单选题</strong>
+          <div class="fraction-line"><span>2/5</span><span>3/7</span><span>4/9</span><span>5/8</span></div>
+          <div class="answer-options"><div>A · 2/5</div><div>B · 3/7</div><div>C · 4/9</div><div>D · 5/8</div></div>
+        </div>
+        <div style="position:relative;min-height:340px">
+          <div class="pie-sketch"></div>
+          <div class="red-mark"><span>先把 1/2 化成 4/8</span></div>
+        </div>
+      </div>
+    `
+  },
+  {
+    kind: "result",
+    thumb: "result",
+    footer: "课件 第 24 页，共 98 页",
+    label: "24/98",
+    html: `
+      <div class="mini-result">
+        <div>
+          <div class="rate">正确率 <strong>66.7</strong>%</div>
+          <p style="font-size:20px;color:#4b5563;font-weight:900">选择 B 的学生最多，可以把小蓝和小黄答案拖上来对比。</p>
+        </div>
+        <div class="chart">
+          <div class="bar" data-label="A" style="height:35%"></div>
+          <div class="bar correct" data-label="B" style="height:72%"></div>
+          <div class="bar" data-label="C" style="height:8%"></div>
+          <div class="bar" data-label="D" style="height:16%"></div>
+        </div>
+      </div>
+    `
+  },
+  {
+    kind: "summary",
+    thumb: "normal",
+    footer: "课件 第 25 页，共 98 页",
+    label: "25/98",
+    html: `
+      <div class="lesson-question" style="font-size:34px">
+        下课总结：今天保留三条板书。<br>
+        1．圆心在线上。<br>
+        2．半径由交点距离确定。<br>
+        3．答题结果自动进入课后报告。
+      </div>
+      <div class="teacher-note">课后动作：发布订正任务，推送错题本和本页批注截图。</div>
+    `
+  }
+];
+
+const canvas = $("#inkCanvas");
+const ctx = canvas.getContext("2d");
+window.annotationCanvas = canvas;
+
+let pageIndex = 1;
+let penActive = false;
+let penColor = "#111827";
+let penSize = 8;
+let penMode = "curve";
+let erasing = false;
+let drawing = false;
+let startPoint = null;
+let lastPoint = null;
+let snapshot = null;
+let toastTimer = 0;
+const annotationsByPage = new Map();
+const undoStackByPage = new Map();
+
+function toast(message, ms = 1600) {
+  const node = $("#toast");
+  node.textContent = message;
+  node.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => node.classList.remove("show"), ms);
+}
+
+function resizeCanvas(preserve = true) {
+  const old = preserve ? canvas.toDataURL("image/png") : null;
+  const rect = canvas.getBoundingClientRect();
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = Math.max(1, Math.round(rect.width * ratio));
+  canvas.height = Math.max(1, Math.round(rect.height * ratio));
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  if (old) {
+    const image = new Image();
+    image.onload = () => {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    };
+    image.src = old;
+  }
+}
+
+function saveInk() {
+  annotationsByPage.set(pageIndex, canvas.toDataURL("image/png"));
+}
+
+function restoreInk() {
+  const data = annotationsByPage.get(pageIndex);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  if (!data) return;
+  const image = new Image();
+  image.onload = () => {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const ratio = window.devicePixelRatio || 1;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  };
+  image.src = data;
+}
+
+function pushUndo() {
+  const stack = undoStackByPage.get(pageIndex) || [];
+  stack.push(canvas.toDataURL("image/png"));
+  if (stack.length > 12) stack.shift();
+  undoStackByPage.set(pageIndex, stack);
+}
+
+function undoInk() {
+  const stack = undoStackByPage.get(pageIndex) || [];
+  const data = stack.pop();
+  if (!data) {
+    toast("当前页没有可撤销批注");
+    return;
+  }
+  const image = new Image();
+  image.onload = () => {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    const ratio = window.devicePixelRatio || 1;
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    saveInk();
+  };
+  image.src = data;
+}
+
+function clearInk() {
+  pushUndo();
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  annotationsByPage.delete(pageIndex);
+  toast("已清空本页批注");
+}
+
+function setPenActive(active = true) {
+  penActive = active;
+  erasing = false;
+  canvas.classList.toggle("active", penActive);
+  $("#penPalette").classList.toggle("show", penActive);
+  $$('[data-action="pen"]').forEach((button) => button.classList.toggle("active", penActive));
+  $$('[data-action="select"]').forEach((button) => button.classList.toggle("active", !penActive));
+  if (penActive) closePanels("penPalette");
+}
+
+function getPoint(event) {
+  const rect = canvas.getBoundingClientRect();
+  return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+}
+
+function startInk(event) {
+  if (!penActive) return;
+  drawing = true;
+  pushUndo();
+  startPoint = getPoint(event);
+  lastPoint = startPoint;
+  snapshot = canvas.toDataURL("image/png");
+  ctx.save();
+  ctx.globalCompositeOperation = erasing ? "destination-out" : "source-over";
+  ctx.strokeStyle = erasing ? "rgba(0,0,0,1)" : penColor;
+  ctx.lineWidth = erasing ? penSize * 2.2 : penSize;
+  ctx.beginPath();
+  ctx.moveTo(startPoint.x, startPoint.y);
+  event.preventDefault();
+}
+
+function drawSnapshotLine(point) {
+  const image = new Image();
+  image.onload = () => {
+    const ratio = window.devicePixelRatio || 1;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    ctx.save();
+    ctx.globalCompositeOperation = erasing ? "destination-out" : "source-over";
+    ctx.strokeStyle = erasing ? "rgba(0,0,0,1)" : penColor;
+    ctx.lineWidth = erasing ? penSize * 2.2 : penSize;
+    ctx.beginPath();
+    ctx.moveTo(startPoint.x, startPoint.y);
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+    ctx.restore();
+  };
+  image.src = snapshot;
+}
+
+function moveInk(event) {
+  if (!drawing || !penActive) return;
+  const point = getPoint(event);
+  if (penMode === "line") {
+    drawSnapshotLine(point);
+  } else {
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+  }
+  lastPoint = point;
+  event.preventDefault();
+}
+
+function endInk() {
+  if (!drawing) return;
+  drawing = false;
+  ctx.restore();
+  saveInk();
+}
+
+function renderThumbs() {
+  $("#filmstrip").innerHTML = pages.map((page, index) => `
+    <div class="thumb-row ${index === pageIndex ? "active" : ""}" data-page="${index}">
+      <span>${index + 1}</span>
+      <button class="thumb ${index === pageIndex ? "active" : ""}" type="button" data-page="${index}">
+        <span class="thumb-mini ${page.thumb || "normal"}"></span>
+      </button>
+    </div>
+  `).join("");
+  $("#pageGallery").innerHTML = pages.map((page, index) => `
+    <button class="gallery-card ${index === pageIndex ? "active" : ""}" type="button" data-page="${index}">
+      <span class="thumb-mini ${page.thumb || "normal"}" style="margin:auto;display:block;margin-top:16px"></span>
+    </button>
+  `).join("");
+}
+
+function renderPage(nextIndex) {
+  saveInk();
+  pageIndex = Math.max(0, Math.min(pages.length - 1, nextIndex));
+  const page = pages[pageIndex];
+  const inner = $("#slideInner");
+  inner.className = `slide-inner ${page.kind === "cover" ? "cover" : ""}`;
+  inner.innerHTML = page.html;
+  $("#pageLabel").textContent = page.label;
+  $("#stripFooter").textContent = page.footer;
+  $("#prevBtn").disabled = pageIndex === 0;
+  $("#nextBtn").disabled = pageIndex === pages.length - 1;
+  renderThumbs();
+  resizeCanvas(false);
+  requestAnimationFrame(restoreInk);
+}
+
+function handleOptimizedSwipe(dx, dy) {
+  if (Math.abs(dx) < 56 || Math.abs(dx) < Math.abs(dy) * 1.25) return false;
+  if (dx < 0) renderPage(pageIndex + 1);
+  else renderPage(pageIndex - 1);
+  return true;
+}
+window.handleOptimizedSwipe = handleOptimizedSwipe;
+
+function closePanels(exceptId = "") {
+  ["morePanel","answerPanel","castPanel","miniBoard","studentDrawer","sidePages"].forEach((id) => {
+    if (id !== exceptId) $(`#${id}`)?.classList.remove("show");
+  });
+}
+
+function showPanel(id) {
+  closePanels(id);
+  $(`#${id}`)?.classList.add("show");
+  if (id !== "morePanel") $("#morePanel").classList.remove("show");
+  if (id !== "penPalette") $("#penPalette").classList.remove("show");
+}
+
+function togglePanel(id) {
+  const node = $(`#${id}`);
+  const shouldShow = !node.classList.contains("show");
+  closePanels(shouldShow ? id : "");
+  node.classList.toggle("show", shouldShow);
+}
+
+function moveOptimizedFloat(x, y) {
+  const node = $("#floatController");
+  const appRect = $("#boardApp").getBoundingClientRect();
+  const width = node.offsetWidth || 76;
+  const height = node.offsetHeight || 260;
+  const left = Math.max(8, Math.min(appRect.width - width - 8, x));
+  const top = Math.max(42, Math.min(appRect.height - height - 92, y));
+  node.style.left = `${left}px`;
+  node.style.right = "auto";
+  node.style.top = `${top}px`;
+}
+window.moveOptimizedFloat = moveOptimizedFloat;
+
+function initFloatDrag() {
+  const controller = $("#floatController");
+  const handle = $("#floatMain");
+  let dragging = false;
+  let moved = false;
+  let offsetX = 0;
+  let offsetY = 0;
+
+  handle.addEventListener("pointerdown", (event) => {
+    dragging = true;
+    moved = false;
+    const rect = controller.getBoundingClientRect();
+    offsetX = event.clientX - rect.left;
+    offsetY = event.clientY - rect.top;
+    handle.setPointerCapture(event.pointerId);
+  });
+  handle.addEventListener("pointermove", (event) => {
+    if (!dragging) return;
+    moved = true;
+    moveOptimizedFloat(event.clientX - offsetX, event.clientY - offsetY);
+  });
+  handle.addEventListener("pointerup", (event) => {
+    dragging = false;
+    handle.releasePointerCapture(event.pointerId);
+    if (!moved) controller.classList.toggle("open");
+  });
+}
+
+function initSwipe() {
+  let start = null;
+  const interactive = "button,.floating-panel,.dock,.easy-controller,.bottom-toolbar,.page-nav,.answer-panel,.cast-wall,.mini-board,.student-drawer,.side-pages";
+  $("#workbench").addEventListener("pointerdown", (event) => {
+    if (event.target.closest(interactive)) return;
+    start = { x:event.clientX, y:event.clientY };
+  });
+  $("#workbench").addEventListener("pointerup", (event) => {
+    if (!start) return;
+    handleOptimizedSwipe(event.clientX - start.x, event.clientY - start.y);
+    start = null;
+  });
+}
+
+function setActivePenColor(button) {
+  penColor = button.dataset.penColor;
+  $$(".swatch").forEach((item) => item.classList.toggle("active", item === button));
+  erasing = false;
+}
+
+function setPenSize(button) {
+  penSize = Number(button.dataset.penSize);
+  $$(".size-dot").forEach((item) => item.classList.toggle("active", item === button));
+}
+
+function setPenMode(button) {
+  penMode = button.dataset.penMode;
+  $$(".mode-button[data-pen-mode]").forEach((item) => item.classList.toggle("active", item === button));
+}
+
+document.addEventListener("click", (event) => {
+  const closeButton = event.target.closest("[data-close]");
+  if (closeButton) {
+    $(`#${closeButton.dataset.close}`)?.classList.remove("show");
+    return;
+  }
+
+  const pageButton = event.target.closest("[data-page]");
+  if (pageButton) {
+    renderPage(Number(pageButton.dataset.page));
+    closePanels();
+    return;
+  }
+
+  const colorButton = event.target.closest("[data-pen-color]");
+  if (colorButton) {
+    setActivePenColor(colorButton);
+    return;
+  }
+  const sizeButton = event.target.closest("[data-pen-size]");
+  if (sizeButton) {
+    setPenSize(sizeButton);
+    return;
+  }
+  const modeButton = event.target.closest("[data-pen-mode]");
+  if (modeButton) {
+    setPenMode(modeButton);
+    return;
+  }
+
+  const actionButton = event.target.closest("[data-action]");
+  if (!actionButton) return;
+  const action = actionButton.dataset.action;
+  switch (action) {
+    case "select":
+      setPenActive(false);
+      break;
+    case "pen":
+      setPenActive(true);
+      break;
+    case "eraser":
+      erasing = true;
+      setPenActive(true);
+      toast("橡皮已开启");
+      break;
+    case "clear":
+      clearInk();
+      break;
+    case "undo":
+      undoInk();
+      break;
+    case "more":
+      setPenActive(false);
+      togglePanel("morePanel");
+      break;
+    case "answer":
+      setPenActive(false);
+      showPanel("answerPanel");
+      break;
+    case "cast":
+      setPenActive(false);
+      showPanel("castPanel");
+      break;
+    case "students":
+      togglePanel("studentDrawer");
+      break;
+    case "miniBoard":
+      setPenActive(false);
+      showPanel("miniBoard");
+      break;
+    case "pages":
+      togglePanel("sidePages");
+      break;
+    case "snapshot":
+      toast("已截取当前白板画面");
+      break;
+    case "function":
+      toast("函数工具已呼出");
+      break;
+    default:
+      break;
+  }
+});
+
+$("#prevBtn").addEventListener("click", () => renderPage(pageIndex - 1));
+$("#nextBtn").addEventListener("click", () => renderPage(pageIndex + 1));
+$("#teachMode").addEventListener("click", () => {
+  document.documentElement.requestFullscreen?.();
+  toast("进入授课模式：底部工具栏与易课堂控制条已就绪");
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.key === "ArrowLeft") renderPage(pageIndex - 1);
+  if (event.key === "ArrowRight") renderPage(pageIndex + 1);
+  if (event.key.toLowerCase() === "p") setPenActive(!penActive);
+});
+window.addEventListener("resize", () => {
+  saveInk();
+  resizeCanvas(false);
+  requestAnimationFrame(restoreInk);
+});
+
+canvas.addEventListener("pointerdown", startInk);
+canvas.addEventListener("pointermove", moveInk);
+canvas.addEventListener("pointerup", endInk);
+canvas.addEventListener("pointerleave", endInk);
+canvas.addEventListener("pointercancel", endInk);
+
+initFloatDrag();
+initSwipe();
+renderPage(pageIndex);
+</script>
+</body>
+</html>

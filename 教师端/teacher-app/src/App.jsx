@@ -4,7 +4,6 @@ import Home from './pages/Home.jsx'
 import Courseware from './pages/Courseware.jsx'
 import CoursewareImport from './pages/CoursewareImport.jsx'
 import CoursewareEditor from './pages/CoursewareEditor.jsx'
-import InteractionPanel from './pages/InteractionPanel.jsx'
 import DictationConfig from './pages/DictationConfig.jsx'
 import QuizConfig from './pages/QuizConfig.jsx'
 import StaticToInteractive from './pages/StaticToInteractive.jsx'
@@ -22,7 +21,7 @@ export default function App() {
     <Routes>
       {/* 全屏页面：编辑器类，不带通用 Layout */}
       <Route path="/editor" element={<CoursewareEditor />} />
-      <Route path="/panel" element={<InteractionPanel />} />
+      <Route path="/panel" element={<Navigate to="/editor" replace />} />
       <Route path="/static-interactive" element={<StaticToInteractive />} />
 
       {/* 通用 Layout 页面 */}

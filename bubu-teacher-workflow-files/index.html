@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>步步四端原型入口</title>
+<style>
+:root{
+  --bg:#f5f7fa;
+  --surface:#ffffff;
+  --text:#132036;
+  --muted:#66738a;
+  --line:#dfe6ee;
+  --primary:#10a77a;
+  --primary-dark:#08765c;
+  --accent:#6f58d9;
+  --shadow:0 16px 38px rgba(19,32,54,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",Arial,sans-serif;
+  display:grid;
+  place-items:center;
+  padding:32px 20px;
+}
+.page{
+  width:min(1180px,100%);
+}
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:34px;
+}
+.mark{
+  width:42px;
+  height:42px;
+  border-radius:10px;
+  display:grid;
+  place-items:center;
+  color:#fff;
+  font-weight:900;
+  background:linear-gradient(135deg,var(--primary),#0b8f8a);
+}
+.brand h1{
+  margin:0;
+  font-size:26px;
+  line-height:1.2;
+  letter-spacing:0;
+}
+.brand p{
+  margin:4px 0 0;
+  color:var(--muted);
+  font-size:14px;
+}
+.entries{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:16px;
+}
+.entry{
+  min-height:190px;
+  padding:22px;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  text-decoration:none;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:10px;
+  box-shadow:var(--shadow);
+  transition:transform .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.entry:hover{
+  transform:translateY(-3px);
+  border-color:var(--primary);
+  box-shadow:0 20px 46px rgba(16,167,122,.12);
+}
+.entry:nth-child(2):hover{
+  border-color:var(--accent);
+  box-shadow:0 20px 46px rgba(111,88,217,.12);
+}
+.entry:nth-child(4):hover{
+  border-color:#2563eb;
+  box-shadow:0 20px 46px rgba(37,99,235,.12);
+}
+.label{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+  text-transform:uppercase;
+}
+.entry h2{
+  margin:14px 0 8px;
+  font-size:24px;
+  line-height:1.25;
+  letter-spacing:0;
+}
+.entry p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.65;
+}
+.open{
+  margin-top:22px;
+  color:var(--primary-dark);
+  font-size:14px;
+  font-weight:900;
+}
+.entry:nth-child(2) .open{
+  color:var(--accent);
+}
+.entry:nth-child(4) .open{
+  color:#2563eb;
+}
+@media (max-width:760px){
+  body{
+    place-items:start center;
+    padding-top:28px;
+  }
+  .brand{
+    align-items:flex-start;
+    margin-bottom:22px;
+  }
+  .brand h1{
+    font-size:22px;
+  }
+  .entries{
+    grid-template-columns:1fr;
+  }
+  .entry{
+    min-height:150px;
+  }
+}
+</style>
+</head>
+<body>
+<main class="page">
+  <header class="brand">
+    <div class="mark">步</div>
+    <div>
+      <h1>步步四端原型</h1>
+      <p>选择一个入口打开完整交互页面。</p>
+    </div>
+  </header>
+
+  <section class="entries" aria-label="四端入口">
+    <a class="entry" href="./步步_教师端_备课工作台.html">
+      <span class="label">Teacher Workspace</span>
+      <div>
+        <h2>教师端</h2>
+        <p>备课工作台、课件编辑、互动卡片、题库与批阅入口。</p>
+      </div>
+      <span class="open">进入教师端</span>
+    </a>
+
+    <a class="entry" href="./步步_学生端_平板.html">
+      <span class="label">Student Tablet</span>
+      <div>
+        <h2>学生端</h2>
+        <p>电子课本、课堂笔记、课堂互动、按日期和学科进入作业。</p>
+      </div>
+      <span class="open">进入学生端</span>
+    </a>
+
+    <a class="entry" href="./步步_白板端_大屏.html">
+      <span class="label">Classroom Board</span>
+      <div>
+        <h2>白板端</h2>
+        <p>教室大屏按课件翻页推进，互动内容随页面自动出现。</p>
+      </div>
+      <span class="open">进入白板端</span>
+    </a>
+
+    <a class="entry" href="./步步_优化白板端_大屏.html">
+      <span class="label">Optimized Board</span>
+      <div>
+        <h2>优化白板端</h2>
+        <p>参考希沃的授课白板：可拖拽课堂悬浮球、底部工具栏、学生投屏、答题结果和板中板。</p>
+      </div>
+      <span class="open">进入优化白板端</span>
+    </a>
+  </section>
+</main>
+</body>
+</html>

@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>白板端悬浮球 + 条形组件同屏</title>
+    <link rel="stylesheet" href="./floating-ball.css" />
+  </head>
+  <body class="same-screen-body">
+    <div id="root"></div>
+    <div id="whiteboard-floating-ball"></div>
+    <div id="ball-toast" class="wbf-toast" role="status" aria-live="polite"></div>
+
+    <script type="module" src="/src/main.jsx"></script>
+    <script src="./floating-ball.js"></script>
+    <script>
+      const toast = document.querySelector("#ball-toast");
+
+      window.sameScreenBall = new window.WhiteboardFloatingBall("#whiteboard-floating-ball", {
+        open: true,
+        showEditor: true,
+        scale: 0.82,
+        position: { x: 84, y: 34 },
+        storageKey: "bubu-whiteboard-floating-ball-same-screen",
+        onAction(item) {
+          toast.textContent = `悬浮球：${item.label}`;
+          toast.classList.add("is-visible");
+          window.clearTimeout(window.__sameScreenBallToastTimer);
+          window.__sameScreenBallToastTimer = window.setTimeout(() => {
+            toast.classList.remove("is-visible");
+          }, 1400);
+        },
+      });
+    </script>
+  </body>
+</html>

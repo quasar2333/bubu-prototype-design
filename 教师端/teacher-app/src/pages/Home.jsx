@@ -11,7 +11,7 @@ export default function Home() {
       {/* 三个快捷入口卡片 */}
       <div className="grid grid-cols-3 gap-5">
         <Link
-          to="/courseware"
+          to="/editor"
           className="rounded-2xl bg-gradient-to-r from-brand-500 to-brand-600 text-white p-6 flex items-center gap-4 shadow-soft hover:shadow-lg transition"
         >
           <div className="w-12 h-12 rounded-xl bg-white/20 flex items-center justify-center">

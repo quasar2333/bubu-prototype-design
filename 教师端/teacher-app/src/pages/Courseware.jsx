@@ -2,7 +2,8 @@ import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Plus, Upload, FileText, Search, RefreshCw, RotateCcw, Grid3x3, List,
-  Edit3, Eye, Send, Copy, Trash2, CheckCircle2, AlertTriangle, X
+  Edit3, Eye, Send, Copy, Trash2, CheckCircle2, AlertTriangle, X,
+  ChevronRight, ChevronLeft
 } from 'lucide-react'
 
 const items = [
@@ -16,17 +17,23 @@ const items = [
 
 export default function Courseware() {
   const [keyword, setKeyword] = useState('')
-  const [view, setView] = useState('grid') // grid | list
-  const [onlyInteract, setOnlyInteract] = useState(false)
+  const [view, setView] = useState('list') // grid | list
+  const [sortOrder, setSortOrder] = useState('desc')
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const [selected, setSelected] = useState(new Set())
 
   const filtered = useMemo(() => {
-    return items.filter(it => {
-      if (onlyInteract && !it.interact) return false
-      if (keyword.trim() && !it.title.includes(keyword.trim())) return false
-      return true
+    let result = [...items]
+    if (keyword.trim()) {
+      result = result.filter(it => it.title.includes(keyword.trim()))
+    }
+    result.sort((a, b) => {
+      const tA = new Date(a.updated).getTime()
+      const tB = new Date(b.updated).getTime()
+      return sortOrder === 'desc' ? tB - tA : tA - tB
     })
-  }, [keyword, onlyInteract])
+    return result
+  }, [keyword, sortOrder])
 
   const toggleSel = (i) => {
     const ns = new Set(selected)
@@ -34,12 +41,13 @@ export default function Courseware() {
     setSelected(ns)
   }
   const clearSel = () => setSelected(new Set())
-  const reset = () => { setKeyword(''); setOnlyInteract(false) }
+  const reset = () => { setKeyword(''); setSortOrder('desc') }
 
   return (
-    <div className="p-6 grid grid-cols-[1fr_280px] gap-5">
-      <div className="space-y-4 min-w-0">
-        {/* 顶部操作按钮 */}
+    <div className={`p-6 gap-5 ${sidebarOpen ? 'grid grid-cols-[1fr_280px]' : 'relative'}`}>
+      <div className="flex flex-col min-w-0 min-h-0">
+        <div className="flex-1 overflow-auto space-y-4">
+          {/* 顶部操作按钮 */}
         <div className="flex gap-3">
           <Link to="/editor" className="btn-primary"><Plus className="w-4 h-4" /> 新建课件</Link>
           <Link to="/courseware/import" className="btn-ghost"><Upload className="w-4 h-4" /> 导入课件</Link>
@@ -47,17 +55,7 @@ export default function Courseware() {
         </div>
 
         {/* 筛选区 */}
-        <div className="card p-4 space-y-3">
-          <div className="flex flex-wrap items-center gap-3 text-sm">
-            <Field label="学科">数学</Field>
-            <Field label="年级">初二</Field>
-            <Field label="教材版本">人教版</Field>
-            <Field label="更新时间" placeholder="请选择日期" date />
-            <div className="flex items-center gap-2 ml-2 cursor-pointer" onClick={() => setOnlyInteract(o => !o)}>
-              <span className="text-slate-500">仅含互动</span>
-              <Switch on={onlyInteract} />
-            </div>
-          </div>
+        <div className="card p-4">
           <div className="flex items-center gap-3">
             <div className="relative flex-1 max-w-[320px]">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -74,6 +72,17 @@ export default function Courseware() {
               )}
             </div>
             <button onClick={reset} className="btn-ghost h-9"><RotateCcw className="w-3.5 h-3.5" /> 重置</button>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 whitespace-nowrap">时间排序:</span>
+              <select
+                className="input h-8 text-xs"
+                value={sortOrder}
+                onChange={e => setSortOrder(e.target.value)}
+              >
+                <option value="desc">最新在前</option>
+                <option value="asc">最早在前</option>
+              </select>
+            </div>
             <div className="ml-auto flex items-center gap-2">
               <span className="text-xs text-slate-500">视图:</span>
               <div className="flex border border-slate-200 rounded-lg overflow-hidden">
@@ -139,7 +148,7 @@ export default function Courseware() {
                     </div>
                   </div>
                   <div className="border-t border-slate-100 px-2 py-2 flex items-center justify-between text-xs text-slate-500" onClick={e => e.stopPropagation()}>
-                    <CardAction icon={<Edit3 className="w-3 h-3" />} label="编辑" />
+                    <CardAction to="/editor" icon={<Edit3 className="w-3 h-3" />} label="编辑" />
                     <CardAction icon={<Eye className="w-3 h-3" />} label="预览" />
                     <CardAction icon={<Send className="w-3 h-3" />} label="发送到白板" />
                     <CardAction icon={<Copy className="w-3 h-3" />} label="复制" />
@@ -179,7 +188,7 @@ export default function Courseware() {
                       </td>
                       <td className="py-2 px-3 text-slate-500">{it.updated}</td>
                       <td className="py-2 px-3 text-center text-xs" onClick={e => e.stopPropagation()}>
-                        <button className="text-brand-600 hover:underline mr-2">编辑</button>
+                        <Link to="/editor" className="text-brand-600 hover:underline mr-2">编辑</Link>
                         <button className="text-brand-600 hover:underline mr-2">预览</button>
                         <button className="text-red-500 hover:underline">删除</button>
                       </td>
@@ -191,9 +200,11 @@ export default function Courseware() {
           </div>
         )}
 
+        </div>
+
         {/* 分页 */}
-        <div className="card p-3 flex items-center justify-between text-sm">
-          <span className="text-slate-500">共 {filtered.length} / 24 个课件</span>
+        <div className="card p-3 flex items-center justify-between text-sm shrink-0">
+          <span className="text-slate-500">已选 {selected.size} / {items.length} 个课件</span>
           <div className="flex items-center gap-1">
             <PageBtn>1</PageBtn>
             <PageBtn off>2</PageBtn>
@@ -206,81 +217,86 @@ export default function Courseware() {
         </div>
       </div>
 
-      {/* 右侧云端同步 */}
-      <div className="space-y-4">
-        <div className="card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="font-semibold text-slate-800">云端同步</span>
-            <button className="text-xs text-brand-600 flex items-center gap-1 hover:underline">
-              <RefreshCw className="w-3 h-3" /> 刷新
-            </button>
-          </div>
-
-          <Section title="同步成功 (18)" defaultOpen>
-            <Row green text="8.2 一元一次不等式" extra="今天 14:32" />
-            <Row green text="7.3 平面直角坐标系" extra="今天 14:20" />
-            <Row green text="概率初步复习" extra="今天 09:45" />
-            <a className="text-xs text-brand-600 hover:underline mt-2 inline-block">查看全部成功记录</a>
-          </Section>
-
-          <Section title="上传中 (2)">
-            <ProgressRow label="期中复习课" progress={65} status="正在上传 65%" />
-            <ProgressRow label="二次根式练习" progress={30} status="正在上传 30%" />
-          </Section>
-
-          <Section title="同步失败 (1)">
-            <Row red text="7.1 整式的乘除" extra="重试" extraLink />
-            <div className="text-[11px] text-red-500 ml-5 mt-1">失败原因：网络异常</div>
-          </Section>
-        </div>
-
-        <div className="card p-4">
-          <div className="font-semibold text-slate-800 mb-3">存储空间</div>
-          <div className="text-sm text-slate-700">已使用 <span className="font-semibold text-brand-600">6.12 GB</span> / 20 GB</div>
-          <div className="h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
-            <div className="h-full bg-brand-500" style={{ width: '30%' }} />
-          </div>
-          <div className="text-xs text-slate-500 mt-1">30%</div>
-
-          <div className="text-xs text-slate-500 mt-4 space-y-1.5">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-brand-500" /> 课件文件 <span className="ml-auto text-slate-700">4.82 GB</span>
+      {/* 右侧面板 */}
+      {sidebarOpen ? (
+        <div className="space-y-4 relative">
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="absolute -left-3 top-3 w-6 h-6 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:bg-slate-50 z-10"
+            title="收起侧栏"
+          >
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          </button>
+          <div className="card p-4">
+            <div className="flex items-center justify-between mb-3">
+              <span className="font-semibold text-slate-800">云端同步</span>
+              <button className="text-xs text-brand-600 flex items-center gap-1 hover:underline">
+                <RefreshCw className="w-3 h-3" /> 刷新
+              </button>
             </div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-amber-400" /> 资源文件 <span className="ml-auto text-slate-700">1.30 GB</span>
-            </div>
+
+            <Section title="同步成功 (18)" defaultOpen>
+              <Row green text="8.2 一元一次不等式" extra="今天 14:32" />
+              <Row green text="7.3 平面直角坐标系" extra="今天 14:20" />
+              <Row green text="概率初步复习" extra="今天 09:45" />
+              <a className="text-xs text-brand-600 hover:underline mt-2 inline-block">查看全部成功记录</a>
+            </Section>
+
+            <Section title="上传中 (2)">
+              <ProgressRow label="期中复习课" progress={65} status="正在上传 65%" />
+              <ProgressRow label="二次根式练习" progress={30} status="正在上传 30%" />
+            </Section>
+
+            <Section title="同步失败 (1)">
+              <Row red text="7.1 整式的乘除" extra="重试" extraLink />
+              <div className="text-[11px] text-red-500 ml-5 mt-1">失败原因：网络异常</div>
+            </Section>
           </div>
 
-          <button className="w-full mt-4 btn-ghost h-9">前往资源管理</button>
+          <div className="card p-4">
+            <div className="font-semibold text-slate-800 mb-3">存储空间</div>
+            <div className="text-sm text-slate-700">已使用 <span className="font-semibold text-brand-600">6.12 GB</span> / 20 GB</div>
+            <div className="h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
+              <div className="h-full bg-brand-500" style={{ width: '30%' }} />
+            </div>
+            <div className="text-xs text-slate-500 mt-1">30%</div>
+
+            <div className="text-xs text-slate-500 mt-4 space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-brand-500" /> 课件文件 <span className="ml-auto text-slate-700">4.82 GB</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-amber-400" /> 资源文件 <span className="ml-auto text-slate-700">1.30 GB</span>
+              </div>
+            </div>
+
+            <button className="w-full mt-4 btn-ghost h-9">前往资源管理</button>
+          </div>
         </div>
-      </div>
+      ) : (
+        <button
+          onClick={() => setSidebarOpen(true)}
+          className="absolute right-4 top-4 w-7 h-7 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center hover:bg-slate-50 z-10"
+          title="展开侧栏"
+        >
+          <ChevronLeft className="w-3.5 h-3.5 text-slate-400" />
+        </button>
+      )}
     </div>
   )
 }
 
-function Field({ label, children, placeholder, date }) {
+function CardAction({ icon, label, danger, to }) {
+  const className = `flex items-center gap-1 px-1.5 py-1 rounded hover:bg-slate-50 ${danger ? 'text-red-500' : ''}`
+  if (to) {
+    return (
+      <Link to={to} className={className}>
+        {icon} {label}
+      </Link>
+    )
+  }
   return (
-    <div className="flex items-center gap-2">
-      <span className="text-slate-500">{label}:</span>
-      <button className="h-8 px-3 rounded-md border border-slate-200 bg-white text-slate-700 text-sm flex items-center gap-2 hover:border-brand-300">
-        {children || <span className="text-slate-400">{placeholder}</span>}
-        <svg className="w-3 h-3 text-slate-400" viewBox="0 0 12 12" fill="currentColor"><path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.4" fill="none"/></svg>
-      </button>
-    </div>
-  )
-}
-
-function Switch({ on }) {
-  return (
-    <div className={`relative w-9 h-5 rounded-full transition ${on ? 'bg-brand-500' : 'bg-slate-300'}`}>
-      <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition ${on ? 'left-[18px]' : 'left-0.5'}`} />
-    </div>
-  )
-}
-
-function CardAction({ icon, label, danger }) {
-  return (
-    <button className={`flex items-center gap-1 px-1.5 py-1 rounded hover:bg-slate-50 ${danger ? 'text-red-500' : ''}`}>
+    <button className={className}>
       {icon} {label}
     </button>
   )

@@ -8,7 +8,7 @@ import {
 
 const items = [
   { to: '/home', icon: Home, label: '首页' },
-  { to: '/courseware', icon: BookOpen, label: '课件' },
+  { to: '/courseware', icon: BookOpen, label: '我的课件' },
   { to: '/quiz', icon: Layers, label: '课堂互动设计' },
   { to: '/homework', icon: ClipboardList, label: '作业布置' },
   { to: '/question-bank', icon: Database, label: '智能题库' },
@@ -19,10 +19,9 @@ const items = [
 
 const allPages = [
   { code: 'T01', to: '/home', label: '教师工作台首页' },
-  { code: 'T02', to: '/courseware', label: '课件列表' },
+  { code: 'T02', to: '/courseware', label: '我的课件' },
   { code: 'T03', to: '/courseware/import', label: '课件导入' },
   { code: 'T04', to: '/editor', label: '课件编辑器（全屏）' },
-  { code: 'T05', to: '/panel', label: '互动组件面板（全屏）' },
   { code: 'T06', to: '/dictation', label: '听写配置' },
   { code: 'T07', to: '/quiz', label: '随堂练配置' },
   { code: 'T08', to: '/static-interactive', label: '静态题互动化（全屏）' },
@@ -82,7 +81,7 @@ export default function Sidebar() {
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
         >
           <Grid3x3 className="w-[18px] h-[18px]" />
-          <span className="flex-1 text-left">全部原型 (16)</span>
+          <span className="flex-1 text-left">全部原型 (15)</span>
           {allOpen ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
         </button>
         {allOpen && (

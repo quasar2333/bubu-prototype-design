@@ -1,0 +1,2433 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1320">
+<title>步步 · 白板端（教室大屏）原型</title>
+<style>
+/* ====== Design tokens（与教师端 / 学生端一致） ====== */
+:root{
+  --primary:#22c993; --primary-dark:#0ea874; --primary-soft:#e8f7f0;
+  --accent:#7d6cf2; --accent-dark:#5b48d6; --accent-soft:#eee9ff;
+  --warn:#f5a623; --warn-soft:#fff4e0;
+  --danger:#e85a5a; --danger-soft:#fde7e7;
+  --text:#1a2332; --muted:#6c7689; --muted-2:#9aa4b8;
+  --line:#e3e6ec; --line-soft:#eef0f4;
+  --surface:#ffffff; --surface-2:#f6f8fa;
+  --bg:#eef1f6;
+  --shadow:0 6px 20px rgba(20,30,55,.08);
+  --shadow-lg:0 16px 50px rgba(20,30,55,.12);
+  --radius:10px; --radius-lg:14px;
+}
+*{ box-sizing:border-box }
+html, body{ margin:0; padding:0; }
+body{
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  background: var(--bg); color: var(--text);
+  font-size:14px; line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* scene tabs */
+.scene-tabs{
+  max-width:1240px; margin:24px auto 18px; padding:0 20px;
+  display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+}
+.scene-tabs .tab{
+  background:var(--surface); border:1px solid var(--line); border-radius:99px;
+  padding:8px 16px; font-size:13px; font-weight:600;
+  cursor:pointer; color:var(--text); transition: all .2s;
+  user-select:none;
+}
+.scene-tabs .tab:hover{ border-color:var(--primary); color:var(--primary-dark); }
+.scene-tabs .tab.active{
+  background:var(--primary); color:#fff; border-color:var(--primary);
+  box-shadow: 0 6px 16px rgba(34,201,147,.32);
+}
+
+/* ====== Whiteboard device shell（大屏外壳） ====== */
+.board-shell{ max-width:1240px; margin: 0 auto 18px; padding: 0 20px; display:flex; justify-content:center; }
+.board-frame{ width:1100px; max-width:100%; position:relative; }
+.board-outer{
+  background: #1a1f2c;
+  padding: 22px 18px 22px;
+  border-radius: 16px;
+  box-shadow: 0 24px 60px rgba(20, 30, 55, .26), inset 0 0 0 1px rgba(255,255,255,.04);
+}
+.board-camera{
+  position:absolute; top:6px; left:50%; transform:translateX(-50%);
+  display:flex; gap:6px; align-items:center;
+  font-size:10px; color:#8b94aa; font-weight:600; z-index:2;
+  letter-spacing:.4px;
+}
+.board-camera::before{ content:""; width:6px; height:6px; border-radius:50%; background:#3a4256; box-shadow:0 0 0 2px #232938; }
+.board-screen{
+  width:100%; aspect-ratio: 16 / 9;
+  background: linear-gradient(135deg, #f6f8fa 0%, #edf2f7 100%);
+  border-radius: 8px;
+  position:relative; overflow:hidden;
+}
+.whiteboard-boot{
+  position:fixed; inset:0; z-index:3000; color:#fff;
+  background:
+    linear-gradient(135deg, rgba(12,74,110,.72), rgba(15,23,42,.82)),
+    linear-gradient(160deg, #145a86 0%, #16706f 44%, #23407a 100%);
+  overflow:hidden; user-select:none;
+}
+.whiteboard-boot.hidden{display:none}
+.wb-desktop{position:absolute;inset:0;padding:26px 34px 58px;background:linear-gradient(130deg,rgba(255,255,255,.08),transparent 34%,rgba(0,0,0,.12) 74%)}
+.wb-desktop-icons{display:grid;grid-template-rows:repeat(5,94px);grid-auto-flow:column;grid-auto-columns:92px;gap:10px 14px;align-content:start;justify-content:start}
+.wb-icon{width:88px;min-height:90px;border:1px solid transparent;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:7px;padding:7px 6px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.46);cursor:default}
+.wb-icon:hover,.wb-icon.selected{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.30)}
+.wb-icon-tile{width:50px;height:50px;border-radius:11px;display:grid;place-items:center;background:linear-gradient(135deg,#e2e8f0,#94a3b8);box-shadow:0 12px 24px rgba(0,0,0,.22);font-size:24px;font-weight:900;position:relative;overflow:hidden}
+.wb-icon-tile::after{content:"";position:absolute;inset:0;border:1px solid rgba(255,255,255,.26);border-radius:inherit;pointer-events:none}
+.wb-icon-tile.bubu{background:linear-gradient(135deg,#24d69a,#0f9f78);color:#fff}
+.wb-icon-tile.bubu .bubu-mark{width:31px;height:31px;border-radius:9px;background:#fff;position:relative;box-shadow:inset 0 0 0 3px rgba(255,255,255,.7)}
+.wb-icon-tile.bubu .bubu-mark::before{content:"";position:absolute;left:7px;top:7px;width:17px;height:17px;border-radius:5px;background:linear-gradient(135deg,#22c993,#7d6cf2);box-shadow:10px 10px 0 rgba(125,108,242,.88)}
+.wb-icon-tile.computer{background:linear-gradient(135deg,#dbeafe,#60a5fa);color:#1e3a8a}
+.wb-icon-tile.computer::before{content:"";width:30px;height:22px;border-radius:3px;background:#eff6ff;border:3px solid #2563eb;box-shadow:0 19px 0 -10px #2563eb}
+.wb-icon-tile.folder{background:linear-gradient(135deg,#fde68a,#f59e0b);color:#78350f}
+.wb-icon-tile.folder::before{content:"";width:34px;height:25px;border-radius:4px;background:#fff7c2;box-shadow:0 -7px 0 -2px #fbbf24}
+.wb-icon-tile.pen{background:linear-gradient(135deg,#f8fafc,#bae6fd);color:#075985}
+.wb-icon-tile.pen::before{content:"";width:8px;height:34px;border-radius:8px;background:#0f172a;transform:rotate(38deg);box-shadow:0 0 0 4px #38bdf8}
+.wb-icon-tile.recycle{background:linear-gradient(135deg,#e0f2fe,#94a3b8);color:#334155}
+.wb-icon-tile.browser{background:linear-gradient(135deg,#fef3c7,#fb7185);color:#7f1d1d}
+.wb-icon span{font-size:12px;font-weight:800;line-height:1.22;text-align:center;max-width:78px}
+.wb-taskbar{position:absolute;left:0;right:0;bottom:0;height:48px;background:rgba(15,23,42,.78);backdrop-filter:blur(14px);display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-top:1px solid rgba(255,255,255,.14)}
+.wb-start{display:flex;align-items:center;gap:10px;font-weight:800;font-size:13px}
+.wb-start::before{content:"";width:20px;height:20px;background:linear-gradient(90deg,#60a5fa 50%,#93c5fd 50%);border-radius:4px;box-shadow:inset 9px 0 0 rgba(255,255,255,.18), inset 0 9px 0 rgba(255,255,255,.18)}
+.wb-taskbar-apps{display:flex;gap:8px;margin-left:10px}.wb-task-pill{width:34px;height:30px;border-radius:7px;background:rgba(255,255,255,.12);display:grid;place-items:center;font-size:14px}
+.wb-tray{display:flex;align-items:center;gap:16px;font-size:12px;color:#dbeafe}
+.wb-login,.wb-course-picker{position:absolute;inset:0;display:none;place-items:center;background:rgba(15,23,42,.36);backdrop-filter:blur(7px)}
+.whiteboard-boot.login .wb-login{display:grid}
+.whiteboard-boot.course-picker .wb-login{display:none}
+.whiteboard-boot.course-picker .wb-course-picker{display:grid}
+.wb-login-card,.wb-course-card{width:540px;background:#fff;color:var(--text);border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.42);padding:22px}
+.wb-course-card{width:760px}
+.wb-login-card h2,.wb-course-card h2{font-size:22px;margin:0 0 6px}
+.wb-login-card p,.wb-course-card p{font-size:13px;color:var(--muted);margin:0 0 16px}
+.wb-login-grid{display:grid;grid-template-columns:1fr 150px;gap:16px;align-items:stretch}
+.wb-teacher-list{display:flex;flex-direction:column;gap:10px}
+.wb-teacher{display:grid;grid-template-columns:42px 1fr auto;gap:10px;align-items:center;border:1px solid var(--line);border-radius:10px;padding:10px;background:#fff;cursor:pointer}
+.wb-teacher:hover{border-color:var(--primary);background:var(--primary-soft)}
+.wb-avatar{width:42px;height:42px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:900}
+.wb-teacher b{font-size:14px}.wb-teacher span{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}.wb-teacher em{font-style:normal;font-size:11px;font-weight:900;color:var(--primary-dark)}
+.wb-qr{border:1px dashed var(--line);border-radius:10px;padding:12px;text-align:center;background:var(--surface-2)}
+.wb-qr-box{width:94px;height:94px;margin:0 auto 8px;background:
+  linear-gradient(90deg,#111827 8px,transparent 8px) 0 0/18px 18px,
+  linear-gradient(#111827 8px,transparent 8px) 0 0/18px 18px,#fff;border:8px solid #fff;box-shadow:inset 0 0 0 1px var(--line)}
+.wb-qr span{font-size:11.5px;color:var(--muted);font-weight:700}
+.wb-course-list{display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:12px}
+.wb-course-item{border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden;display:flex;flex-direction:column;min-height:210px}
+.wb-course-item.primary{border-color:rgba(34,201,147,.55);box-shadow:0 10px 24px rgba(34,201,147,.12)}
+.wb-course-cover{height:88px;padding:14px 16px;background:linear-gradient(135deg,#e8f7f0,#e0f2fe);display:flex;flex-direction:column;justify-content:flex-end}
+.wb-course-cover b{font-size:20px}.wb-course-cover span{font-size:12px;color:var(--muted);font-weight:800;margin-top:4px}
+.wb-course-body{padding:14px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+.wb-course-meta{display:flex;gap:6px;flex-wrap:wrap}.wb-course-meta span{border:1px solid var(--line);border-radius:999px;padding:3px 8px;font-size:11px;color:var(--muted);font-weight:800;background:var(--surface-2)}
+.wb-course-actions{margin-top:auto;display:flex;gap:8px}.wb-course-actions button{height:34px;border-radius:8px;border:1px solid var(--line);background:#fff;font-weight:900;padding:0 12px;cursor:pointer}.wb-course-actions .primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.wb-app-layer{position:absolute;inset:0;display:none;place-items:center;background:rgba(2,6,23,.22);backdrop-filter:blur(3px)}
+.whiteboard-boot.pen-app .wb-pen-app,.whiteboard-boot.browser-app .wb-browser-app{display:grid}
+.whiteboard-boot.pen-app .wb-login,.whiteboard-boot.pen-app .wb-course-picker,.whiteboard-boot.browser-app .wb-login,.whiteboard-boot.browser-app .wb-course-picker{display:none}
+.wb-app-window{background:#f8fafc;color:var(--text);border:1px solid rgba(255,255,255,.5);border-radius:12px;box-shadow:0 30px 90px rgba(0,0,0,.36);overflow:hidden}
+.wb-app-titlebar{height:44px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px 0 16px}
+.wb-app-titlebar b{font-size:14px}.wb-app-titlebar span{font-size:12px;color:var(--muted);font-weight:800;margin-left:8px}.wb-window-actions{display:flex;gap:6px}
+.wb-window-actions button{width:30px;height:28px;border:1px solid var(--line);border-radius:7px;background:#fff;font-weight:900;cursor:pointer}
+.wb-pen-window{width:min(1180px,92vw);height:min(720px,86vh);display:flex;flex-direction:column}
+.wb-pen-toolbar{height:54px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 16px}
+.wb-pen-toolbar button{height:34px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:900;padding:0 12px;cursor:pointer}
+.wb-pen-toolbar button.active{background:var(--primary-soft);border-color:var(--primary);color:var(--primary-dark)}
+.standalone-pen-stage{position:relative;flex:1;background:#fff}
+#standalonePenCanvas{position:absolute;inset:0;width:100%;height:100%;cursor:crosshair;background:#fff}
+.wb-browser-window{width:min(1060px,88vw);height:min(680px,84vh);display:flex;flex-direction:column}
+.wb-browser-bar{height:58px;background:#fff;border-bottom:1px solid var(--line);display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;padding:0 14px}
+.wb-browser-nav{display:flex;gap:6px}.wb-browser-nav button,.wb-browser-bar button{height:36px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:900;padding:0 12px;cursor:pointer}
+.wb-browser-bar input{height:38px;border:1px solid var(--line);border-radius:9px;padding:0 12px;font-size:13px;font-weight:700;color:var(--text)}
+.wb-browser-content{flex:1;background:#eef2f7;padding:16px;display:grid;grid-template-columns:240px 1fr;gap:14px}
+.wb-browser-bookmarks,.wb-browser-view{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px;overflow:auto}
+.wb-browser-view{display:flex;flex-direction:column;gap:10px;padding:0;overflow:hidden}.wb-browser-view h3{padding:14px 14px 0;margin:0}
+.wb-browser-bookmarks h3,.wb-browser-view h3{font-size:16px;margin:0 0 10px}.wb-browser-bookmarks button{width:100%;height:38px;margin-bottom:8px;border:1px solid var(--line);border-radius:8px;background:#fff;text-align:left;padding:0 10px;font-weight:800;cursor:pointer}
+.wb-browser-bookmarks button:hover{border-color:var(--primary);color:var(--primary-dark)}
+.wb-browser-status{font-size:12px;color:var(--muted);font-weight:700;line-height:1.6;padding:0 14px}.wb-browser-status a{color:var(--primary-dark);font-weight:900}
+.wb-browser-frame-wrap{position:relative;flex:1;border-top:1px solid var(--line);background:#fff}
+.wb-browser-frame-wrap iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#fff}
+.scene-root{ position:absolute; inset:0; overflow:hidden; }
+.course-slide{position:absolute;inset:0;padding:42px 52px 78px;background:linear-gradient(135deg,#f8fafc,#eef8f3);display:flex;flex-direction:column;color:var(--text)}
+.slide-tag{display:inline-flex;align-self:flex-start;border:1px solid var(--primary-soft);background:#e8f7f0;color:var(--primary-dark);border-radius:999px;padding:5px 10px;font-size:12px;font-weight:900;margin-bottom:16px}
+.slide-tag.warn{background:#fff4e0;color:#a06800;border-color:#fde3ac}.slide-tag.info{background:#dbeafe;color:#1d4ed8;border-color:#bfdbfe}.slide-tag.danger{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
+.slide-title{font-size:38px;font-weight:900;line-height:1.18;margin-bottom:10px;letter-spacing:0}
+.slide-subtitle{font-size:17px;color:var(--muted);font-weight:700;line-height:1.55;margin-bottom:16px}
+.slide-bullet{font-size:20px;font-weight:750;line-height:1.55;margin:8px 0;color:#243145}
+.slide-bullet strong{color:var(--primary-dark)}
+.cover-num{position:absolute;right:62px;top:42px;font-size:116px;line-height:1;color:rgba(34,201,147,.12);font-weight:900}
+.flow-cards,.rule-board,.place-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:10px}
+.rule-card,.flow-card,.place-card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px;box-shadow:var(--shadow)}
+.rule-card b,.flow-card b,.place-card b{display:block;font-size:26px;color:var(--primary-dark);margin-bottom:6px}.rule-card span,.flow-card span,.place-card span{font-size:13px;color:var(--muted);font-weight:700;line-height:1.5}
+.fraction-strip{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;margin:18px 0 12px}.fraction-strip span{height:58px;background:#fff;border:1px solid var(--line);border-radius:6px}.fraction-strip span.active{background:var(--primary);border-color:var(--primary)}
+.formula-box{align-self:flex-start;background:#fff;border:1px solid var(--line);border-left:5px solid var(--primary);border-radius:10px;padding:13px 18px;font-size:24px;font-weight:900;box-shadow:var(--shadow);margin-top:8px}
+.interact-placeholder{margin-top:auto;background:#fff;border:1.5px solid var(--primary-soft);border-radius:12px;padding:14px 16px;box-shadow:var(--shadow);max-width:820px}
+.ip-header{display:flex;align-items:center;gap:8px;font-weight:900;color:var(--text);font-size:14px}.ip-tag{margin-left:auto;border-radius:999px;background:var(--primary-soft);color:var(--primary-dark);font-size:10px;padding:3px 8px}.ip-body{margin-top:6px;color:var(--muted);font-size:13px;font-weight:700}.ip-actions{display:flex;gap:8px;margin-top:10px}
+.ip-actions button{height:32px;border:1px solid var(--line);border-radius:8px;background:#fff;font-weight:900;cursor:pointer;padding:0 12px}.ip-actions button.primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.board-canvas{
+  position:absolute; inset:0; width:100%; height:100%; z-index:58;
+  pointer-events:none; cursor:crosshair;
+}
+.board-canvas.active{ pointer-events:auto; }
+.page-controls{
+  position:absolute; left:50%; bottom:14px; transform:translateX(-50%);
+  z-index:66; display:flex; gap:12px; align-items:center;
+  background:rgba(15,23,42,.78); color:#fff; border:1px solid rgba(255,255,255,.14);
+  border-radius:14px; padding:8px 10px; box-shadow:0 12px 28px rgba(15,23,42,.20);
+}
+.page-controls button{
+  min-width:72px; height:38px; border:0; border-radius:10px;
+  background:#fff; color:#111827; font-weight:900; cursor:pointer;
+}
+.page-controls .primary{ background:var(--primary); color:#fff; }
+.page-controls button:disabled{ opacity:.35; cursor:not-allowed; }
+.page-label{ min-width:160px; text-align:center; font-size:13px; font-weight:900; color:#dbeafe; }
+.floating-ball{
+  position:absolute; right:22px; bottom:104px; z-index:80;
+  width:64px; height:64px; border-radius:50%;
+  touch-action:none; user-select:none;
+}
+.floating-ball.dragging{ transition:none; }
+.float-main{
+  width:64px; height:64px; border-radius:50%;
+  border:1px solid rgba(255,255,255,.56);
+  background:linear-gradient(135deg,#152033,#263f69);
+  color:#fff; box-shadow:0 18px 44px rgba(15,23,42,.32);
+  display:grid; place-items:center; cursor:pointer;
+  font-weight:900; font-size:13px; letter-spacing:0;
+}
+.float-main span{ display:block; font-size:20px; line-height:1; margin-bottom:2px; }
+.float-main small{ display:block; font-size:10px; color:#cbd5e1; font-weight:800; }
+.floating-ball.open .float-main{ background:linear-gradient(135deg,var(--primary),#119f73); }
+.floating-panel{
+  position:absolute; z-index:79; width:312px; max-width:calc(100% - 36px);
+  background:rgba(15,23,42,.94); color:#fff;
+  border:1px solid rgba(255,255,255,.16); border-radius:14px;
+  box-shadow:0 20px 48px rgba(15,23,42,.32);
+  padding:12px; opacity:0; transform:translateY(10px) scale(.98);
+  pointer-events:none; transition:opacity .16s ease, transform .16s ease;
+}
+.floating-panel.show{ opacity:1; transform:translateY(0) scale(1); pointer-events:auto; }
+.float-panel-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px; }
+.float-panel-title{ font-size:15px; font-weight:900; }
+.float-panel-sub{ font-size:12px; color:#cbd5e1; margin-top:2px; }
+.float-panel-close{
+  width:30px; height:30px; border-radius:8px; border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.10); color:#fff; font-weight:900; cursor:pointer;
+}
+.pen-palette{ display:grid; grid-template-columns:1fr; gap:8px; margin-bottom:8px; }
+.pen-card{
+  border:1px solid rgba(34,201,147,.34); border-radius:12px;
+  background:rgba(34,201,147,.12); padding:10px;
+}
+.pen-card h4{ margin:0 0 8px; font-size:13px; }
+.pen-row{ display:flex; flex-wrap:wrap; gap:7px; align-items:center; }
+.pen-chip{
+  height:30px; min-width:38px; border-radius:8px; border:1px solid rgba(255,255,255,.18);
+  background:rgba(255,255,255,.10); color:#fff; font-size:12px; font-weight:900; cursor:pointer;
+}
+.pen-chip.active{ outline:2px solid #fff; background:rgba(34,201,147,.36); }
+.pen-color{ width:30px; min-width:30px; border-radius:50%; color:transparent; }
+.pen-color[data-color="#111827"]{ background:#111827; }
+.pen-color[data-color="#e11d48"]{ background:#e11d48; }
+.pen-color[data-color="#2563eb"]{ background:#2563eb; }
+.float-tool-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
+.float-tool{
+  min-height:54px; border-radius:10px; border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.08); color:#fff; cursor:pointer;
+  padding:9px; display:flex; align-items:center; gap:8px; justify-content:flex-start;
+  text-align:left; font:inherit; transition:.16s ease;
+}
+.float-tool:hover,.float-tool.active{ background:rgba(34,201,147,.22); border-color:rgba(34,201,147,.78); transform:translateY(-1px); }
+.float-tool .ico{ width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:rgba(255,255,255,.14); font-weight:900; flex:none; }
+.float-tool strong{ font-size:13px; line-height:1.2; }
+.float-tool span{ font-size:11px; line-height:1.35; color:#cbd5e1; display:none; }
+.float-panel-foot{
+  margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:10px;
+  color:#cbd5e1; font-size:12px; border-top:1px solid rgba(255,255,255,.10); padding-top:11px;
+}
+.float-panel-foot button{
+  border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.10); color:#fff;
+  border-radius:8px; padding:7px 10px; cursor:pointer; font-weight:800;
+}
+.board-stand{
+  position:absolute; left:50%; bottom:-32px; transform:translateX(-50%);
+  width:280px; height:14px;
+  background: linear-gradient(180deg, #353b4c 0%, #1a1f2c 100%);
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 6px 16px rgba(0,0,0,.18);
+}
+.board-stand::after{
+  content:""; position:absolute; left:50%; top:14px; transform:translateX(-50%);
+  width:140px; height:8px;
+  background: linear-gradient(180deg, #1a1f2c 0%, #0d1018 100%);
+  border-radius: 0 0 12px 12px;
+}
+.board-base-text{
+  position:absolute; left:50%; bottom:-50px; transform:translateX(-50%);
+  font-size:10.5px; color:#8b94aa; font-weight:700; letter-spacing:1.2px;
+}
+
+/* ====== 大屏内部通用 UI ====== */
+.bd-topbar{
+  position:absolute; top:14px; left:18px; right:18px;
+  display:flex; justify-content:space-between; align-items:center;
+  z-index:5;
+}
+.bd-topbar .left, .bd-topbar .right{ display:flex; gap:8px; align-items:center; }
+.chip{
+  display:inline-flex; gap:6px; align-items:center;
+  padding:5px 11px; border-radius:99px;
+  background: var(--surface); border:1px solid var(--line-soft);
+  font-size:12px; font-weight:700; color:var(--text);
+  box-shadow: 0 1px 2px rgba(20,30,55,.04);
+}
+.chip strong{ color: var(--primary-dark); }
+.chip.live{
+  background: var(--danger-soft); color:var(--danger); border-color: rgba(232,90,90,.2);
+}
+.chip.live::before{
+  content:""; width:7px; height:7px; border-radius:50%; background:var(--danger);
+  animation: livePulse 1.4s infinite;
+}
+@keyframes livePulse{ 0%,100%{ opacity:.5; transform:scale(1) } 50%{ opacity:1; transform:scale(1.4) } }
+
+/* ====== Scene · welcome ====== */
+.scn-welcome{
+  position:absolute; inset:0; padding: 58px 56px 92px;
+  display:flex; flex-direction:column; align-items:flex-start; justify-content:center;
+  background: linear-gradient(135deg, #f8fbff 0%, #e9f8f3 100%);
+}
+.w-eyebrow{ font-size:15px; color:var(--primary-dark); font-weight:800; letter-spacing:.4px; margin-bottom:10px; }
+.w-title{ max-width:760px; font-size:46px; font-weight:900; color:var(--text); margin:6px 0 14px; line-height:1.15; }
+.w-sub{ max-width:760px; font-size:22px; color:#334155; font-weight:700; line-height:1.55; margin-bottom:26px; }
+.w-cd{
+  display:inline-flex; gap:12px; align-items:baseline;
+  background: var(--surface); padding:12px 22px; border-radius:14px;
+  box-shadow: var(--shadow); border:1px solid var(--line-soft);
+  margin-bottom:20px;
+}
+.w-cd .lab{ font-size:13px; color:var(--muted); font-weight:600; }
+.w-cd .num{ font-size:30px; font-weight:800; color:var(--primary-dark); font-variant-numeric: tabular-nums; }
+.pad-grid{ display:grid; grid-template-columns: repeat(14, 1fr); gap:5px; margin-top: 6px; max-width:520px; width:100%; }
+.pad-grid .p{ aspect-ratio:1; background: var(--primary); border-radius:3px; box-shadow: 0 2px 4px rgba(34,201,147,.22); }
+.pad-grid .p.charge{ background: var(--warn); }
+.pad-grid .p.off{ background: var(--line); box-shadow:none; }
+.pad-stat{ display:flex; gap:14px; margin-top:8px; font-size:12px; color:var(--muted); font-weight:600; }
+.pad-stat span{ display:inline-flex; gap:5px; align-items:center; }
+.pad-stat span::before{ content:""; width:8px; height:8px; border-radius:50%; }
+.pad-stat .p1::before{ background:var(--primary); }
+.pad-stat .p2::before{ background:var(--warn); }
+.pad-stat .p3::before{ background:var(--line); }
+.preclass-actions{
+  position:absolute; right:48px; bottom:92px; z-index:8;
+  display:flex; gap:10px; align-items:center;
+}
+.preclass-note-editor{
+  margin-top:8px; display:flex; align-items:stretch; gap:10px;
+  width:min(760px, 100%);
+}
+.preclass-note-editor textarea{
+  flex:1; resize:none; border:1px solid var(--line);
+  border-radius:10px; padding:10px 12px;
+  font:600 14px/1.55 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+  color:var(--text); background:rgba(255,255,255,.86);
+  box-shadow:0 6px 18px rgba(20,30,55,.06);
+}
+.preclass-note-editor button{ flex:none; align-self:center; }
+
+/* ====== Scene · teach ====== */
+.scn-teach{ position:absolute; inset:0; padding: 64px 48px 88px; }
+.teach-page{
+  height: 100%; background: rgba(255,255,255,.66); border-radius:8px;
+  border: 1px solid rgba(148,163,184,.20);
+  padding: 30px 36px; display:flex; flex-direction:column; gap:14px;
+  position:relative;
+}
+.teach-page::before{
+  content:""; position:absolute; inset:0;
+  background-image:
+    linear-gradient(rgba(148,163,184,.16) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(148,163,184,.16) 1px, transparent 1px);
+  background-size:36px 36px;
+  pointer-events:none;
+}
+.teach-page > *{ position:relative; z-index:1; }
+.teach-page h2{ margin:0; font-size:28px; font-weight:800; }
+.teach-page .lead{ font-size:15px; color:var(--muted); font-weight:500; line-height:1.7; max-width:75%; }
+.teach-page .lead strong{ color: var(--primary-dark); }
+.teach-vis{ flex:1; display:grid; grid-template-columns: 1fr 1fr; gap:24px; align-items:center; }
+.pizza{
+  width:200px; height:200px; border-radius:50%;
+  background: conic-gradient(var(--warn-soft) 0 25%, #fff 25% 50%, var(--warn-soft) 50% 75%, #fff 75%);
+  border: 4px solid var(--warn);
+  position:relative; margin: 0 auto;
+  box-shadow: 0 8px 20px rgba(245,166,35,.2);
+}
+.pizza::before, .pizza::after{ content:""; position:absolute; background:var(--warn); }
+.pizza::before{ top:0; left:50%; width:4px; height:100%; transform:translateX(-50%); }
+.pizza::after{ left:0; top:50%; width:100%; height:4px; transform:translateY(-50%); }
+.pizza-cap{ text-align:center; font-size:14px; color:var(--muted); font-weight:600; margin-top:10px; }
+.bullet-list{ list-style:none; padding:0; margin:0; font-size:15px; line-height:2; }
+.bullet-list li{ padding-left:24px; position:relative; }
+.bullet-list li::before{ content:"●"; color:var(--primary); font-size:14px; position:absolute; left:6px; top:0; }
+.bullet-list strong{ color:var(--primary-dark); }
+.teacher-mark{
+  position:absolute; left:54%; top:42%;
+  width:200px; height:120px; border:3px dashed var(--danger);
+  border-radius:50% / 30%;
+  transform: rotate(-8deg);
+  pointer-events:none;
+  animation: markIn .8s ease;
+}
+.teacher-mark::after{
+  content:"老师圈了这"; position:absolute; right:-110px; top:50%;
+  background: var(--danger); color:#fff; padding:5px 10px; border-radius:14px;
+  font-size:11.5px; font-weight:700;
+  transform:translateY(-50%);
+  box-shadow: var(--shadow);
+  white-space:nowrap;
+}
+@keyframes markIn{ from{ opacity:0; transform: rotate(-8deg) scale(.6); } to{ opacity:1; transform: rotate(-8deg) scale(1); } }
+.whiteboard-prompt{
+  position:absolute; left:36px; top:30px; right:36px;
+  display:flex; align-items:center; justify-content:space-between; gap:18px;
+  color:#475569; font-size:15px; font-weight:800;
+}
+.whiteboard-prompt strong{ color:#0f172a; font-size:24px; }
+.teach-pageinfo{
+  position:absolute; right:18px; top:14px;
+  font-size:12px; color:var(--muted); font-weight:600;
+  background: var(--surface-2); padding:4px 10px; border-radius:12px;
+  border:1px solid var(--line-soft);
+}
+
+/* ====== Scene · live（实时答题） ====== */
+.scn-live{ position:absolute; inset:0; padding: 60px 40px 70px; display:flex; flex-direction:column; gap:10px; }
+.live-q{ font-size:30px; font-weight:800; text-align:center; color:var(--text); margin: 0 0 4px; line-height:1.3; }
+.live-q small{ display:block; font-size:13px; color:var(--muted); font-weight:500; margin-top:4px; }
+.live-q strong{ color: var(--primary-dark); }
+.live-opts{ display:grid; grid-template-columns: repeat(4,1fr); gap:14px; margin: 8px 0 8px; }
+.live-opt{ background: var(--surface); border:2px solid var(--line); border-radius:12px; padding:14px 8px; text-align:center; }
+.live-opt .k{
+  width:34px; height:34px; border-radius:50%;
+  background: var(--primary-soft); color:var(--primary-dark);
+  display:grid; place-items:center;
+  font-size:15px; font-weight:800; margin: 0 auto 6px;
+}
+.live-opt .v{ font-size:22px; font-weight:800; color:var(--text); }
+.live-prog-row{
+  display:flex; gap:18px; align-items:center;
+  background: var(--surface); padding:12px 18px; border-radius:12px;
+  border:1px solid var(--line-soft);
+}
+.live-prog-row .lpr-l{ flex:none; font-size:13px; font-weight:700; color:var(--muted); }
+.live-prog-row .lpr-l strong{ color:var(--text); font-size:18px; }
+.live-bar{ flex:1; height:14px; background: var(--line-soft); border-radius:99px; overflow:hidden; position:relative; }
+.live-bar .fill{
+  position:absolute; left:0; top:0; bottom:0;
+  background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+  border-radius:99px; transition: width 1s cubic-bezier(.25,.6,.3,1);
+}
+.live-prog-row .lpr-r{ flex:none; font-size:14px; font-weight:800; color:var(--primary-dark); min-width:40px; text-align:right; }
+.live-fastest{
+  background: var(--surface); border:1px solid var(--line-soft); border-radius:12px;
+  padding:10px 16px; display:flex; gap:14px; align-items:center;
+}
+.live-fastest .lf-l{ font-size:13px; font-weight:700; color:var(--muted); flex:none; }
+.live-fastest .lf-list{ display:flex; gap:14px; flex:1; align-items:center; overflow:hidden; }
+.live-sync-summary{
+  margin-top:10px; display:flex; align-items:center; justify-content:space-between; gap:12px;
+  background:#f8fffc; border:1px solid var(--primary-soft); border-radius:12px; padding:10px 12px;
+  color:var(--text); font-size:12.5px; font-weight:700;
+}
+.live-sync-summary strong{ color:var(--primary-dark); font-size:13px; white-space:nowrap; }
+.live-sync-summary span{ color:var(--muted); font-weight:600; text-align:right; line-height:1.5; }
+.live-avatar{ display:flex; flex-direction:column; align-items:center; gap:3px; flex:none; }
+.live-avatar .av{
+  width:36px; height:36px; border-radius:50%;
+  background: var(--accent-soft); color: var(--accent-dark);
+  display:grid; place-items:center;
+  font-size:14px; font-weight:800;
+  border: 2px solid var(--accent);
+}
+.live-avatar.gold .av{ background:#fff4d2; color:#a06800; border-color:#f5b840; box-shadow: 0 0 0 3px rgba(245,184,64,.3); }
+.live-avatar .nm{ font-size:11px; color:var(--text); font-weight:700; }
+.live-avatar .rk{ font-size:9px; color:var(--accent-dark); font-weight:800; }
+
+/* ====== Scene · result（揭晓） ====== */
+.scn-result{ position:absolute; inset:0; padding: 56px 60px 80px; display:flex; flex-direction:column; }
+.result-h{ display:flex; gap:10px; align-items:baseline; margin-bottom: 20px; flex-wrap:wrap; }
+.result-h .lab{ font-size:14px; color:var(--muted); font-weight:600; }
+.result-h .ans{
+  font-size:28px; font-weight:800; color:var(--primary-dark);
+  background: var(--primary-soft); padding:6px 16px; border-radius:10px;
+  border:1px solid rgba(34,201,147,.25);
+}
+.result-h .stats{ margin-left:auto; font-size:14px; color:var(--muted); font-weight:600; }
+.result-h .stats strong{ color:var(--primary-dark); font-size:20px; }
+.bars{ display:grid; grid-template-columns:repeat(4,1fr); gap:24px; flex:1; align-items:end; margin-bottom:14px; padding-bottom:30px; }
+.bar-col{ display:flex; flex-direction:column; align-items:center; height:100%; justify-content:flex-end; }
+.bar-wrap{ width:100%; height:100%; display:flex; flex-direction:column; justify-content:flex-end; position:relative; }
+.bar{
+  width:100%; background: var(--line-soft); border-radius: 8px 8px 0 0;
+  transition: height 1.2s cubic-bezier(.25,.6,.3,1);
+  display:flex; flex-direction:column; justify-content:flex-end;
+  min-height:6px; position:relative;
+}
+.bar-col.correct .bar{ background: linear-gradient(180deg, var(--primary) 0%, var(--primary-dark) 100%); box-shadow: 0 -6px 18px rgba(34,201,147,.36); }
+.bar .ct{
+  font-size:14px; font-weight:800; color:var(--text);
+  position:absolute; top:-22px; left:50%; transform:translateX(-50%);
+}
+.bar-col.correct .bar .ct{ color: var(--primary-dark); }
+.bar-col .lab2{ margin-top:8px; font-size:13px; font-weight:600; color:var(--muted); display:flex; gap:6px; align-items:center; }
+.bar-col .lab2 .key{
+  display:inline-block; width:22px; height:22px; line-height:22px; border-radius:50%;
+  background: var(--surface-2); color: var(--text); text-align:center;
+  font-size:12px; font-weight:800;
+}
+.bar-col.correct .lab2 .key{ background: var(--primary); color:#fff; }
+.bar-avatars{ display:flex; flex-wrap:wrap; gap:2px; padding:4px; align-content:flex-end; }
+.bar-avatars .a{
+  width:14px; height:14px; border-radius:50%;
+  background: rgba(255,255,255,.7);
+  font-size:8px; font-weight:800; display:grid; place-items:center;
+  color:var(--text);
+}
+
+/* ====== Scene · draw（抽人） ====== */
+.scn-draw{ position:absolute; inset:0; padding: 50px 40px 80px; display:flex; align-items:center; justify-content:center; gap:50px; }
+.draw-wheel{
+  width:300px; height:300px; border-radius:50%;
+  background: conic-gradient(from 0deg,
+    var(--primary) 0 30deg, var(--accent) 30deg 60deg,
+    var(--warn) 60deg 90deg, var(--danger) 90deg 120deg,
+    var(--primary-dark) 120deg 150deg, var(--accent-dark) 150deg 180deg,
+    var(--primary) 180deg 210deg, var(--accent) 210deg 240deg,
+    var(--warn) 240deg 270deg, var(--danger) 270deg 300deg,
+    var(--primary-dark) 300deg 330deg, var(--accent-dark) 330deg 360deg);
+  position:relative;
+  box-shadow: 0 12px 40px rgba(20,30,55,.18), inset 0 0 0 8px rgba(255,255,255,.32);
+}
+.draw-wheel.spin{ animation: wheelSpin 2.6s cubic-bezier(.16,.8,.34,1) forwards; }
+@keyframes wheelSpin{ 0%{ transform: rotate(0deg) } 100%{ transform: rotate(1840deg) } }
+.draw-pointer{
+  position:absolute; left:50%; top:-14px; transform:translateX(-50%);
+  width:0; height:0;
+  border-left: 14px solid transparent; border-right: 14px solid transparent;
+  border-top: 22px solid var(--text);
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,.18));
+  z-index:2;
+}
+.draw-wheel-c{
+  position:absolute; left:50%; top:50%; transform: translate(-50%, -50%);
+  width:130px; height:130px; border-radius:50%;
+  background: var(--surface); border:5px solid var(--text);
+  display:grid; place-items:center;
+  font-size:14px; font-weight:800; color:var(--text);
+  text-align:center; line-height:1.4;
+}
+.draw-info{ flex:0 1 380px; }
+.draw-info .di-h{ font-size:14px; color:var(--muted); font-weight:600; margin-bottom:6px; }
+.draw-info .di-name{ font-size:64px; font-weight:800; color:var(--accent-dark); margin: 4px 0 16px; line-height:1; }
+.draw-info .di-name.pop{ animation: popIn .5s cubic-bezier(.25,.6,.3,1.4); }
+@keyframes popIn{
+  0%{ transform: scale(.4); opacity:0; }
+  60%{ transform: scale(1.18); opacity:1; }
+  100%{ transform: scale(1); opacity:1; }
+}
+.draw-why{
+  background: var(--accent-soft); padding: 14px 16px; border-radius:10px;
+  border: 1px solid rgba(125,108,242,.18);
+  font-size:14px; color:var(--text); line-height:1.7; font-weight:500;
+}
+.draw-why strong{ color: var(--accent-dark); }
+
+.grp-row{ flex:1; display:grid; grid-template-columns: repeat(4,1fr); gap:14px; margin-top:12px; }
+.grp-card{
+  background: var(--surface); border:1px solid var(--line-soft); border-radius:14px;
+  padding:14px; display:flex; flex-direction:column; gap:10px;
+  box-shadow: var(--shadow);
+}
+.grp-h{ display:flex; gap:8px; align-items:center; }
+.grp-h .gh-k{
+  width:28px; height:28px; border-radius:50%;
+  background: var(--primary); color:#fff; display:grid; place-items:center;
+  font-size:12px; font-weight:800;
+}
+.grp-h .gh-t{ font-size:14px; font-weight:800; }
+.grp-h .gh-tag{ margin-left:auto; font-size:10px; padding:2px 8px; border-radius:6px; background:var(--primary-soft); color:var(--primary-dark); font-weight:700; }
+.grp-photo{
+  flex:1; min-height:80px;
+  background: linear-gradient(135deg, var(--surface-2), var(--line-soft));
+  border-radius:8px;
+  display:grid; place-items:center; font-size:34px;
+}
+.grp-tags{ display:flex; flex-wrap:wrap; gap:5px; }
+.grp-tags span{ font-size:11px; padding:3px 8px; border-radius:6px; background: var(--accent-soft); color:var(--accent-dark); font-weight:700; }
+
+/* ====== Scene · end（下课总结） ====== */
+.scn-end{ position:absolute; inset:0; padding: 50px 50px 80px; display:flex; flex-direction:column; gap:14px; background: linear-gradient(135deg, #f6efff 0%, #e6f9f3 100%); }
+.end-h{ font-size:30px; font-weight:800; color:var(--text); }
+.end-h small{ display:block; font-size:14px; color:var(--muted); font-weight:500; margin-top:4px; }
+.end-key{ display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+.ek-card{
+  background: var(--surface); border-radius:12px; padding:18px;
+  border:1px solid var(--line-soft); box-shadow: var(--shadow);
+  position:relative;
+}
+.ek-num{
+  width:36px; height:36px; border-radius:50%;
+  background: var(--primary); color:#fff; font-size:18px; font-weight:800;
+  display:grid; place-items:center; margin-bottom:8px;
+}
+.ek-card h4{ margin:0 0 4px; font-size:16px; font-weight:800; }
+.ek-card p{ margin:0; font-size:13px; color:var(--muted); line-height:1.6; }
+.ek-card p strong{ color: var(--primary-dark); }
+
+.end-foot{ display:grid; grid-template-columns: 1fr 1fr; gap:14px; }
+.end-card{ background: var(--surface); border-radius:12px; padding:14px 16px; border:1px solid var(--line-soft); }
+.end-card .ec-l{ font-size:13px; color:var(--muted); font-weight:600; margin-bottom:4px; }
+.end-card .ec-t{ font-size:15px; font-weight:700; }
+.end-card.warm{ background: linear-gradient(135deg, var(--warn-soft), #fff); border-color: rgba(245,166,35,.25); }
+
+.scene-actions{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:14px; }
+.scene-btn{
+  border:0; background:var(--primary); color:#fff; border-radius:8px;
+  padding:10px 18px; font-size:14px; font-weight:800; cursor:pointer;
+  box-shadow:0 6px 16px rgba(34,201,147,.24);
+}
+.scene-btn.secondary{ background:var(--surface); color:var(--text); border:1px solid var(--line); box-shadow:none; }
+.scene-btn.purple{ background:var(--accent); box-shadow:0 6px 16px rgba(125,108,242,.24); }
+.scene-btn:active{ transform:translateY(1px); }
+.board-sync-strip{
+  position:absolute; right:22px; top:22px; z-index:35; max-width:420px;
+  background:rgba(15,23,42,.88); color:#fff; border:1px solid rgba(255,255,255,.18);
+  border-radius:12px; padding:10px 14px; box-shadow:0 14px 34px rgba(15,23,42,.22);
+  font-size:13px; line-height:1.45; pointer-events:none;
+}
+.board-sync-strip strong{display:block;font-size:13px;margin-bottom:2px;color:#d1fae5}
+.metric-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.metric-card{
+  background:var(--surface); border:1px solid var(--line-soft); border-radius:10px;
+  padding:12px 14px;
+}
+.metric-card .m-num{ font-size:28px; line-height:1; font-weight:800; color:var(--primary-dark); }
+.metric-card .m-lab{ margin-top:5px; font-size:12px; color:var(--muted); font-weight:700; }
+.end-mini-list{ display:grid; grid-template-columns:repeat(2,1fr); gap:8px; margin-top:4px; }
+.end-mini-list span{ background:var(--surface-2); border:1px solid var(--line-soft); border-radius:8px; padding:8px 10px; font-size:12px; font-weight:700; color:var(--text); }
+
+/* ====== Toast / Modal ====== */
+.toast-stack{ position:fixed; right:20px; top:80px; display:flex; flex-direction:column; gap:8px; z-index:1000; pointer-events:none; }
+.toast{
+  background: var(--surface); border:1px solid var(--line);
+  border-radius:10px; padding:10px 14px; font-size:13px; font-weight:600;
+  box-shadow: var(--shadow); display:flex; gap:8px; align-items:center;
+  transition: opacity .25s, transform .25s; max-width: 320px;
+}
+.toast.ok{ border-left:4px solid var(--primary); }
+.toast.no{ border-left:4px solid var(--danger); }
+.toast.warn{ border-left:4px solid var(--warn); }
+.toast.info{ border-left:4px solid var(--accent); }
+
+.modal-bg{ position:fixed; inset:0; background: rgba(20,30,55,.45); display:none; align-items:center; justify-content:center; z-index:1001; }
+.modal-bg.show{ display:flex; }
+.modal{
+  background: var(--surface); border-radius: var(--radius-lg);
+  padding: 22px 26px; box-shadow: var(--shadow-lg);
+  max-width: 520px; width: 90%; max-height: 80vh; overflow:auto;
+}
+.modal h3{ margin:0 0 12px; font-size:17px; font-weight:800; display:flex; gap:10px; align-items:center; }
+.mh-tag{ font-size:11px; padding:3px 8px; border-radius:6px; background: var(--accent-soft); color:var(--accent-dark); font-weight:800; }
+.m-body{ font-size:13.5px; line-height:1.7; color:var(--text); }
+.m-body p{ margin:0 0 10px; }
+.m-body ul{ margin:0 0 10px; padding-left: 22px; }
+.m-body li{ margin: 4px 0; }
+.m-body strong{ color: var(--primary-dark); }
+.m-body .note{ background: var(--surface-2); padding:10px 12px; border-radius:8px; border-left:3px solid var(--accent); font-size:12.5px; color:var(--muted); margin: 8px 0; }
+.m-body .note.accent{ background: var(--primary-soft); border-left-color: var(--primary); color:var(--text); }
+.m-foot{ display:flex; gap:8px; justify-content:flex-end; margin-top:14px; padding-top:14px; border-top:1px solid var(--line-soft); }
+.m-foot button{
+  border:1px solid var(--line); background:var(--surface); color:var(--text);
+  border-radius:8px; padding:8px 16px; font-size:13px; font-weight:700;
+  cursor:pointer; transition: all .2s;
+}
+.m-foot button:hover{ border-color: var(--primary); color: var(--primary-dark); }
+.m-foot button.pri{ background: var(--primary); color:#fff; border-color: var(--primary); }
+.m-foot button.pri:hover{ background: var(--primary-dark); }
+
+.foot-note{ text-align:center; font-size:12px; color:var(--muted); padding:24px 20px 50px; max-width:1240px; margin: 0 auto; }
+
+/* ====== 升级版样式 v2 ====== */
+
+/* live 升级 */
+.opt-mini-bar{ height:5px; background: var(--line-soft); border-radius:99px; margin-top:8px; overflow:hidden; }
+.opt-mini-bar .omb-fill{ height:100%; background: var(--accent); border-radius:99px; transition: width 1.2s cubic-bezier(.25,.6,.3,1); }
+.opt-mini-num{ font-size:11px; color:var(--muted); margin-top:5px; font-weight:700; }
+.live-opt[data-act]{ cursor:pointer; transition:.2s; }
+.live-opt[data-act]:hover{ border-color:var(--accent); transform:translateY(-2px); box-shadow:var(--shadow); }
+.live-actions{ display:flex; gap:10px; justify-content:center; margin-top:6px; flex-wrap:wrap; }
+.la-btn{
+  border:1px solid var(--line); background:var(--surface); color:var(--text);
+  border-radius:8px; padding:8px 14px; font-size:12.5px; font-weight:700;
+  cursor:pointer; transition:.2s; display:inline-flex; gap:5px; align-items:center;
+}
+.la-btn:hover{ border-color:var(--primary); color:var(--primary-dark); transform:translateY(-1px); }
+.la-btn.warn{ background:var(--warn); color:#fff; border-color:var(--warn); }
+.la-btn.warn:hover{ background:#d99020; color:#fff; }
+.la-btn.pri{ background:var(--primary); color:#fff; border-color:var(--primary); }
+.la-btn.pri:hover{ background:var(--primary-dark); color:#fff; }
+
+/* result 升级 */
+.result-vs{ margin-left:auto; font-size:13px; color:var(--muted); font-weight:600; }
+.result-vs strong{ color:var(--warn); font-size:18px; }
+.bar-col[data-act]{ cursor:pointer; }
+.bar-col[data-act]:hover .bar{ filter:brightness(.94); }
+.lab2 .bc-warn{ font-size:9px; padding:2px 5px; border-radius:4px; background:var(--warn-soft); color:#a06800; font-weight:800; margin-left:4px; }
+.result-actions{ display:flex; gap:10px; justify-content:center; margin-top:6px; flex-wrap:wrap; padding-bottom:4px; }
+
+/* draw 升级 */
+.draw-modes{ display:flex; gap:5px; }
+.dm-btn{
+  font-size:11.5px; padding:5px 10px; border-radius:99px;
+  background:var(--surface-2); border:1px solid var(--line);
+  color:var(--muted); font-weight:700; cursor:pointer; transition:.2s;
+}
+.dm-btn:hover{ border-color:var(--accent); color:var(--accent-dark); }
+.dm-btn.active{ background:var(--accent); color:#fff; border-color:var(--accent); }
+.scn-draw{ flex-direction:column !important; gap:18px; padding-top:60px !important; }
+.draw-main{ display:flex; align-items:center; justify-content:center; gap:50px; flex:1; min-height:0; }
+.draw-wheel-c{ cursor:pointer; transition:.2s; }
+.draw-wheel-c:hover{ transform:translate(-50%,-50%) scale(1.06); }
+.draw-actions{ display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+.draw-history{
+  background: var(--surface); border:1px solid var(--line-soft); border-radius:12px;
+  padding:10px 16px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;
+  font-size:12px;
+}
+.dh-l{ font-weight:700; color:var(--muted); }
+.dh-name{ background:var(--accent-soft); color:var(--accent-dark); padding:3px 9px; border-radius:99px; font-weight:700; }
+.dh-tip{ margin-left:auto; color:var(--warn); font-weight:700; font-size:11.5px; }
+
+.grp-h-bar{ display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.grp-h-title{ font-size:17px; font-weight:800; color:var(--text); }
+.grp-mem{ display:flex; gap:3px; flex-wrap:wrap; }
+.gm-av{
+  width:22px; height:22px; border-radius:50%;
+  background: var(--accent-soft); color:var(--accent-dark);
+  font-size:11px; font-weight:800; display:grid; place-items:center;
+  border:1.5px solid #fff; box-shadow:0 1px 2px rgba(0,0,0,.05);
+}
+.grp-card[data-act]{ position:relative; cursor:pointer; transition:.2s; }
+.grp-card[data-act]:hover{ transform:translateY(-3px); box-shadow:0 12px 28px rgba(20,30,55,.14); }
+.grp-card.recommended{ border-color:var(--accent); box-shadow: 0 0 0 2px var(--accent-soft), var(--shadow); }
+.grp-badge{ position:absolute; top:6px; right:6px; font-size:10px; padding:3px 8px; border-radius:6px; font-weight:800; }
+.gb-fast{ background:var(--warn-soft); color:#a06800; }
+.gb-creative{ background:var(--accent); color:#fff; }
+
+/* end 升级 */
+.scn-end{ padding:42px 50px 78px !important; gap:12px !important; }
+.end-stats{ display:grid; grid-template-columns: repeat(4,1fr); gap:12px; }
+.es-chip{
+  background: var(--surface); border-radius:12px; padding:12px 16px;
+  border:1px solid var(--line-soft); box-shadow: var(--shadow);
+  text-align:center;
+}
+.es-num{ font-size:26px; font-weight:800; color:var(--primary-dark); line-height:1; font-variant-numeric: tabular-nums; }
+.es-lab{ font-size:11px; color:var(--muted); font-weight:700; margin-top:5px; }
+.end-h{ font-size:24px !important; }
+.ek-anim{ opacity:0; transform:translateY(12px); animation: ekIn .5s ease forwards; }
+@keyframes ekIn{ to{ opacity:1; transform:translateY(0);} }
+.end-card[data-act]{ cursor:pointer; transition:.2s; }
+.end-card[data-act]:hover{ border-color:var(--primary); transform:translateY(-2px); box-shadow:var(--shadow); }
+.end-push{ background: var(--surface); border-radius:12px; padding:12px 16px; border:1px solid var(--line-soft); }
+.ep-h{ font-size:12px; color:var(--muted); font-weight:800; margin-bottom:8px; }
+.ep-list{ display:grid; grid-template-columns: repeat(4,1fr); gap:10px; }
+.ep-card{ display:flex; gap:9px; align-items:center; background: var(--surface-2); padding:7px 10px; border-radius:8px; }
+.ep-av{ width:28px; height:28px; border-radius:50%; background: var(--accent-soft); color: var(--accent-dark); font-size:12px; font-weight:800; display:grid; place-items:center; flex:none; }
+.ep-n{ font-size:12px; font-weight:800; line-height:1.2; }
+.ep-d{ font-size:10.5px; color:var(--muted); margin-top:2px; }
+</style>
+</head>
+<body>
+<div class="whiteboard-boot" id="whiteboardBoot">
+  <div class="wb-desktop">
+    <div class="wb-desktop-icons">
+      <div class="wb-icon" data-boot-act="open-computer" title="双击打开此电脑">
+        <div class="wb-icon-tile computer"></div>
+        <span>此电脑</span>
+      </div>
+      <div class="wb-icon" data-boot-act="open-bubu" title="双击打开步步课堂">
+        <div class="wb-icon-tile bubu"><i class="bubu-mark"></i></div>
+        <span>步步课堂</span>
+      </div>
+      <div class="wb-icon" data-boot-act="open-pen" title="双击打开白板笔">
+        <div class="wb-icon-tile pen"></div>
+        <span>白板笔</span>
+      </div>
+      <div class="wb-icon" data-boot-act="open-folder" title="双击打开课件文件夹">
+        <div class="wb-icon-tile folder"></div>
+        <span>课件文件夹</span>
+      </div>
+      <div class="wb-icon" data-boot-act="open-recycle" title="回收站">
+        <div class="wb-icon-tile recycle">♲</div>
+        <span>回收站</span>
+      </div>
+      <div class="wb-icon" data-boot-act="open-browser" title="浏览器">
+        <div class="wb-icon-tile browser">e</div>
+        <span>浏览器</span>
+      </div>
+      <div class="wb-icon" data-boot-act="open-cloud" title="云盘">
+        <div class="wb-icon-tile" style="background:linear-gradient(135deg,#f59e0b,#f97316)">云</div>
+        <span>云盘</span>
+      </div>
+    </div>
+    <div class="wb-taskbar">
+      <div class="wb-start">Windows 白板桌面 <span class="wb-taskbar-apps"><i class="wb-task-pill">步</i><i class="wb-task-pill">笔</i><i class="wb-task-pill">📁</i></span></div>
+      <div class="wb-tray"><span>网络已连接</span><span id="wbClock">08:00</span></div>
+    </div>
+  </div>
+  <div class="wb-login" id="whiteboardLogin">
+    <div class="wb-login-card">
+      <h2>登录步步课堂</h2>
+      <p>老师到教室后先登录账号，再选择已经备好的课开始授课。</p>
+      <div class="wb-login-grid">
+        <div class="wb-teacher-list">
+          <div class="wb-teacher" data-boot-act="login"><div class="wb-avatar">王</div><div><b>王老师</b><span>数学 · 最近课件《小数的意义》</span></div><em>进入</em></div>
+          <div class="wb-teacher" data-boot-act="login"><div class="wb-avatar" style="background:#7d6cf2">李</div><div><b>李老师</b><span>语文 · 最近课件《草原》</span></div><em>进入</em></div>
+        </div>
+        <div class="wb-qr"><div class="wb-qr-box"></div><span>扫码登录<br>手机确认身份</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="wb-course-picker" id="whiteboardCoursePicker">
+    <div class="wb-course-card">
+      <h2>选择备好的课</h2>
+      <p>这里展示老师已经在教师端备好的课件，进入后再开始上课。</p>
+      <div class="wb-course-list">
+        <div class="wb-course-item primary">
+          <div class="wb-course-cover"><b>小数的意义</b><span>四年级下 · 数学 · 已同步</span></div>
+          <div class="wb-course-body">
+            <div class="wb-course-meta"><span>8 页课件</span><span>第 5 页随堂练</span><span>第 7 页抽人</span></div>
+            <div class="wb-course-actions">
+              <button class="primary" type="button" data-boot-act="start-course">开始上课</button>
+              <button type="button" data-boot-act="preview-course">预览</button>
+            </div>
+          </div>
+        </div>
+        <div class="wb-course-item">
+          <div class="wb-course-cover" style="background:linear-gradient(135deg,#fff7ed,#ffedd5)"><b>单位换算练习</b><span>四年级下 · 数学 · 草稿</span></div>
+          <div class="wb-course-body">
+            <div class="wb-course-meta"><span>5 页</span><span>待补互动</span></div>
+            <div class="wb-course-actions"><button type="button" data-boot-act="course-disabled">未完成</button></div>
+          </div>
+        </div>
+        <div class="wb-course-item">
+          <div class="wb-course-cover" style="background:linear-gradient(135deg,#eef2ff,#e0e7ff)"><b>分数比较</b><span>四年级下 · 数学 · 明日课</span></div>
+          <div class="wb-course-body">
+            <div class="wb-course-meta"><span>6 页</span><span>已备题库</span></div>
+            <div class="wb-course-actions"><button type="button" data-boot-act="course-disabled">稍后上课</button></div>
+          </div>
+        </div>
+      </div>
+      <div class="wb-course-actions" style="margin-top:14px">
+        <button type="button" data-boot-act="back-login">返回登录</button>
+      </div>
+    </div>
+  </div>
+  <div class="wb-app-layer wb-pen-app" id="standalonePenApp">
+    <div class="wb-app-window wb-pen-window">
+      <div class="wb-app-titlebar">
+        <div><b>白板笔</b><span>独立书写软件</span></div>
+        <div class="wb-window-actions"><button type="button" data-boot-act="pen-close">×</button></div>
+      </div>
+      <div class="wb-pen-toolbar">
+        <button class="active" type="button" data-standalone-pen-color="#111827">黑色</button>
+        <button type="button" data-standalone-pen-color="#e11d48">红色</button>
+        <button type="button" data-standalone-pen-color="#2563eb">蓝色</button>
+        <button class="active" type="button" data-standalone-pen-size="4">细笔</button>
+        <button type="button" data-standalone-pen-size="9">粗笔</button>
+        <button type="button" data-boot-act="pen-clear">清空</button>
+      </div>
+      <div class="standalone-pen-stage"><canvas id="standalonePenCanvas"></canvas></div>
+    </div>
+  </div>
+  <div class="wb-app-layer wb-browser-app" id="desktopBrowserApp">
+    <div class="wb-app-window wb-browser-window">
+      <div class="wb-app-titlebar">
+        <div><b>浏览器</b><span>网页直接在白板桌面内部打开</span></div>
+        <div class="wb-window-actions"><button type="button" data-boot-act="browser-close">×</button></div>
+      </div>
+      <div class="wb-browser-bar">
+        <div class="wb-browser-nav">
+          <button type="button" data-boot-act="browser-home">主页</button>
+        </div>
+        <input id="desktopBrowserInput" type="text" value="https://example.com" aria-label="浏览器地址栏">
+        <button type="button" data-boot-act="browser-go">打开网页</button>
+      </div>
+      <div class="wb-browser-content">
+        <div class="wb-browser-bookmarks">
+          <h3>常用</h3>
+          <button type="button" data-browser-bookmark="https://www.bing.com/search?q=小学数学小数的意义">搜小数的意义</button>
+          <button type="button" data-browser-bookmark="https://www.bing.com">Bing</button>
+          <button type="button" data-browser-bookmark="https://www.baidu.com">百度</button>
+          <button type="button" data-browser-bookmark="https://example.com">示例网页</button>
+        </div>
+        <div class="wb-browser-view">
+          <h3>网页打开区</h3>
+          <div class="wb-browser-status" id="desktopBrowserStatus">
+            输入网址或关键词，点击“打开网页”。网页会留在这个窗口里；个别网站若拒绝内嵌，会在下方框内显示浏览器拦截提示。
+          </div>
+          <div class="wb-browser-frame-wrap">
+            <iframe id="desktopBrowserFrame" title="桌面浏览器内部页面" referrerpolicy="no-referrer"></iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ===== Whiteboard device shell ===== -->
+<div class="board-shell">
+  <div class="board-frame">
+    <div class="board-camera">📡 步步教学一体机 · WB-A23</div>
+    <div class="board-outer">
+      <div class="board-screen" id="boardScreen">
+        <div class="scene-root" id="sceneRoot"></div>
+        <canvas class="board-canvas" id="boardCanvas" data-canvas="annotationCanvas"></canvas>
+        <div class="selection-ghost" id="selectionGhost"></div>
+
+        <div class="floating-ball" id="floatingBall" style="right:22px;bottom:104px">
+          <button class="float-main" id="floatingMain" type="button" aria-label="打开白板悬浮球">
+            <span>✦</span><small>白板</small>
+          </button>
+        </div>
+
+        <div class="floating-panel" id="floatingPanel" aria-label="白板功能台">
+          <div class="float-panel-head">
+            <div>
+              <div class="float-panel-title">白板功能台</div>
+              <div class="float-panel-sub">拖动圆球放任意位置；这里只放白板笔</div>
+            </div>
+            <button class="float-panel-close" type="button" data-board-action="closeFloatingPanel">×</button>
+          </div>
+          <div class="pen-palette" id="penPalette">
+            <div class="pen-card">
+              <h4>白板笔</h4>
+              <div class="pen-row">
+                <button class="pen-chip pen-color active" data-pen-color="#111827" data-color="#111827" type="button">黑</button>
+                <button class="pen-chip pen-color" data-pen-color="#e11d48" data-color="#e11d48" type="button">红</button>
+                <button class="pen-chip pen-color" data-pen-color="#2563eb" data-color="#2563eb" type="button">蓝</button>
+                <button class="pen-chip active" data-pen-size="4" type="button">细</button>
+                <button class="pen-chip" data-pen-size="8" type="button">粗</button>
+                <button class="pen-chip active" data-pen-mode="curve" type="button">曲线</button>
+                <button class="pen-chip" data-pen-mode="line" type="button">直线</button>
+              </div>
+            </div>
+          </div>
+          <div class="float-tool-grid">
+            <button class="float-tool" data-board-tool="pen" type="button"><span class="ico">笔</span><strong>白板笔</strong><span>红/蓝/黑、粗细、直线/曲线</span></button>
+            <button class="float-tool" data-board-tool="clearBoard" type="button"><span class="ico">清</span><strong>清空批注</strong><span>撤掉当前圈画与浮层</span></button>
+          </div>
+          <div class="float-panel-foot">
+            <span>批注跟随当前页；翻页后画面重新清爽。</span>
+            <button type="button" data-board-action="closeFloatingPanel">收起</button>
+          </div>
+        </div>
+
+        <div class="page-controls" id="pageControls">
+          <button type="button" data-act="prevPage">上一页</button>
+          <div class="page-label" id="pageLabel">第 1 / 6 页 · 上课前</div>
+          <button class="primary" type="button" data-act="nextPage">下一页</button>
+        </div>
+      </div>
+      <div class="scene-tabs board-tabs" id="sceneTabs">
+        <div class="tab active" data-scene="cw1">封面</div>
+        <div class="tab" data-scene="cw3">0.1</div>
+        <div class="tab" data-scene="cw5">随堂练页</div>
+        <div class="tab" data-scene="cw7">抽人页</div>
+        <div class="tab" data-scene="live">随堂答题</div>
+        <div class="tab" data-scene="draw">抽人提问</div>
+      </div>
+    </div>
+    <div class="board-stand"></div>
+    <div class="board-base-text">STEP · STEP · CLASSROOM 65"</div>
+  </div>
+</div>
+
+<!-- ===== Toast / Modal ===== -->
+<div class="toast-stack" id="toastStack"></div>
+<div class="modal-bg" id="modalBg">
+  <div class="modal">
+    <h3 id="modalTitle">标题 <span class="mh-tag" id="modalTag">说明</span></h3>
+    <div class="m-body" id="modalBody"></div>
+    <div class="m-foot">
+      <button data-act="modalClose">关闭</button>
+      <button class="pri" id="modalPri" data-act="modalClose">我知道了</button>
+    </div>
+  </div>
+</div>
+<script>
+// ============ 全局工具 ============
+const $  = (s, p=document) => p.querySelector(s);
+const $$ = (s, p=document) => Array.from(p.querySelectorAll(s));
+
+function toast(msg, type='ok', ms=2200){
+  const stack = $('#toastStack'); if(!stack) return;
+  const el = document.createElement('div');
+  el.className = 'toast ' + (type||'');
+  const ic = type==='no'?'⛔':type==='warn'?'⚠️':type==='info'?'💡':'✓';
+  el.innerHTML = `<span>${ic}</span><span>${msg}</span>`;
+  stack.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(20px)'; }, ms-300);
+  setTimeout(()=> el.remove(), ms);
+}
+function showModal(title, html, tag='演示', priText='我知道了'){
+  $('#modalTitle').firstChild.nodeValue = title + ' ';
+  $('#modalTag').textContent = tag;
+  $('#modalBody').innerHTML = html;
+  $('#modalPri').textContent = priText;
+  $('#modalBg').classList.add('show');
+}
+function closeModal(){ $('#modalBg').classList.remove('show'); }
+$('#modalBg').addEventListener('click', e=>{ if(e.target===$('#modalBg')) closeModal(); });
+
+const BUBU_SYNC_KEY = 'bubu-three-end-demo-sync-v1';
+const BUBU_SYNC_CHANNEL = 'bubu-three-end-demo-channel';
+let bubuSyncChannel = null;
+try { bubuSyncChannel = new BroadcastChannel(BUBU_SYNC_CHANNEL); } catch {}
+function readBubuSync(){
+  try { return JSON.parse(localStorage.getItem(BUBU_SYNC_KEY) || '{}') || {}; }
+  catch { return {}; }
+}
+function escapeBoardHTML(value=''){
+  return String(value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+function writeBubuSync(patch){
+  const next = {...readBubuSync(), ...patch, updatedAt:Date.now()};
+  try { localStorage.setItem(BUBU_SYNC_KEY, JSON.stringify(next)); } catch {}
+  try { bubuSyncChannel?.postMessage(next); } catch {}
+  return next;
+}
+function listenBubuSync(handler){
+  window.addEventListener('storage', e => {
+    if(e.key === BUBU_SYNC_KEY && e.newValue){
+      try { handler(JSON.parse(e.newValue), true); } catch {}
+    }
+  });
+  try { bubuSyncChannel?.addEventListener('message', e => handler(e.data || {}, true)); } catch {}
+}
+function setBoardSyncStrip(title, message){
+  const host = $('#boardScreen');
+  if(!host) return;
+  let strip = $('#boardSyncStrip');
+  if(!strip){
+    strip = document.createElement('div');
+    strip.className = 'board-sync-strip';
+    strip.id = 'boardSyncStrip';
+    host.appendChild(strip);
+  }
+  strip.innerHTML = `<strong>${title || '三端同步'}</strong><span>${message || '教师端状态已同步'}</span>`;
+}
+function applyBoardSyncState(state, flash=false){
+  const board = state?.board;
+  if(board){
+    const scene = board.scene || (state.homework ? 'end' : 'teach');
+    if(typeof selectScene === 'function') selectScene(scene, true);
+    else if(typeof renderScene === 'function') renderScene(scene);
+    setBoardSyncStrip(board.title || '三端同步', board.message || '教师端状态已同步');
+    if(flash && (state.source === 'teacher' || state.source === 'student')) toast(board.message || '教师端状态已同步', 'info', 2000);
+  }
+  if(state?.classActivity) applyBoardClassActivity(state.classActivity, flash && state.source === 'student');
+  if(state?.drawResponse){
+    setBoardSyncStrip('抽人回答状态', `${state.drawResponse.student || '学生'} 已答完，老师可继续追问或讲评。`);
+    if(flash && state.source === 'student') toast(`${state.drawResponse.student || '学生'} 已答完`, 'info', 1600);
+  }
+  if(state?.drawCall && !board){
+    setBoardSyncStrip('抽人提问同步', `${state.drawCall.target || '同学'} 的平板已进入回答状态`);
+  }
+}
+
+function emptyLiveActivity(){
+  return {
+    type:'live-question',
+    id:'live-' + Date.now(),
+    scene:'mcq',
+    title:'随堂题 · 单选',
+    prompt:'下面哪个分数最接近 1/2？',
+    total:28,
+    answerKey:'C',
+    options:{A:0,B:0,C:0,D:0},
+    submissions:[],
+    status:'collecting'
+  };
+}
+function syncLivePushFromBoard(){
+  const activity = emptyLiveActivity();
+  const state = writeBubuSync({
+    source:'board',
+    classroom:{
+      scene:'mcq',
+      pushId:activity.id,
+      title:'王老师 · 随堂练',
+      desc:'白板端推送了单选题：下面哪个分数最接近 1/2？提交后只给本人反馈。'
+    },
+    board:{
+      scene:'live',
+      title:'随堂题已推送',
+      message:'学生端已进入答题页，白板正在回收提交进度。'
+    },
+    classActivity:activity
+  });
+  applyBoardSyncState(state, false);
+  toast('📨 已推送本题到学生端', 'ok', 1800);
+}
+function syncDrawCallFromBoard(){
+  const call = {
+    id:'draw-' + Date.now(),
+    target:'嘉怡',
+    targetId:'wang-jiayi',
+    question:'说一说：4/9 为什么最接近 1/2？',
+    status:'called',
+    at:Date.now()
+  };
+  const state = writeBubuSync({
+    source:'board',
+    classroom:{
+      scene:'draw',
+      title:'王老师 · 抽人提问',
+      desc:`${call.target}正在回答，其他同学保持旁听。`
+    },
+    board:{
+      scene:'draw',
+      title:'抽人提问已同步',
+      message:`${call.target} 的平板已出现回答提示，其他学生端显示旁听。`
+    },
+    drawCall:call
+  });
+  applyBoardSyncState(state, false);
+}
+function liveActivityCounts(activity){
+  const submissions = Array.isArray(activity?.submissions) ? activity.submissions : [];
+  const options = {...(activity?.options || {})};
+  ['A','B','C','D'].forEach(k => {
+    options[k] = Number(options[k] || 0);
+  });
+  const answered = submissions.length || Number(activity?.answered || 0);
+  const correct = submissions.filter(s => s.correct).length || Number(activity?.correct || 0);
+  return {submissions, options, answered, correct, total:Number(activity?.total || 28)};
+}
+function setLiveSyncSummary(activity){
+  const host = $('.scn-live');
+  if(!host) return;
+  let summary = $('#liveSyncSummary');
+  if(!summary){
+    summary = document.createElement('div');
+    summary.className = 'live-sync-summary';
+    summary.id = 'liveSyncSummary';
+    const actions = $('.live-actions');
+    host.insertBefore(summary, actions || null);
+  }
+  const {options, answered, correct, total} = liveActivityCounts(activity);
+  const distribution = `A ${options.A || 0} · B ${options.B || 0} · C ${options.C || 0} · D ${options.D || 0}`;
+  const rate = answered ? Math.round(correct / answered * 100) : 0;
+  summary.innerHTML = `<strong data-sync-role="live-progress">已提交 ${answered} / ${total}</strong><span data-sync-role="typical-reason">选项分布：${distribution}；正确率 ${rate}%</span>`;
+}
+function applyBoardClassActivity(activity, flash=false){
+  if(!activity || activity.type !== 'live-question') return;
+  if(currentScene !== 'live' && typeof selectScene === 'function') selectScene('live', true);
+  const {options, answered, correct, total} = liveActivityCounts(activity);
+  const ans = $('#liveAns');
+  const fill = $('#liveFill');
+  const pct = $('#livePct');
+  const percent = total ? Math.round(answered / total * 100) : 0;
+  if(ans) ans.textContent = answered;
+  if(fill) fill.style.width = percent + '%';
+  if(pct) pct.textContent = percent + '%';
+  Object.entries(options).forEach(([key, count]) => {
+    const opt = $(`.live-opt[data-k="${key}"]`);
+    const num = opt?.querySelector('.opt-mini-num');
+    const bar = opt?.querySelector('.omb-fill');
+    if(num) num.textContent = `${count} 人选`;
+    if(bar) bar.style.width = total ? Math.max(4, Math.round(count / total * 100)) + '%' : '0%';
+  });
+  setLiveSyncSummary(activity);
+  setBoardSyncStrip('随堂题回收中', `已提交 ${answered}/${total}，正确 ${correct} 人。`);
+  if(flash) toast(`收到学生提交：${answered}/${total}`, 'info', 1400);
+}
+
+const CLASSMATES = ['李小明','陈思雨','张佳怡','王浩然','赵一诺','孙晨','刘安琪','周航','何雨桐','郑嘉豪','钱乐乐','许知远'];
+function avatarHTML(names=CLASSMATES.slice(0,7)){
+  return names.map((n,i)=>`
+    <div class="live-avatar ${i===0?'gold':''}">
+      <div class="av">${n.slice(0,1)}</div>
+      <div class="nm">${n}</div>
+      <div class="rk">#${i+1}</div>
+    </div>`).join('');
+}
+function barAvatars(n){
+  return Array.from({length:n}, (_,i)=>`<span class="a">${i+1}</span>`).join('');
+}
+
+const COURSEWARE_PAGES = [
+  {num:1,title:'小数的意义',sub:'人教版 · 四年级下 · 第四单元 · 示例课件',tag:'示例PPT',html:`
+    <div class="cover-num">0.1</div>
+    <div class="slide-title" style="font-size:48px">小数的意义</div>
+    <div class="slide-subtitle">同一份课件：教师端备课编辑，白板端授课翻页。</div>
+    <div class="flow-cards" style="margin-top:24px">
+      <div class="flow-card"><b>1</b><span>数数引入，唤醒十进制经验</span></div>
+      <div class="flow-card"><b>2</b><span>分而有数，理解 0.1 / 0.01</span></div>
+      <div class="flow-card"><b>3</b><span>扩充数系，建立小数模型</span></div>
+    </div>`},
+  {num:2,title:'数数引入：唤醒计数经验',sub:'先让学生数一数，再追问“满十怎么办？”',tag:'导入',html:`
+    <div class="slide-bullet">10 个一是 <strong>十</strong>，10 个十是 <strong>一百</strong>。</div>
+    <div class="slide-bullet">整数可以往左扩展，那么 1 不够分时，数还能往右扩展吗？</div>
+    <div class="formula-box">满十进一，分十退一</div>`},
+  {num:3,title:'分而有数：深入理解 0.1',sub:'把一个整体平均分成 10 份，其中 1 份就是十分之一。',tag:'核心概念',html:`
+    <div class="slide-bullet">把 <strong>1 米</strong> 平均分成 <strong>10 份</strong>。</div>
+    <div class="fraction-strip"><span class="active"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+    <div class="formula-box">1/10 = 0.1</div>`},
+  {num:4,title:'分了再分：0.01 与 0.001',sub:'10 个 0.01 是 0.1；10 个 0.001 是 0.01。',tag:'概念推进',html:`
+    <div class="rule-board">
+      <div class="rule-card"><b>0.1</b><span>十分之一</span></div>
+      <div class="rule-card"><b>0.01</b><span>百分之一</span></div>
+      <div class="rule-card"><b>0.001</b><span>千分之一</span></div>
+    </div>
+    <div class="slide-bullet">小数每向右一位，计数单位就缩小到原来的十分之一。</div>`},
+  {num:5,title:'扩充数系：0.156 怎么数？',sub:'教师端已绑定“随堂练”，白板翻到第 5 页时自动出现该互动。',tag:'随堂互动',bind:'quiz',html:`
+    <div class="slide-bullet"><strong>0.156</strong> 里面有几个 0.1、几个 0.01、几个 0.001？</div>
+    <div class="place-grid">
+      <div class="place-card"><b>1</b><span>十分位：1 个 0.1</span></div>
+      <div class="place-card"><b>5</b><span>百分位：5 个 0.01</span></div>
+      <div class="place-card"><b>6</b><span>千分位：6 个 0.001</span></div>
+    </div>
+    <div class="interact-placeholder">
+      <div class="ip-header">📝 <span>第 5 页互动：随堂练已绑定</span><span class="ip-tag">教师端同步</span></div>
+      <div class="ip-body">题目：10 个 0.01 是多少？学生提交后白板显示进度、选项分布和正确率。</div>
+      <div class="ip-actions"><button class="primary" data-act="livePush">推送本题</button><button data-act="liveHint">给全班提示</button></div>
+    </div>`},
+  {num:6,title:'数位顺序表',sub:'把整数位和小数位放在同一张表里看。',tag:'板书页',html:`
+    <div class="rule-board">
+      <div class="rule-card"><b>个位</b><span>1</span></div>
+      <div class="rule-card"><b>十分位</b><span>0.1</span></div>
+      <div class="rule-card"><b>百分位</b><span>0.01</span></div>
+    </div>
+    <div class="slide-bullet">白板笔可以直接在本页圈画和补充例子。</div>`},
+  {num:7,title:'独立练习：连一连',sub:'教师端已绑定“抽人回答”，白板翻到第 7 页时自动出现该互动。',tag:'抽人互动',bind:'draw',html:`
+    <div class="slide-bullet">把小数和它表示的意义连起来：0.3、0.07、1.25。</div>
+    <div class="interact-placeholder">
+      <div class="ip-header">🎲 <span>第 7 页互动：抽人回答已绑定</span><span class="ip-tag">教师端同步</span></div>
+      <div class="ip-body">抽中后，只有该学生平板出现“轮到你回答”，其他学生端显示旁听。</div>
+      <div class="ip-actions"><button class="primary" data-act="drawAccept">让她回答</button><button data-act="drawRespin">重抽</button></div>
+    </div>`},
+  {num:8,title:'标一标与课后任务',sub:'把 0.4、0.08、1.2 标到数轴上，并记录生活里的 5 个小数。',tag:'收束',html:`
+    <div class="slide-bullet">今天学会了：小数表示十分之一、百分之一、千分之一……</div>
+    <div class="slide-bullet">课后找一找价格、长度、质量中的小数。</div>
+    <div class="formula-box">小数 = 更细的计数单位</div>`}
+];
+
+function renderCoursewarePage(num){
+  const p = COURSEWARE_PAGES.find(x => x.num === num) || COURSEWARE_PAGES[0];
+  const tagClass = p.bind === 'quiz' ? 'info' : p.bind === 'draw' ? 'warn' : '';
+  return `<div class="course-slide">
+    <span class="slide-tag ${tagClass}">${p.tag}</span>
+    <div class="slide-title">${p.title}</div>
+    <div class="slide-subtitle">${p.sub}</div>
+    ${p.html}
+  </div>`;
+}
+const coursewareScenes = Object.fromEntries(COURSEWARE_PAGES.map(p => [`cw${p.num}`, () => renderCoursewarePage(p.num)]));
+
+// ============ 场景 HTML 渲染 ============
+const SCENES = {
+  ...coursewareScenes,
+  welcome: () => `
+    <div class="bd-topbar">
+      <div class="left">
+        <span class="chip">⏰ 16:55</span>
+        <span class="chip" style="background:var(--primary-soft);color:var(--primary-dark)">17:00 开始上课</span>
+      </div>
+      <div class="right">
+        <span class="chip">课前白板</span>
+      </div>
+    </div>
+    <div class="scn-welcome">
+      <div class="w-eyebrow">老师课前提示</div>
+      <div class="w-title" id="preClassMessage">同学们，进教室后先安静入座，把要用的材料放在桌角。5 点准时开始。</div>
+      <div class="w-sub">老师可以在课间把一段话直接发到这块白板上，全班进门第一眼就能看到。</div>
+      <div class="w-cd">
+        <span class="lab">距上课</span>
+        <span class="num" id="welcomeCD">04:58</span>
+      </div>
+      <div class="preclass-note-editor">
+        <textarea id="preClassNoteInput" rows="2">把水杯放到桌脚，黑板左侧留给今天的随手板书。</textarea>
+        <button class="scene-btn pri" data-act="publishPreClassNote">发布到白板</button>
+      </div>
+    </div>
+    <div class="preclass-actions"><button class="scene-btn pri" data-act="startClass">开始上课</button></div>
+  `,
+  teach: () => `
+    <div class="bd-topbar">
+      <div class="left">
+        <span class="chip">白板讲解</span>
+      </div>
+      <div class="right">
+        <span class="chip">白板笔可直接书写</span>
+      </div>
+    </div>
+    <div class="scn-teach">
+      <div class="teach-page">
+        <div class="whiteboard-prompt">
+          <strong>空白讲解页</strong>
+          <span>点悬浮球打开白板笔，或直接点“开始讲解”进入书写。</span>
+        </div>
+      </div>
+    </div>
+    <div class="scene-actions" style="position:absolute;left:40px;bottom:84px"><button class="scene-btn pri" data-act="startTeach">开始讲解</button></div>
+  `,
+  live: () => `
+    <div class="bd-topbar">
+      <div class="left">
+        <span class="chip live">⏱ 第 1 题 · 答题中</span>
+        <span class="chip" style="background:var(--warn-soft);color:#a06800">倒计时 <strong id="liveCD" style="margin-left:4px">02:08</strong></span>
+      </div>
+      <div class="right">
+        <span class="chip" style="background:var(--primary-soft);color:var(--primary-dark)">📊 实时同步</span>
+      </div>
+    </div>
+    <div class="scn-live">
+      <div class="live-q">下面哪个分数最接近 <strong>1/2</strong>？<small>点选项卡可查看实时分布（不揭晓答案）</small></div>
+      <div class="live-opts">
+        <div class="live-opt" data-act="liveOpt" data-k="A"><div class="k">A</div><div class="v">2/5</div><div class="opt-mini-bar"><div class="omb-fill" data-w="18"></div></div><div class="opt-mini-num">3 人选</div></div>
+        <div class="live-opt" data-act="liveOpt" data-k="B"><div class="k">B</div><div class="v">3/7</div><div class="opt-mini-bar"><div class="omb-fill" data-w="6"></div></div><div class="opt-mini-num">1 人选</div></div>
+        <div class="live-opt" data-act="liveOpt" data-k="C"><div class="k">C</div><div class="v">4/9</div><div class="opt-mini-bar"><div class="omb-fill" data-w="35"></div></div><div class="opt-mini-num">6 人选</div></div>
+        <div class="live-opt" data-act="liveOpt" data-k="D"><div class="k">D</div><div class="v">5/8</div><div class="opt-mini-bar"><div class="omb-fill" data-w="41"></div></div><div class="opt-mini-num">7 人选</div></div>
+      </div>
+      <div class="live-prog-row">
+        <div class="lpr-l">已答 <strong id="liveAns">17</strong> / 28</div>
+        <div class="live-bar"><div class="fill" id="liveFill" style="width:0%"></div></div>
+        <div class="lpr-r" id="livePct">0%</div>
+      </div>
+      <div class="live-fastest">
+        <div class="lf-l">⚡ 最快 5 名</div>
+        <div class="lf-list" id="lfList"></div>
+      </div>
+      <div class="live-actions">
+        <button class="la-btn pri" data-act="livePush">📨 推送本题</button>
+        <button class="la-btn" data-act="liveAdd30">⏱ + 30 秒</button>
+        <button class="la-btn" data-act="liveSlow">👀 查看慢答 11 人</button>
+        <button class="la-btn" data-act="liveHint">💡 给全班一个提示</button>
+        <button class="la-btn warn" data-act="liveEnd">✅ 结束本题 · 揭晓</button>
+      </div>
+    </div>
+  `,
+  result: () => `
+    <div class="bd-topbar">
+      <div class="left">
+        <span class="chip" style="background:var(--primary-soft);color:var(--primary-dark)">✅ 答案揭晓</span>
+        <span class="chip">第 1 题 · 单选</span>
+        <span class="chip" data-act="resultKnowledge" style="cursor:pointer">📖 考点 · 分数大小比较</span>
+      </div>
+      <div class="right">
+        <span class="chip">⏱ 本题用时 02:30</span>
+      </div>
+    </div>
+    <div class="scn-result">
+      <div class="result-h">
+        <span class="lab">正确答案：</span>
+        <span class="ans">D · 5/8</span>
+        <span class="result-vs">本班 <strong>39%</strong> · 年级平均 52% · <span style="color:var(--warn);font-weight:800">需关注</span></span>
+      </div>
+      <div class="bars">
+        <div class="bar-col" data-act="resultBar" data-k="A"><div class="bar-wrap"><div class="bar" data-h="32" style="height:6px"><span class="ct">5</span><div class="bar-avatars" data-c="5"></div></div></div><div class="lab2"><span class="key">A</span>2/5</div></div>
+        <div class="bar-col" data-act="resultBar" data-k="B"><div class="bar-wrap"><div class="bar" data-h="20" style="height:6px"><span class="ct">3</span><div class="bar-avatars" data-c="3"></div></div></div><div class="lab2"><span class="key">B</span>3/7</div></div>
+        <div class="bar-col" data-act="resultBar" data-k="C"><div class="bar-wrap"><div class="bar" data-h="58" style="height:6px"><span class="ct">9</span><div class="bar-avatars" data-c="9"></div></div></div><div class="lab2"><span class="key">C</span>4/9<span class="bc-warn">高频错</span></div></div>
+        <div class="bar-col correct" data-act="resultBar" data-k="D"><div class="bar-wrap"><div class="bar" data-h="72" style="height:6px"><span class="ct">11</span><div class="bar-avatars" data-c="11"></div></div></div><div class="lab2"><span class="key">D</span>5/8</div></div>
+      </div>
+      <div class="result-actions">
+        <button class="la-btn" data-act="resAddWrong">📝 加入 17 人错题本</button>
+        <button class="la-btn" data-act="resPushSimilar">📨 推 1 道相似题给错答学生</button>
+        <button class="la-btn" data-act="resReplay">🎬 回放慢答过程</button>
+        <button class="la-btn pri" data-act="resNext">➡️ 下一题</button>
+      </div>
+    </div>
+  `,
+  draw: () => `
+    <div class="bd-topbar">
+      <div class="left">
+        <span class="chip" style="background:var(--accent-soft);color:var(--accent-dark)">🎯 抽人提问</span>
+        <span class="chip">28 名候选</span>
+      </div>
+      <div class="right">
+        <div class="draw-modes" id="drawModes">
+          <span class="dm-btn active" data-act="drawMode" data-mode="cheer">🌟 鼓励型</span>
+          <span class="dm-btn" data-act="drawMode" data-mode="care">👋 关注型</span>
+          <span class="dm-btn" data-act="drawMode" data-mode="random">🎲 完全随机</span>
+        </div>
+      </div>
+    </div>
+    <div class="scn-draw">
+      <div class="draw-main">
+        <div style="position:relative;">
+          <div class="draw-pointer"></div>
+          <div class="draw-wheel spin" id="drawWheel">
+            <div class="draw-wheel-c" data-act="drawRespin" title="点击重抽">点击<br>重抽</div>
+          </div>
+        </div>
+        <div class="draw-info">
+          <div class="di-h">恭喜被点到的同学：</div>
+          <div class="di-name" id="drawWaiting" style="font-size:24px;color:var(--muted)">转盘转动中…</div>
+          <div class="di-name pop" id="drawName" style="display:none">嘉怡</div>
+          <div class="draw-why" id="drawWhy" style="display:none">
+            <strong>为什么是嘉怡？</strong>前 3 题答得最快，准确率 100%。<br>
+            最近 1 周抽过 <strong>2 次</strong>，今天还是首次。
+          </div>
+          <div class="draw-actions" id="drawActions" style="display:none">
+            <button class="la-btn pri" data-act="drawAccept">🎤 让她回答</button>
+            <button class="la-btn" data-act="drawSwap">🔁 让别人来</button>
+            <button class="la-btn" data-act="drawRespin">🔄 再抽一次</button>
+          </div>
+        </div>
+      </div>
+      <div class="draw-history">
+        <span class="dh-l">📜 最近 5 次：</span>
+        <span class="dh-name">嘉怡</span><span class="dh-name">子涵</span><span class="dh-name">嘉怡</span><span class="dh-name">雨桐</span><span class="dh-name">家豪</span>
+        <span class="dh-tip">💡 30 天没抽到：芷雨、明轩、星辰</span>
+      </div>
+    </div>
+  `,
+  end: () => `
+    <div class="bd-topbar">
+      <div class="left">
+        <span class="chip">🌙 14:55 下课</span>
+        <span class="chip" style="background:var(--primary-soft);color:var(--primary-dark)">本节用时 30 分钟</span>
+      </div>
+      <div class="right">
+        <span class="chip" data-act="endReport" style="cursor:pointer">📊 查看完整课后报告</span>
+      </div>
+    </div>
+    <div class="scn-end">
+      <div class="end-stats">
+        <div class="es-chip"><div class="es-num">96<small style="font-size:14px">%</small></div><div class="es-lab">参与率</div></div>
+        <div class="es-chip"><div class="es-num">73<small style="font-size:14px">%</small></div><div class="es-lab">综合正确率</div></div>
+        <div class="es-chip"><div class="es-num">12</div><div class="es-lab">主动举手</div></div>
+        <div class="es-chip"><div class="es-num">17</div><div class="es-lab">入错题本</div></div>
+      </div>
+      <div class="end-h">今日重点 · 三句话<small>看完再走 ✋</small></div>
+      <div class="end-key">
+        <div class="ek-card ek-anim" style="animation-delay:.0s"><div class="ek-num">1</div><h4>分数 = 平均分</h4><p>必须把整体<strong>平均</strong>分成若干份。</p></div>
+        <div class="ek-card ek-anim" style="animation-delay:.3s"><div class="ek-num">2</div><h4>同分母加减</h4><p>分子相加，<strong>分母不变</strong>。</p></div>
+        <div class="ek-card ek-anim" style="animation-delay:.6s"><div class="ek-num">3</div><h4>异分母先通分</h4><p>找到<strong>公分母</strong>再相加。</p></div>
+      </div>
+      <div class="end-foot">
+        <div class="end-card" data-act="endTomorrow">
+          <div class="ec-l">📅 明日预告（点击看课件）</div>
+          <div class="ec-t">分数应用题 · 单位换算（千克 / 克）</div>
+        </div>
+        <div class="end-card warm">
+          <div class="ec-l">💪 今日鼓励</div>
+          <div class="ec-t">圈选题正确率 92%！比上周提升 14% 👍</div>
+        </div>
+      </div>
+      <div class="end-push">
+        <div class="ep-h">📨 已自动按薄弱点给 4 位同学推送针对性练习：</div>
+        <div class="ep-list">
+          <div class="ep-card"><div class="ep-av" style="background:#fff4d2;color:#a06800">嘉</div><div><div class="ep-n">嘉怡</div><div class="ep-d">无任务（满分）</div></div></div>
+          <div class="ep-card"><div class="ep-av">涵</div><div><div class="ep-n">子涵</div><div class="ep-d">补 1 题 · 通分</div></div></div>
+          <div class="ep-card"><div class="ep-av">芷</div><div><div class="ep-n">芷雨</div><div class="ep-d">补 2 题 · 分数比较</div></div></div>
+          <div class="ep-card"><div class="ep-av">辰</div><div><div class="ep-n">星辰</div><div class="ep-d">补 1 题 · 异分母</div></div></div>
+        </div>
+      </div>
+    </div>
+  `,
+};
+let welcomeCDInterval, liveCDInterval, liveAnsInterval;
+const LESSON_FLOW = [
+  {scene:'cw1', title:'小数的意义'},
+  {scene:'cw2', title:'数数引入'},
+  {scene:'cw3', title:'0.1'},
+  {scene:'cw4', title:'0.01'},
+  {scene:'cw5', title:'随堂练'},
+  {scene:'cw6', title:'数位顺序表'},
+  {scene:'cw7', title:'抽人练习'},
+  {scene:'cw8', title:'课后任务'}
+];
+let currentScene = 'cw1';
+let lessonPageIndex = 0;
+let penColor = '#111827';
+let penSize = 4;
+let penMode = 'curve';
+let penActive = false;
+let inkDrawing = false;
+let inkStart = null;
+let inkSnapshot = null;
+const annotationsByPage = new Map();
+window.penColor = penColor;
+window.penSize = penSize;
+
+function renderScene(scene){
+  const fn = SCENES[scene];
+  const screen = $('#sceneRoot');
+  if(!fn){ screen.innerHTML = '<div style="padding:80px;text-align:center;color:#999">场景待补</div>'; return; }
+  // 清理 interval
+  welcomeCDInterval && clearInterval(welcomeCDInterval);
+  liveCDInterval && clearInterval(liveCDInterval);
+  liveAnsInterval && clearInterval(liveAnsInterval);
+  screen.innerHTML = fn();
+  setupSceneEffects(scene);
+  updateMiniBoard(scene);
+  updatePageControls();
+}
+
+function setupSceneEffects(scene){
+  // ---- welcome：平板网格 + 距上课倒计时 ----
+  if(scene==='welcome'){
+    const grid = $('#padGrid');
+    if(grid){
+      let h = '';
+      for(let i=0; i<28; i++){
+        const cls = i===27?'off':i===26?'charge':'';
+        h += `<div class="p ${cls}"></div>`;
+      }
+      grid.innerHTML = h;
+    }
+    let s = 4*60+58;
+    welcomeCDInterval = setInterval(()=>{
+      const el = $('#welcomeCD'); if(!el){ clearInterval(welcomeCDInterval); return; }
+      s--;
+      if(s<0){ el.textContent='上课啦'; clearInterval(welcomeCDInterval); return; }
+      const m = String(Math.floor(s/60)).padStart(2,'0');
+      const ss = String(s%60).padStart(2,'0');
+      el.textContent = m+':'+ss;
+    }, 1000);
+  }
+  // ---- live：进度条 / 最快头像 / 倒计时 / 已答数 ----
+  if(scene==='live'){
+    const syncedActivity = readBubuSync().classActivity;
+    if(syncedActivity?.type === 'live-question'){
+      applyBoardClassActivity(syncedActivity, false);
+      return;
+    }
+    const lfl = $('#lfList');
+    const names = [['嘉怡','1','gold'],['子涵','2',''],['晓彤','3',''],['家豪','4',''],['雨桐','5','']];
+    if(lfl){
+      lfl.innerHTML = names.map(([n,r,c])=>`
+        <div class="live-avatar ${c}">
+          <div class="av">${n[0]}</div>
+          <div class="nm">${n}</div>
+          <div class="rk">第 ${r} 名</div>
+        </div>`).join('');
+    }
+    setTimeout(()=>{
+      const fill = $('#liveFill'); if(fill) fill.style.width = '60.7%';
+      const pct = $('#livePct'); if(pct) pct.textContent='61%';
+      $$('.live-opt .omb-fill').forEach(f=>{ if(f.dataset.w) f.style.width = f.dataset.w + '%'; });
+    }, 250);
+    let cd = 2*60+8;
+    liveCDInterval = setInterval(()=>{
+      const el = $('#liveCD'); if(!el){ clearInterval(liveCDInterval); return; }
+      cd--;
+      if(cd<0){ el.textContent='时间到'; clearInterval(liveCDInterval); return; }
+      const m = String(Math.floor(cd/60)).padStart(2,'0');
+      const ss = String(cd%60).padStart(2,'0');
+      el.textContent = m+':'+ss;
+    }, 1000);
+    let ans = 17;
+    liveAnsInterval = setInterval(()=>{
+      const el = $('#liveAns'); if(!el){ clearInterval(liveAnsInterval); return; }
+      if(ans>=27) return;
+      if(Math.random()<0.35){
+        ans++;
+        el.textContent = ans;
+        const p = Math.round(ans/28*100);
+        const fill = $('#liveFill'); if(fill) fill.style.width = p+'%';
+        const pct = $('#livePct'); if(pct) pct.textContent = p+'%';
+      }
+    }, 1500);
+  }
+  // ---- result：柱状图增长 + 头像点阵 ----
+  if(scene==='result'){
+    setTimeout(()=>{
+      $$('.bars .bar').forEach(b=>{ b.style.height = b.dataset.h + '%'; });
+      $$('.bar-avatars').forEach(av=>{
+        const c = +av.dataset.c;
+        let h = '';
+        const ns = '子嘉晓家雨芷明星轩涵彤豪桐';
+        for(let i=0;i<c;i++){ h += `<div class="a">${ns[i%ns.length]}</div>`; }
+        av.innerHTML = h;
+      });
+    }, 200);
+  }
+  // ---- draw：2.7 秒后揭晓 ----
+  if(scene==='draw'){
+    setTimeout(()=>{
+      const w = $('#drawWheel'); if(w) w.classList.remove('spin');
+      const wait = $('#drawWaiting'); if(wait) wait.style.display='none';
+      const nm = $('#drawName'); if(nm) nm.style.display='block';
+      const why = $('#drawWhy'); if(why) why.style.display='block';
+      const acts = $('#drawActions'); if(acts) acts.style.display='flex';
+      toast('🎯 抽中：嘉怡', 'info', 1800);
+    }, 2700);
+  }
+}
+
+function updateMiniBoard(scene){}
+
+function updatePageControls(){
+  const item = LESSON_FLOW[lessonPageIndex];
+  const label = $('#pageLabel');
+  if(label) label.textContent = `第 ${lessonPageIndex + 1} / ${LESSON_FLOW.length} 页 · ${item?.title || ''}`;
+  const prev = $('[data-act="prevPage"]');
+  const next = $('[data-act="nextPage"]');
+  if(prev) prev.disabled = lessonPageIndex === 0;
+  if(next) next.disabled = lessonPageIndex === LESSON_FLOW.length - 1;
+}
+
+function selectScene(scene, silent=false){
+  savePageInk();
+  const idx = LESSON_FLOW.findIndex(item => item.scene === scene);
+  if(idx >= 0) lessonPageIndex = idx;
+  currentScene = scene;
+  $$('#sceneTabs .tab').forEach(t => t.classList.toggle('active', t.dataset.scene===scene));
+  renderScene(scene);
+  resizeInkCanvas(false);
+  restorePageInk();
+  if(!silent){
+    const tab = $(`#sceneTabs .tab[data-scene="${scene}"]`);
+    toast('已切换：' + (tab ? tab.textContent.trim() : scene), 'info', 1200);
+  }
+}
+
+function renderLessonPage(index){
+  const next = Math.max(0, Math.min(LESSON_FLOW.length - 1, index));
+  lessonPageIndex = next;
+  const scene = LESSON_FLOW[next].scene;
+  selectScene(scene, true);
+  return scene;
+}
+
+function resizeInkCanvas(preserve=true){
+  const canvas = $('#boardCanvas');
+  const screen = $('#boardScreen');
+  if(!canvas || !screen) return;
+  const existing = preserve ? canvas.toDataURL?.() : '';
+  const rect = screen.getBoundingClientRect();
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = Math.max(1, Math.round(rect.width * ratio));
+  canvas.height = Math.max(1, Math.round(rect.height * ratio));
+  canvas.style.width = rect.width + 'px';
+  canvas.style.height = rect.height + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+  if(existing && existing.length > 100){
+    const img = new Image();
+    img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+    img.src = existing;
+  }
+}
+
+function getInkPoint(e){
+  const canvas = $('#boardCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches?.[0] || e.changedTouches?.[0];
+  const clientX = touch ? touch.clientX : e.clientX;
+  const clientY = touch ? touch.clientY : e.clientY;
+  return {x: clientX - rect.left, y: clientY - rect.top};
+}
+
+function setPenActive(active=true){
+  penActive = active;
+  const canvas = $('#boardCanvas');
+  canvas?.classList.toggle('active', penActive);
+  $('[data-board-tool="pen"]')?.classList.toggle('active', penActive);
+  toast(penActive ? '白板笔已开启：可以直接在屏幕上书写' : '白板笔已关闭', 'info', 1600);
+}
+
+function clearInk(){
+  const canvas = $('#boardCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  annotationsByPage.delete(currentScene);
+}
+window.clearInk = clearInk;
+function clearAnnotations(){ clearInk(); }
+window.clearAnnotations = clearAnnotations;
+
+function savePageInk(){
+  const canvas = $('#boardCanvas');
+  if(!canvas) return;
+  annotationsByPage.set(currentScene, canvas.toDataURL());
+}
+
+function restorePageInk(){
+  const canvas = $('#boardCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const data = annotationsByPage.get(currentScene);
+  if(!data) return;
+  const rect = canvas.getBoundingClientRect();
+  const img = new Image();
+  img.onload = () => ctx.drawImage(img, 0, 0, rect.width, rect.height);
+  img.src = data;
+}
+
+function startInk(e){
+  if(!penActive) return;
+  if(e.button !== undefined && e.button !== 0) return;
+  e.preventDefault();
+  resizeInkCanvas();
+  const canvas = $('#boardCanvas');
+  const ctx = canvas.getContext('2d');
+  inkDrawing = true;
+  inkStart = getInkPoint(e);
+  inkSnapshot = penMode === 'line' ? ctx.getImageData(0, 0, canvas.width, canvas.height) : null;
+  ctx.strokeStyle = penColor;
+  ctx.lineWidth = penSize;
+  ctx.beginPath();
+  ctx.moveTo(inkStart.x, inkStart.y);
+}
+
+function moveInk(e){
+  if(!inkDrawing || !penActive) return;
+  e.preventDefault();
+  const canvas = $('#boardCanvas');
+  const ctx = canvas.getContext('2d');
+  const point = getInkPoint(e);
+  ctx.strokeStyle = penColor;
+  ctx.lineWidth = penSize;
+  if(penMode === 'line' && inkSnapshot){
+    ctx.putImageData(inkSnapshot, 0, 0);
+    ctx.beginPath();
+    ctx.moveTo(inkStart.x, inkStart.y);
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+  }else{
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+  }
+}
+
+function endInk(e){
+  if(!inkDrawing) return;
+  moveInk(e);
+  inkDrawing = false;
+  inkSnapshot = null;
+  savePageInk();
+}
+
+function initBoardInk(){
+  resizeInkCanvas();
+  const canvas = $('#boardCanvas');
+  if(!canvas) return;
+  window.annotationCanvas = canvas;
+  canvas.addEventListener('pointerdown', startInk);
+  canvas.addEventListener('pointermove', moveInk);
+  canvas.addEventListener('pointerup', endInk);
+  canvas.addEventListener('pointerleave', endInk);
+  canvas.addEventListener('mousedown', startInk);
+  canvas.addEventListener('mousemove', moveInk);
+  document.addEventListener('mouseup', endInk);
+  canvas.addEventListener('touchstart', startInk, {passive:false});
+  canvas.addEventListener('touchmove', moveInk, {passive:false});
+  canvas.addEventListener('touchend', endInk, {passive:false});
+  window.addEventListener('resize', resizeInkCanvas);
+}
+
+function updatePenChoice(choiceSelector, activeButton){
+  $$(choiceSelector).forEach(btn => btn.classList.toggle('active', btn === activeButton));
+}
+
+function handleBoardSwipe(dx, dy){
+  if(Math.abs(dx) < 80) return false;
+  if(Math.abs(dx) < Math.abs(dy) * 1.5) return false;
+  renderLessonPage(lessonPageIndex + (dx < 0 ? 1 : -1));
+  return true;
+}
+window.handleBoardSwipe = handleBoardSwipe;
+
+function initBoardSwipe(){
+  const screen = $('#boardScreen');
+  if(!screen) return;
+  let start = null;
+  const interactive = '.floating-ball,.floating-panel,.page-controls,.board-tabs,.modal,.toast-stack,button,[data-act],[data-board-tool],[data-pen-color],[data-pen-size],[data-pen-mode]';
+  const begin = e=>{
+    if(penActive) return;
+    if(e.button !== undefined && e.button !== 0) return;
+    if(e.target.closest(interactive)) return;
+    const touch = e.touches?.[0];
+    start = {x: touch ? touch.clientX : e.clientX, y: touch ? touch.clientY : e.clientY};
+  };
+  const finish = e=>{
+    if(!start) return;
+    const touch = e.changedTouches?.[0];
+    const x = touch ? touch.clientX : e.clientX;
+    const y = touch ? touch.clientY : e.clientY;
+    handleBoardSwipe(x - start.x, y - start.y);
+    start = null;
+  };
+  screen.addEventListener('mousedown', begin);
+  screen.addEventListener('mouseup', finish);
+  screen.addEventListener('touchstart', begin, {passive:true});
+  screen.addEventListener('touchend', finish, {passive:true});
+}
+
+function showOverlay(id){
+  const el = $('#' + id);
+  if(el) el.classList.add('show');
+}
+
+function hideOverlay(id){
+  const el = $('#' + id);
+  if(el) el.classList.remove('show');
+}
+
+function hideBoardOverlays(){
+  $('#selectionGhost')?.classList.remove('show');
+}
+
+function placeFloatingPanel(){
+  const ball = $('#floatingBall');
+  const panel = $('#floatingPanel');
+  const screen = $('#boardScreen');
+  if(!ball || !panel || !screen) return;
+  const b = ball.getBoundingClientRect();
+  const s = screen.getBoundingClientRect();
+  const panelW = Math.min(312, s.width - 36);
+  const panelH = Math.min(panel.offsetHeight || 320, s.height - 36);
+  let x = (b.left - s.left) - panelW - 14;
+  if(x < 18) x = (b.left - s.left) + b.width + 14;
+  x = Math.max(18, Math.min(x, s.width - panelW - 18));
+  let y = (b.top - s.top) - 112;
+  y = Math.max(18, Math.min(y, s.height - panelH - 18));
+  panel.style.left = `${x}px`;
+  panel.style.top = `${y}px`;
+}
+
+function moveFloatingBall(x, y){
+  const ball = $('#floatingBall');
+  const screen = $('#boardScreen');
+  if(!ball || !screen) return;
+  const s = screen.getBoundingClientRect();
+  const nextX = Math.max(12, Math.min(x, s.width - ball.offsetWidth - 12));
+  const nextY = Math.max(12, Math.min(y, s.height - ball.offsetHeight - 12));
+  ball.style.left = `${nextX}px`;
+  ball.style.top = `${nextY}px`;
+  ball.style.right = 'auto';
+  ball.style.bottom = 'auto';
+  placeFloatingPanel();
+}
+window.moveFloatingBall = moveFloatingBall;
+
+function toggleFloatingPanel(force){
+  const ball = $('#floatingBall');
+  const panel = $('#floatingPanel');
+  if(!ball || !panel) return;
+  const shouldOpen = typeof force === 'boolean' ? force : !panel.classList.contains('show');
+  panel.classList.toggle('show', shouldOpen);
+  ball.classList.toggle('open', shouldOpen);
+  if(shouldOpen) placeFloatingPanel();
+}
+
+function initFloatingBall(){
+  const ball = $('#floatingBall');
+  const main = $('#floatingMain');
+  const screen = $('#boardScreen');
+  if(!ball || !main || !screen) return;
+  let dragging = false;
+  let moved = false;
+  let suppressClick = false;
+  let startX = 0;
+  let startY = 0;
+  let offsetX = 0;
+  let offsetY = 0;
+  const dragThreshold = 6;
+
+  main.addEventListener('click', e=>{
+    e.stopPropagation();
+    if(suppressClick){
+      suppressClick = false;
+      return;
+    }
+    toggleFloatingPanel();
+  });
+
+  function startDrag(e){
+    dragging = true;
+    moved = false;
+    startX = e.clientX;
+    startY = e.clientY;
+    ball.classList.add('dragging');
+    const b = ball.getBoundingClientRect();
+    offsetX = e.clientX - b.left;
+    offsetY = e.clientY - b.top;
+    if(e.pointerId !== undefined) ball.setPointerCapture?.(e.pointerId);
+    e.preventDefault?.();
+  }
+
+  function dragMove(e){
+    if(!dragging) return;
+    const distance = Math.hypot(e.clientX - startX, e.clientY - startY);
+    if(!moved && distance < dragThreshold) return;
+    moved = true;
+    const s = screen.getBoundingClientRect();
+    const x = Math.max(12, Math.min(e.clientX - s.left - offsetX, s.width - ball.offsetWidth - 12));
+    const y = Math.max(12, Math.min(e.clientY - s.top - offsetY, s.height - ball.offsetHeight - 12));
+    moveFloatingBall(x, y);
+  }
+
+  function endDrag(e){
+    if(!dragging) return;
+    const wasMoved = moved;
+    dragging = false;
+    ball.classList.remove('dragging');
+    if(e.pointerId !== undefined) ball.releasePointerCapture?.(e.pointerId);
+    if(!wasMoved){
+      suppressClick = true;
+      toggleFloatingPanel();
+      setTimeout(()=>{ suppressClick = false; }, 0);
+    }
+  }
+
+  if(window.PointerEvent){
+    ball.addEventListener('pointerdown', startDrag);
+    ball.addEventListener('pointermove', dragMove);
+    ball.addEventListener('pointerup', endDrag);
+  }else{
+    ball.addEventListener('mousedown', startDrag);
+    document.addEventListener('mousemove', dragMove);
+    document.addEventListener('mouseup', endDrag);
+  }
+}
+
+// 切换 tab
+$$('#sceneTabs .tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    selectScene(t.dataset.scene);
+  });
+});
+
+let standalonePenColor = '#111827';
+let standalonePenSize = 4;
+let standalonePenDrawing = false;
+
+function resizeStandalonePenCanvas(){
+  const canvas = $('#standalonePenCanvas');
+  if(!canvas) return;
+  const rect = canvas.getBoundingClientRect();
+  const ratio = window.devicePixelRatio || 1;
+  canvas.width = Math.max(1, Math.round(rect.width * ratio));
+  canvas.height = Math.max(1, Math.round(rect.height * ratio));
+  const ctx = canvas.getContext('2d');
+  ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+}
+
+function getStandalonePenPoint(e){
+  const canvas = $('#standalonePenCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const touch = e.touches?.[0] || e.changedTouches?.[0];
+  return {
+    x: (touch ? touch.clientX : e.clientX) - rect.left,
+    y: (touch ? touch.clientY : e.clientY) - rect.top
+  };
+}
+
+function startStandalonePen(e){
+  if(e.button !== undefined && e.button !== 0) return;
+  e.preventDefault();
+  standalonePenDrawing = true;
+  const canvas = $('#standalonePenCanvas');
+  const ctx = canvas.getContext('2d');
+  const point = getStandalonePenPoint(e);
+  ctx.strokeStyle = standalonePenColor;
+  ctx.lineWidth = standalonePenSize;
+  ctx.beginPath();
+  ctx.moveTo(point.x, point.y);
+}
+
+function moveStandalonePen(e){
+  if(!standalonePenDrawing) return;
+  e.preventDefault();
+  const canvas = $('#standalonePenCanvas');
+  const ctx = canvas.getContext('2d');
+  const point = getStandalonePenPoint(e);
+  ctx.strokeStyle = standalonePenColor;
+  ctx.lineWidth = standalonePenSize;
+  ctx.lineTo(point.x, point.y);
+  ctx.stroke();
+}
+
+function endStandalonePen(e){
+  if(!standalonePenDrawing) return;
+  moveStandalonePen(e);
+  standalonePenDrawing = false;
+}
+
+function clearStandalonePen(){
+  const canvas = $('#standalonePenCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+function openStandalonePenApp(){
+  const boot = $('#whiteboardBoot');
+  if(!boot) return;
+  if(penActive) setPenActive(false);
+  else{
+    $('#boardCanvas')?.classList.remove('active');
+    $('[data-board-tool="pen"]')?.classList.remove('active');
+  }
+  toggleFloatingPanel(false);
+  boot.classList.remove('hidden','login','course-picker','browser-app');
+  boot.classList.add('pen-app');
+  requestAnimationFrame(()=> resizeStandalonePenCanvas());
+  toast('已打开独立白板笔软件，不进入课堂课件', 'ok', 1800);
+}
+
+function closeStandalonePenApp(){
+  $('#whiteboardBoot')?.classList.remove('pen-app');
+}
+
+function initStandalonePenApp(){
+  const canvas = $('#standalonePenCanvas');
+  if(!canvas) return;
+  resizeStandalonePenCanvas();
+  canvas.addEventListener('pointerdown', startStandalonePen);
+  canvas.addEventListener('pointermove', moveStandalonePen);
+  canvas.addEventListener('pointerup', endStandalonePen);
+  canvas.addEventListener('pointerleave', endStandalonePen);
+  canvas.addEventListener('touchstart', startStandalonePen, {passive:false});
+  canvas.addEventListener('touchmove', moveStandalonePen, {passive:false});
+  canvas.addEventListener('touchend', endStandalonePen, {passive:false});
+  window.addEventListener('resize', resizeStandalonePenCanvas);
+  $$('[data-standalone-pen-color]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      standalonePenColor = btn.dataset.standalonePenColor || '#111827';
+      $$('[data-standalone-pen-color]').forEach(item=> item.classList.toggle('active', item === btn));
+    });
+  });
+  $$('[data-standalone-pen-size]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      standalonePenSize = Number(btn.dataset.standalonePenSize) || 4;
+      $$('[data-standalone-pen-size]').forEach(item=> item.classList.toggle('active', item === btn));
+    });
+  });
+}
+
+function normalizeDesktopBrowserTarget(raw){
+  const value = String(raw || '').trim();
+  if(!value) return 'https://www.bing.com';
+  const hasScheme = /^https?:\/\//i.test(value);
+  const looksLikeDomain = /^[\w.-]+\.[a-z]{2,}(\/.*)?$/i.test(value);
+  if(hasScheme || looksLikeDomain){
+    try{ return new URL(hasScheme ? value : `https://${value}`).href; }
+    catch{ return `https://www.bing.com/search?q=${encodeURIComponent(value)}`; }
+  }
+  return `https://www.bing.com/search?q=${encodeURIComponent(value)}`;
+}
+
+function openDesktopBrowserApp(){
+  const boot = $('#whiteboardBoot');
+  if(!boot) return;
+  if(penActive) setPenActive(false);
+  else{
+    $('#boardCanvas')?.classList.remove('active');
+    $('[data-board-tool="pen"]')?.classList.remove('active');
+  }
+  toggleFloatingPanel(false);
+  boot.classList.remove('hidden','login','course-picker','pen-app');
+  boot.classList.add('browser-app');
+  setTimeout(()=> $('#desktopBrowserInput')?.focus(), 80);
+}
+
+function closeDesktopBrowserApp(){
+  $('#whiteboardBoot')?.classList.remove('browser-app');
+}
+
+function goDesktopBrowser(raw){
+  const input = $('#desktopBrowserInput');
+  const status = $('#desktopBrowserStatus');
+  const frame = $('#desktopBrowserFrame');
+  const url = normalizeDesktopBrowserTarget(raw ?? input?.value);
+  if(input) input.value = url;
+  if(frame) frame.src = url;
+  if(status){
+    status.textContent = `已在内部窗口打开：${url}。如果页面显示“拒绝连接/无法显示”，说明该网站禁止被嵌入白板网页。`;
+  }
+}
+
+function initDesktopBrowserApp(){
+  $('#desktopBrowserInput')?.addEventListener('keydown', e=>{
+    if(e.key === 'Enter') goDesktopBrowser();
+  });
+  $$('[data-browser-bookmark]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const url = btn.dataset.browserBookmark || '';
+      const input = $('#desktopBrowserInput');
+      if(input) input.value = url;
+      goDesktopBrowser(url);
+    });
+  });
+}
+
+function initWhiteboardBoot(){
+  const boot = $('#whiteboardBoot');
+  const clock = $('#wbClock');
+  if(clock){
+    const d = new Date();
+    clock.textContent = `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+  }
+  const selectDesktopIcon = icon=>{
+    boot?.querySelectorAll('.wb-icon').forEach(item=> item.classList.toggle('selected', item === icon));
+  };
+  boot?.querySelectorAll('.wb-icon').forEach(icon=>{
+    icon.addEventListener('click', ()=> selectDesktopIcon(icon));
+  });
+  boot?.querySelectorAll('[data-boot-act="open-bubu"]').forEach(icon=>{
+    icon.addEventListener('dblclick', ()=>{
+      selectDesktopIcon(icon);
+      boot.classList.remove('course-picker');
+      boot.classList.add('login');
+      toast('已打开步步课堂，请登录教师账号', 'info', 1600);
+    });
+  });
+  boot?.querySelectorAll('[data-boot-act="open-pen"]').forEach(icon=>{
+    icon.addEventListener('dblclick', ()=>{
+      selectDesktopIcon(icon);
+      openStandalonePenApp();
+    });
+  });
+  boot?.querySelectorAll('[data-boot-act="open-browser"]').forEach(icon=>{
+    icon.addEventListener('dblclick', ()=>{
+      selectDesktopIcon(icon);
+      openDesktopBrowserApp();
+    });
+  });
+  boot?.querySelectorAll('[data-boot-act="open-computer"],[data-boot-act="open-folder"],[data-boot-act="open-recycle"],[data-boot-act="open-cloud"]').forEach(icon=>{
+    icon.addEventListener('dblclick', ()=>{
+      selectDesktopIcon(icon);
+      toast('这个桌面入口用于模拟白板机环境，核心授课请打开步步课堂或白板笔', 'info', 1800);
+    });
+  });
+  boot?.querySelectorAll('[data-boot-act="login"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      boot.classList.remove('login');
+      boot.classList.add('course-picker');
+      toast('登录成功，请选择要上的课', 'ok', 1600);
+    });
+  });
+  boot?.querySelectorAll('[data-boot-act="start-course"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      boot.classList.add('hidden');
+      boot.classList.remove('login','course-picker');
+      selectScene('cw1', true);
+      setPenActive(false);
+      toggleFloatingPanel(false);
+      toast('已进入《小数的意义》，可以开始上课', 'ok', 2200);
+    });
+  });
+  boot?.querySelectorAll('[data-boot-act="preview-course"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      toast('预览：8 页课件，随堂练绑定在第 5 页，抽人提问绑定在第 7 页', 'info', 2200);
+    });
+  });
+  boot?.querySelectorAll('[data-boot-act="course-disabled"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      toast('这节课还没有完成备课，先选择《小数的意义》演示', 'warn', 1800);
+    });
+  });
+  boot?.querySelectorAll('[data-boot-act="back-login"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      boot.classList.remove('course-picker');
+      boot.classList.add('login');
+    });
+  });
+  boot?.querySelectorAll('[data-boot-act="pen-close"]').forEach(btn=>{
+    btn.addEventListener('click', closeStandalonePenApp);
+  });
+  boot?.querySelectorAll('[data-boot-act="pen-clear"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      clearStandalonePen();
+      toast('白板笔画布已清空', 'ok', 1200);
+    });
+  });
+  boot?.querySelectorAll('[data-boot-act="browser-close"]').forEach(btn=>{
+    btn.addEventListener('click', closeDesktopBrowserApp);
+  });
+  boot?.querySelectorAll('[data-boot-act="browser-go"]').forEach(btn=>{
+    btn.addEventListener('click', ()=> goDesktopBrowser());
+  });
+  boot?.querySelectorAll('[data-boot-act="browser-home"]').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const input = $('#desktopBrowserInput');
+      if(input) input.value = 'https://www.bing.com';
+      goDesktopBrowser('https://www.bing.com');
+    });
+  });
+  boot?.classList.add('ready');
+}
+
+// 抽人重抽（draw 场景共用）
+function reSpinDraw(){
+  const w = $('#drawWheel'); if(!w) return;
+  const wait = $('#drawWaiting');
+  const nm = $('#drawName');
+  const why = $('#drawWhy');
+  const acts = $('#drawActions');
+  if(wait){ wait.style.display='block'; wait.textContent='转盘转动中…'; }
+  if(nm){ nm.style.display='none'; nm.classList.remove('pop'); }
+  if(why) why.style.display='none';
+  if(acts) acts.style.display='none';
+  w.classList.remove('spin');
+  void w.offsetWidth;
+  w.classList.add('spin');
+  setTimeout(()=>{
+    w.classList.remove('spin');
+    if(wait) wait.style.display='none';
+    if(nm){ nm.style.display='block'; nm.classList.add('pop'); }
+    if(why) why.style.display='block';
+    if(acts) acts.style.display='flex';
+    toast('🎯 抽中：嘉怡', 'info', 1600);
+  }, 2700);
+}
+
+// ============ 全局事件 dispatcher ============
+document.addEventListener('click', e=>{
+  const a = e.target.closest('[data-act]');
+  if(!a) return;
+  const act = a.dataset.act;
+  switch(act){
+    case 'modalClose': closeModal(); break;
+    case 'publishPreClassNote': {
+      const input = $('#preClassNoteInput');
+      const target = $('#preClassMessage');
+      const text = input?.value?.trim();
+      if(text && target){
+        target.textContent = text;
+        toast('课前提示已发布到白板', 'ok', 1600);
+      }
+      break;
+    }
+    case 'startClass':
+      selectScene('teach');
+      break;
+    case 'startTeach':
+      setPenActive(true);
+      toggleFloatingPanel(true);
+      toast('白板笔已打开，可以直接写', 'ok', 1600);
+      break;
+    case 'prevPage':
+      renderLessonPage(lessonPageIndex - 1);
+      break;
+    case 'nextPage':
+      renderLessonPage(lessonPageIndex + 1);
+      break;
+
+    // ===== live =====
+    case 'livePush':
+      syncLivePushFromBoard();
+      break;
+    case 'liveOpt': {
+      const k = a.dataset.k;
+      const data = {
+        A:{c:3, t:'00:42', tag:'少'},
+        B:{c:1, t:'01:08', tag:'极少'},
+        C:{c:6, t:'00:38', tag:'中（偏多）'},
+        D:{c:7, t:'00:51', tag:'主流'}
+      };
+      const d = data[k];
+      showModal('选项 ' + k + ' · 实时统计',
+        `<p>当前已有 <strong>${d.c} 人</strong>选择此选项，平均答题用时 <strong>${d.t}</strong>，分布标签：<strong>${d.tag}</strong>。</p>
+        <div class="note">⚠️ 大屏不会显示<strong>具体哪个学生选了什么</strong>——这是"答题中"阶段的隐私保护。揭晓后才会显示。</div>`,
+        '实时数据');
+      break;
+    }
+    case 'liveAdd30': toast('⏱ 已 +30 秒，倒计时已延长', 'ok', 1800); break;
+    case 'liveSlow': showModal('慢答 11 人',
+      `<p>以下同学还未提交答案（按未答时长排序）：</p>
+      <ul>
+        <li><strong>芷雨</strong> · 已 2:08（最近 3 次都偏慢）</li>
+        <li><strong>明轩</strong> · 已 1:56</li>
+        <li><strong>星辰</strong> · 已 1:45</li>
+        <li>另有 8 人...</li>
+      </ul>
+      <div class="note">建议先看是<strong>设备问题</strong>还是<strong>题目难度</strong>——可以走过去问一句。</div>`, '慢答监控');
+      break;
+    case 'liveHint': toast('💡 已给全班发送提示："想想 1/2 等于多少"', 'info', 2400); break;
+    case 'liveEnd':
+      selectScene('result', true);
+      toast('✅ 本题已结束，自动揭晓', 'ok', 1600);
+      break;
+
+    // ===== result =====
+    case 'resultKnowledge': showModal('考点 · 分数大小比较',
+      `<p>本题考察：</p>
+      <ul>
+        <li><strong>1/2 的本质</strong>：分子是分母的一半</li>
+        <li><strong>判断"接近 1/2"的方法</strong>：比较 (分子 × 2) 与 分母</li>
+        <li>5/8 → 5×2=10，10 与 8 差 2，最接近</li>
+      </ul>
+      <div class="note accent">📈 班级历史：本知识点近 7 天正确率 <strong>从 28% 升到 39%</strong>，仍属薄弱点。</div>`, '知识点');
+      break;
+    case 'resultBar': {
+      const k = a.dataset.k;
+      const data = {
+        A:{c:5, names:'李子涵、王雨桐、陈芷雨、吴星辰、张明轩'},
+        B:{c:3, names:'李轩、刘晓彤、家豪'},
+        C:{c:9, names:'吴星辰、陈嘉怡、王家豪、张明轩、刘晓彤、陈雨桐、李子涵、王嘉怡、芷雨'},
+        D:{c:11, names:'李子涵、王嘉怡、陈雨桐、张明轩、刘晓彤、王家豪、吴星辰、芷雨、明轩、星辰、嘉怡'}
+      };
+      const d = data[k];
+      const ok = k==='D';
+      showModal((ok?'✅ ':'')+'选项 '+k+' · '+d.c+' 人',
+        `<p>选择此项的同学：</p><p>${d.names}</p>
+        ${ok ? '<div class="note accent">这是正确答案。</div>'
+             : (k==='C' ? '<div class="note">⚠️ 9 人选 C 是<strong>本周高频错点</strong>——可能把"分子小"误解为"接近 1/2"。已加入这 9 人的错题本。</div>'
+                        : '<div class="note">已加入这些同学的错题本。</div>')}`,
+        ok?'正确名单':'错答名单');
+      break;
+    }
+    case 'resAddWrong': toast('📝 已加入 17 人错题本', 'ok', 1800); break;
+    case 'resPushSimilar': toast('📨 已推送 1 道相似题给 17 名错答学生', 'ok', 2200); break;
+    case 'resReplay': showModal('🎬 慢答过程回放',
+      `<p>系统记录每位学生的答题时间轴：</p>
+      <ul>
+        <li>00:08 · 嘉怡 选 D（最快）</li>
+        <li>00:15 · 子涵 选 D</li>
+        <li>00:42 · 雨桐 选 C → 改 D（值得表扬）</li>
+        <li>01:08 · 芷雨 选 C（未改）</li>
+        <li>02:08 · 明轩 还在思考...</li>
+      </ul>
+      <div class="note">回放有助于发现学生的<strong>思维路径</strong>——比如雨桐改了答案，可以表扬。</div>`, '回放');
+      break;
+    case 'resNext':
+      renderLessonPage(lessonPageIndex + 1);
+      break;
+
+    // ===== draw =====
+    case 'drawMode': {
+      const m = a.dataset.mode;
+      $$('#drawModes .dm-btn').forEach(b=> b.classList.toggle('active', b===a));
+      const labels = {cheer:'🌟 鼓励型（答得快+答得对优先）', care:'👋 关注型（举手少+错题多优先）', random:'🎲 完全随机'};
+      toast('已切换：' + labels[m], 'info', 2000);
+      break;
+    }
+    case 'drawAccept':
+      syncDrawCallFromBoard();
+      toast('🎤 已点名嘉怡，她的平板已进入回答提示', 'ok', 2000);
+      break;
+    case 'drawSwap': toast('🔁 跳过嘉怡，重新抽取', 'info', 1400); reSpinDraw(); break;
+    case 'drawRespin': reSpinDraw(); break;
+
+    // ===== end =====
+    case 'endTomorrow': showModal('📅 明日课件预览 · 分数应用题',
+      `<p><strong>明天第 3 节 · 11/13（周四）</strong></p>
+      <ul>
+        <li>分数应用题入门（5 道例题）</li>
+        <li>千克与克的单位换算</li>
+        <li>课堂练习 8 道（其中 2 道针对今日错点 C）</li>
+      </ul>
+      <div class="note accent">课件已就绪，可在<strong>教师端备课工作台</strong>打开继续修改。</div>`,
+      '明日预告', '前往备课工作台');
+      break;
+    case 'endReport': showModal('📊 完整课后报告',
+      `<p>本节课关键数据：</p>
+      <ul>
+        <li>参与率：<strong>96%</strong>（28 人 → 27 人参与）</li>
+        <li>综合正确率：<strong>73%</strong>（含 3 道题）</li>
+        <li>主动举手：<strong>12 次</strong>（嘉怡 4 次最高）</li>
+        <li>错题本新增：<strong>17 题次</strong>（涉及 11 名学生）</li>
+        <li>课堂用时：30 分钟（计划 35 分钟，提前 5 分钟）</li>
+      </ul>
+      <div class="note">完整 PDF 报告已发到你的邮箱，也可在<strong>校长端</strong>查看汇总。</div>`,
+      '课后报告');
+      break;
+  }
+});
+
+document.addEventListener('click', e=>{
+  const close = e.target.closest('[data-overlay-close]');
+  if(close){
+    hideOverlay(close.dataset.overlayClose);
+    return;
+  }
+  const boardAction = e.target.closest('[data-board-action]');
+  if(boardAction){
+    if(boardAction.dataset.boardAction === 'closeFloatingPanel') toggleFloatingPanel(false);
+    return;
+  }
+  const colorButton = e.target.closest('[data-pen-color]');
+  if(colorButton){
+    penColor = colorButton.dataset.penColor;
+    window.penColor = penColor;
+    updatePenChoice('[data-pen-color]', colorButton);
+    setPenActive(true);
+    return;
+  }
+  const sizeButton = e.target.closest('[data-pen-size]');
+  if(sizeButton){
+    penSize = Number(sizeButton.dataset.penSize) || 4;
+    window.penSize = penSize;
+    updatePenChoice('[data-pen-size]', sizeButton);
+    setPenActive(true);
+    return;
+  }
+  const modeButton = e.target.closest('[data-pen-mode]');
+  if(modeButton){
+    penMode = modeButton.dataset.penMode || 'curve';
+    updatePenChoice('[data-pen-mode]', modeButton);
+    setPenActive(true);
+    return;
+  }
+  const tool = e.target.closest('[data-board-tool]');
+  if(tool){
+    const action = tool.dataset.boardTool;
+    $$('.float-tool').forEach(b=> b.classList.toggle('active', b === tool && action === 'pen'));
+    if(action === 'pen'){
+      setPenActive(!penActive);
+    }
+    if(action === 'clearBoard'){
+      clearInk();
+      hideBoardOverlays();
+      toast('已清空当前页批注', 'ok', 1600);
+    }
+    return;
+  }
+  if(!e.target.closest('#floatingBall') && !e.target.closest('#floatingPanel')){
+    toggleFloatingPanel(false);
+  }
+});
+
+document.addEventListener('keydown', e=>{
+  if(e.key === 'Escape'){
+    closeModal();
+    hideBoardOverlays();
+    toggleFloatingPanel(false);
+  }
+});
+
+// 初次渲染（SCENES 字典由后续 edit 注入后才有内容）
+setTimeout(()=>{
+  initStandalonePenApp();
+  initDesktopBrowserApp();
+  initWhiteboardBoot();
+  initFloatingBall();
+  initBoardInk();
+  initBoardSwipe();
+  renderScene('cw1');
+  applyBoardSyncState(readBubuSync(), false);
+  listenBubuSync(applyBoardSyncState);
+  setTimeout(()=> toast('点击悬浮球打开白板笔，或左右滑动翻页','info', 3200), 600);
+}, 50);
+</script>
+</body>
+</html>
