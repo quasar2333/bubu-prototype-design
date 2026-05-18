@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  BookOpen, Minus, Square, X, Undo2, Redo2, Play, Save, Send, Plus,
+  BookOpen, Minus, Square, X, Undo2, Redo2, Play, Send, Plus,
   Type, Image as ImageIcon, Shapes, Sigma, BarChart3, Table, Sparkles, Music,
   Video, GitBranch, MoreHorizontal, CheckCircle2, Cloud, Maximize2, FileText,
   GripVertical, Clock3, Layers3, Users, FlaskConical, CircleDot,
@@ -819,7 +819,7 @@ export default function CoursewareEditor() {
         updatedAt: Date.now()
       }))
     } catch {}
-    showToast('已保存并上传')
+    showToast('已发送到白板')
   }
 
   return (
@@ -857,7 +857,7 @@ export default function CoursewareEditor() {
             <Play className="w-3.5 h-3.5 text-brand-500" /> 预览
           </button>
           <button onClick={sendToBoard} className="btn-primary h-8 px-3">
-            <Save className="w-3.5 h-3.5" /> 保存并上传
+            <Send className="w-3.5 h-3.5" /> 保存并上传
           </button>
         </div>
       </div>

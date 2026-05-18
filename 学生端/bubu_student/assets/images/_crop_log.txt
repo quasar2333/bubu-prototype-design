@@ -1,0 +1,10 @@
+﻿Source d:\project\步步原型设计\学生端\学生端原型图\S01_学生端主页.png
+Dims 1448 x 1086
+Saved avatar_zhang size 138x134 at 70,89
+Saved illu_pre_class_materials size 374x286 at 1019,280
+Saved icon_textbook size 145x96 at 96,746
+Saved icon_notebook size 145x96 at 365,746
+Saved icon_homework size 145x96 at 634,746
+Saved icon_errorbook size 145x96 at 904,746
+Saved icon_courseware size 145x96 at 1173,746
+Done.
