@@ -71,14 +71,9 @@ export default function Home() {
               <span className="text-base font-medium text-slate-800">10:10 - 10:55</span>
               <span className="text-slate-600">8.2 一元一次不等式（第1课时）</span>
             </div>
-            <div className="grid grid-cols-2 gap-3">
-              <button className="btn-ghost">
+            <Link to="/editor" className="btn-primary">
                 <BookOpen className="w-4 h-4" /> 进入备课
-              </button>
-              <Link to="/editor" className="btn-primary">
-                <Send className="w-4 h-4" /> 发送到白板
               </Link>
-            </div>
           </div>
         </div>
 
