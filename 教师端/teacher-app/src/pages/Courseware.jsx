@@ -44,9 +44,9 @@ export default function Courseware() {
   const reset = () => { setKeyword(''); setSortOrder('desc') }
 
   return (
-    <div className={`p-6 gap-5 ${sidebarOpen ? 'grid grid-cols-[1fr_280px]' : 'relative'}`}>
-      <div className="flex flex-col min-w-0 min-h-0">
-        <div className="flex-1 overflow-auto space-y-4">
+    <div className={`p-6 gap-5 h-full ${sidebarOpen ? 'grid grid-cols-[1fr_280px]' : 'relative'}`}>
+      <div className="flex flex-col min-w-0 min-h-0 overflow-hidden">
+        <div className="flex-1 overflow-y-auto space-y-4 pr-1">
           {/* 顶部操作按钮 */}
         <div className="flex gap-3">
           <Link to="/editor" className="btn-primary"><Plus className="w-4 h-4" /> 新建课件</Link>
