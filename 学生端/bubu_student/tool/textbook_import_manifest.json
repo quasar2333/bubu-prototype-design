@@ -1,0 +1,204 @@
+{
+  "books": [
+    {
+      "id": "g5-up-yuwen",
+      "sourcePdf": "五年级人教版各科全量_打包源/01_语文_统编版/语文_统编版_上册_义务教育教科书·语文五年级上册.pdf",
+      "subject": "语文",
+      "grade": 5,
+      "semester": "上册",
+      "edition": "统编版",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-down-yuwen",
+      "sourcePdf": "五年级人教版各科全量_打包源/01_语文_统编版/语文_统编版_下册_义务教育教科书·语文五年级下册.pdf",
+      "subject": "语文",
+      "grade": 5,
+      "semester": "下册",
+      "edition": "统编版",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-up-shuxue",
+      "sourcePdf": "五年级人教版各科全量_打包源/02_数学_人教版/数学_人教版_上册_义务教育教科书 · 数学五年级上册.pdf",
+      "subject": "数学",
+      "grade": 5,
+      "semester": "上册",
+      "edition": "人教版",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-down-shuxue",
+      "sourcePdf": "五年级人教版各科全量_打包源/02_数学_人教版/数学_人教版_下册_义务教育教科书·数学五年级下册.pdf",
+      "subject": "数学",
+      "grade": 5,
+      "semester": "下册",
+      "edition": "人教版",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-up-yingyu-pep",
+      "sourcePdf": "五年级人教版各科全量_打包源/03_英语_人教版（PEP）（三年级起点）（主编：吴欣）/英语_人教版（PEP）（三年级起点）（主编：吴欣）_上册_义务教育教科书·英语（PEP）（三年级起点）五年级上册.pdf",
+      "subject": "英语",
+      "grade": 5,
+      "semester": "上册",
+      "edition": "PEP 三年级起点",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-down-yingyu-pep",
+      "sourcePdf": "五年级人教版各科全量_打包源/03_英语_人教版（PEP）（三年级起点）（主编：吴欣）/英语_人教版（PEP）（三年级起点）（主编：吴欣）_下册_义务教育教科书·英语（三年级起点）五年级下册.pdf",
+      "subject": "英语",
+      "grade": 5,
+      "semester": "下册",
+      "edition": "PEP 三年级起点",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-up-yingyu-1qidian",
+      "sourcePdf": "五年级人教版各科全量_打包源/03_英语_人教版（一年级起点）（主编：吴欣）/英语_人教版（一年级起点）（主编：吴欣）_上册_义务教育教科书·英语（一年级起点）五年级上册.pdf",
+      "subject": "英语",
+      "grade": 5,
+      "semester": "上册",
+      "edition": "一年级起点",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-down-yingyu-1qidian",
+      "sourcePdf": "五年级人教版各科全量_打包源/03_英语_人教版（一年级起点）（主编：吴欣）/英语_人教版（一年级起点）（主编：吴欣）_下册_义务教育教科书·英语（一年级起点）五年级下册.pdf",
+      "subject": "英语",
+      "grade": 5,
+      "semester": "下册",
+      "edition": "一年级起点",
+      "bodyStartPageIndex": 4,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-up-yingyu-jingtong",
+      "sourcePdf": "五年级人教版各科全量_打包源/03_英语_人教版（精通）（三年级起点）（主编：郝建平）/英语_人教版（精通）（三年级起点）（主编：郝建平）_上册_义务教育教科书·英语（精通）（三年级起点）五年级上册.pdf",
+      "subject": "英语",
+      "grade": 5,
+      "semester": "上册",
+      "edition": "精通 三年级起点",
+      "bodyStartPageIndex": 7,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-down-yingyu-jingtong",
+      "sourcePdf": "五年级人教版各科全量_打包源/03_英语_人教版（精通）（三年级起点）（主编：郝建平）/英语_人教版（精通）（三年级起点）（主编：郝建平）_下册_义务教育教科书·英语（三年级起点）五年级下册.pdf",
+      "subject": "英语",
+      "grade": 5,
+      "semester": "下册",
+      "edition": "精通 三年级起点",
+      "bodyStartPageIndex": 7,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-up-daode",
+      "sourcePdf": "五年级人教版各科全量_打包源/04_道德与法治_统编版/道德与法治_统编版_上册_义务教育教科书·道德与法治五年级上册.pdf",
+      "subject": "道德与法治",
+      "grade": 5,
+      "semester": "上册",
+      "edition": "统编版",
+      "bodyStartPageIndex": 3,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-down-daode",
+      "sourcePdf": "五年级人教版各科全量_打包源/04_道德与法治_统编版/道德与法治_统编版_下册_义务教育教科书·道德与法治五年级下册.pdf",
+      "subject": "道德与法治",
+      "grade": 5,
+      "semester": "下册",
+      "edition": "统编版",
+      "bodyStartPageIndex": 3,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-up-kexue",
+      "sourcePdf": "五年级人教版各科全量_打包源/05_科学_人教鄂教版/科学_人教鄂教版_上册_义务教育教科书·科学五年级上册.pdf",
+      "subject": "科学",
+      "grade": 5,
+      "semester": "上册",
+      "edition": "人教鄂教版",
+      "bodyStartPageIndex": 3,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-down-kexue",
+      "sourcePdf": "五年级人教版各科全量_打包源/05_科学_人教鄂教版/科学_人教鄂教版_下册_义务教育教科书·科学五年级下册.pdf",
+      "subject": "科学",
+      "grade": 5,
+      "semester": "下册",
+      "edition": "人教鄂教版",
+      "bodyStartPageIndex": 3,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-up-meishu",
+      "sourcePdf": "五年级人教版各科全量_打包源/06_美术_人教版/美术_人教版_上册_义务教育教科书·美术五年级上册.pdf",
+      "subject": "美术",
+      "grade": 5,
+      "semester": "上册",
+      "edition": "人教版",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-down-meishu",
+      "sourcePdf": "五年级人教版各科全量_打包源/06_美术_人教版/美术_人教版_下册_义务教育教科书·美术五年级下册.pdf",
+      "subject": "美术",
+      "grade": 5,
+      "semester": "下册",
+      "edition": "人教版",
+      "bodyStartPageIndex": 4,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-up-yinyue-wuxianpu",
+      "sourcePdf": "五年级人教版各科全量_打包源/07_音乐_人教版（五线谱）/音乐_人教版（五线谱）_上册_义务教育教科书·音乐（五线谱）五年级上册.pdf",
+      "subject": "音乐",
+      "grade": 5,
+      "semester": "上册",
+      "edition": "五线谱",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-down-yinyue-wuxianpu",
+      "sourcePdf": "五年级人教版各科全量_打包源/07_音乐_人教版（五线谱）/音乐_人教版（五线谱）_下册_义务教育教科书·音乐（五线谱）五年级下册.pdf",
+      "subject": "音乐",
+      "grade": 5,
+      "semester": "下册",
+      "edition": "五线谱",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-up-yinyue-jianpu",
+      "sourcePdf": "五年级人教版各科全量_打包源/07_音乐_人教版（简谱）/音乐_人教版（简谱）_上册_义务教育教科书·音乐（简谱）五年级上册.pdf",
+      "subject": "音乐",
+      "grade": 5,
+      "semester": "上册",
+      "edition": "简谱",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    },
+    {
+      "id": "g5-down-yinyue-jianpu",
+      "sourcePdf": "五年级人教版各科全量_打包源/07_音乐_人教版（简谱）/音乐_人教版（简谱）_下册_义务教育教科书·音乐（简谱）五年级下册.pdf",
+      "subject": "音乐",
+      "grade": 5,
+      "semester": "下册",
+      "edition": "简谱",
+      "bodyStartPageIndex": 5,
+      "coverPageIndex": 0
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-/// 电子课本数据模型。
+// 电子课本数据模型。
 
 /// 出版社
 enum Publisher {
@@ -49,13 +49,15 @@ class TextbookResource {
   final ResourceType resourceType;
   final String subject;
   final int grade;
-  final String semester;  // '上册' / '下册'
+  final String semester; // '上册' / '下册'
   final Publisher publisher;
   final String edition;
-  final int priority;  // P0..P3
+  final int priority; // P0..P3
   final String? coverAssetPath;
   final List<String> pageAssets;
   final int pageCount;
+  final int bodyStartPageIndex;
+  final int coverPageIndex;
   final List<TocEntry> toc;
   final String? sourceUrl;
   final String? sourcePlatform;
@@ -75,6 +77,8 @@ class TextbookResource {
     this.coverAssetPath,
     this.pageAssets = const [],
     this.pageCount = 0,
+    this.bodyStartPageIndex = 0,
+    this.coverPageIndex = 0,
     this.toc = const [],
     this.sourceUrl,
     this.sourcePlatform,
@@ -84,10 +88,56 @@ class TextbookResource {
   });
 
   /// 显示名称
-  String get displayName => '$subject  ${grade}年级$semester';
+  String get displayName {
+    final editionSuffix = edition.isEmpty || edition == '2024版'
+        ? ''
+        : '（$edition）';
+    return '$subject$editionSuffix  $grade年级$semester';
+  }
 
   /// 短名
-  String get shortName => '$subject ${grade}年级$semester';
+  String get shortName => '$subject $grade年级$semester';
+
+  /// 正文页数。导入资源通常包含封面、版权页、目录等前置页，这些不计入正文页码。
+  int get bodyPageCount {
+    final count = pageCount - bodyStartPageIndex;
+    return count > 0 ? count : pageCount;
+  }
+
+  String get pageCountLabel {
+    if (pageCount <= 0) return '未导入';
+    if (bodyStartPageIndex <= 0) return '共$pageCount页';
+    return '正文$bodyPageCount页 · 全册$pageCount张';
+  }
+
+  int pageIndexToBodyPage(int pageIndex) {
+    return pageIndex - bodyStartPageIndex + 1;
+  }
+
+  String pageDisplayLabel(int pageIndex, {bool compact = false}) {
+    if (pageIndex < 0 || pageIndex >= pageCount) {
+      return compact ? '-' : '未导入';
+    }
+    final bodyPage = pageIndexToBodyPage(pageIndex);
+    if (bodyPage >= 1) {
+      return compact ? '$bodyPage' : '第$bodyPage页';
+    }
+    if (pageIndex == coverPageIndex) return '封面';
+    if (bodyPage == 0) return compact ? '正文前' : '正文前页';
+    return compact ? '前${pageIndex + 1}' : '前置页${pageIndex + 1}';
+  }
+
+  String pageRangeLabel(List<int> pageIndexes) {
+    if (pageIndexes.isEmpty) return '0 / 0';
+    final labels = pageIndexes
+        .map((page) => pageDisplayLabel(page, compact: true))
+        .toList(growable: false);
+    final range = labels.length == 1
+        ? labels.first
+        : '${labels.first}-${labels.last}';
+    final total = bodyStartPageIndex > 0 ? '正文$bodyPageCount页' : '共$pageCount页';
+    return '$range / $total';
+  }
 }
 
 /// 目录条目

@@ -39,11 +39,9 @@ class StatusGroupChip extends StatelessWidget {
         color: AppColors.cardBg,
         borderRadius: BorderRadius.circular(AppRadius.chip + 2),
         border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.control,
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: children,
-      ),
+      child: Row(mainAxisSize: MainAxisSize.min, children: children),
     );
   }
 
@@ -93,6 +91,13 @@ class HintBadge extends StatelessWidget {
         color: AppColors.brandTint,
         borderRadius: BorderRadius.circular(AppRadius.chip - 2),
         border: Border.all(color: const Color(0xFFDDE7FF)),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x082C6BFF),
+            blurRadius: 10,
+            offset: Offset(0, 3),
+          ),
+        ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

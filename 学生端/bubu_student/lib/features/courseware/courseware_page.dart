@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/tokens.dart';
+import '../../core/widgets/motion.dart';
 import '../../core/widgets/status_chip.dart';
 
 class CoursewarePage extends StatefulWidget {
@@ -56,7 +57,12 @@ class _CoursewarePageState extends State<CoursewarePage> {
                   children: [
                     _buildSlideList(),
                     const SizedBox(width: AppSpacing.xl),
-                    Expanded(child: _buildSlidePreview(slide)),
+                    Expanded(
+                      child: BubuPageSwitcher(
+                        pageKey: _selectedIndex,
+                        child: _buildSlidePreview(slide),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -73,31 +79,44 @@ class _CoursewarePageState extends State<CoursewarePage> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       child: Row(
         children: [
-          InkWell(
+          BubuPressable(
             onTap: () => Navigator.of(context).pop(),
             borderRadius: BorderRadius.circular(AppRadius.button),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              decoration: BoxDecoration(
-                color: AppColors.subjectOrange,
-                borderRadius: BorderRadius.circular(AppRadius.button),
-              ),
-              child: const Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(Icons.ondemand_video_rounded,
-                      color: Colors.white, size: 18),
-                  SizedBox(width: 8),
-                  Text(
-                    '课件查看',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                    ),
+            pressedScale: 0.975,
+            builder: (context, state, child) {
+              return AnimatedContainer(
+                duration: AppMotion.fast,
+                curve: AppMotion.easeOut,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.subjectOrange,
+                  borderRadius: BorderRadius.circular(AppRadius.button),
+                  boxShadow: state.active ? AppShadows.control : null,
+                ),
+                child: child,
+              );
+            },
+            child: const Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  Icons.ondemand_video_rounded,
+                  color: Colors.white,
+                  size: 18,
+                ),
+                SizedBox(width: 8),
+                Text(
+                  '课件查看',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 15,
+                    fontWeight: FontWeight.w700,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
           const SizedBox(width: 14),
@@ -165,50 +184,63 @@ class _CoursewarePageState extends State<CoursewarePage> {
               itemBuilder: (_, index) {
                 final selected = index == _selectedIndex;
                 final slide = _slides[index];
-                return InkWell(
+                return BubuPressable(
                   onTap: () => setState(() => _selectedIndex = index),
                   borderRadius: BorderRadius.circular(14),
-                  child: Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.subjectOrangeBg
-                          : AppColors.pageBg,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(
+                  pressedScale: 0.975,
+                  builder: (context, state, child) {
+                    return AnimatedContainer(
+                      duration: AppMotion.normal,
+                      curve: AppMotion.easeOut,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
                         color: selected
-                            ? AppColors.subjectOrange
-                            : AppColors.border,
-                        width: selected ? 1.6 : 1,
+                            ? AppColors.subjectOrangeBg
+                            : AppColors.pageBg,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(
+                          color: selected
+                              ? AppColors.subjectOrange
+                              : state.active
+                              ? AppColors.borderStrong
+                              : AppColors.border,
+                          width: selected ? 1.6 : 1,
+                        ),
+                        boxShadow: state.active && !selected
+                            ? AppShadows.control
+                            : null,
                       ),
-                    ),
-                    child: Row(
-                      children: [
-                        Text(
-                          '${index + 1}',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
-                            color: selected
-                                ? AppColors.subjectOrange
-                                : AppColors.textMuted,
+                      child: child,
+                    );
+                  },
+                  child: Row(
+                    children: [
+                      AnimatedDefaultTextStyle(
+                        duration: AppMotion.fast,
+                        curve: AppMotion.easeOut,
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w800,
+                          color: selected
+                              ? AppColors.subjectOrange
+                              : AppColors.textMuted,
+                        ),
+                        child: Text('${index + 1}'),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          slide.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textBody,
+                            fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            slide.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: AppColors.textBody,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 );
               },
@@ -226,7 +258,7 @@ class _CoursewarePageState extends State<CoursewarePage> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(26),
         border: Border.all(color: AppColors.border),
-        boxShadow: AppShadows.card,
+        boxShadow: AppShadows.lifted,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -269,8 +301,11 @@ class _CoursewarePageState extends State<CoursewarePage> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.edit_note_rounded,
-                    color: AppColors.subjectOrange, size: 28),
+                const Icon(
+                  Icons.edit_note_rounded,
+                  color: AppColors.subjectOrange,
+                  size: 28,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -304,8 +339,11 @@ class _CoursewarePageState extends State<CoursewarePage> {
               color: AppColors.subjectOrangeBg,
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.check_rounded,
-                size: 17, color: AppColors.subjectOrange),
+            child: const Icon(
+              Icons.check_rounded,
+              size: 17,
+              color: AppColors.subjectOrange,
+            ),
           ),
           const SizedBox(width: 14),
           Expanded(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/tokens.dart';
+import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../../../data/mock_data.dart';
 
@@ -9,20 +10,20 @@ class CurrentClassCard extends StatelessWidget {
   final CurrentClassInfo info;
   final VoidCallback? onViewMaterials;
 
-  const CurrentClassCard({
-    super.key,
-    required this.info,
-    this.onViewMaterials,
-  });
+  const CurrentClassCard({super.key, required this.info, this.onViewMaterials});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.cardBg,
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [Colors.white, Color(0xFFFBFDFF)],
+        ),
         borderRadius: BorderRadius.circular(AppRadius.heroCard),
         border: Border.all(color: AppColors.border),
-        boxShadow: AppShadows.card,
+        boxShadow: AppShadows.lifted,
       ),
       padding: const EdgeInsets.fromLTRB(28, 24, 28, 28),
       child: Row(
@@ -58,8 +59,11 @@ class _LeftSide extends StatelessWidget {
                 color: AppColors.brandSurface,
                 borderRadius: BorderRadius.circular(7),
               ),
-              child: const Icon(Icons.access_time_rounded,
-                  size: 16, color: AppColors.brand),
+              child: const Icon(
+                Icons.access_time_rounded,
+                size: 16,
+                color: AppColors.brand,
+              ),
             ),
             const SizedBox(width: 8),
             const Text(
@@ -118,8 +122,11 @@ class _LeftSide extends StatelessWidget {
         const SizedBox(height: 14),
         Row(
           children: [
-            const Icon(Icons.person_outline,
-                size: 16, color: AppColors.textMuted),
+            const Icon(
+              Icons.person_outline,
+              size: 16,
+              color: AppColors.textMuted,
+            ),
             const SizedBox(width: 4),
             Text(
               '${info.teacherName} · ${info.subject}',
@@ -140,10 +147,7 @@ class _LeftSide extends StatelessWidget {
               text: info.tips.isNotEmpty ? info.tips[0] : '',
             ),
             if (info.tips.length > 1)
-              HintBadge(
-                icon: Icons.menu_book_rounded,
-                text: info.tips[1],
-              ),
+              HintBadge(icon: Icons.menu_book_rounded, text: info.tips[1]),
           ],
         ),
       ],
@@ -168,11 +172,7 @@ class _RightSide extends StatelessWidget {
           SizedBox(
             width: 260,
             height: 175,
-            child: Image.asset(
-              illustrationAsset,
-              fit: BoxFit.contain,
-              filterQuality: FilterQuality.high,
-            ),
+            child: _FloatingIllustration(asset: illustrationAsset),
           ),
           const SizedBox(height: 12),
           _ViewButton(onTap: onView),
@@ -188,34 +188,96 @@ class _ViewButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return BubuPressable(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.button + 4),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-        decoration: BoxDecoration(
-          color: AppColors.brandTint,
-          borderRadius: BorderRadius.circular(AppRadius.button + 4),
-          border: Border.all(color: const Color(0xFFD8E4FF)),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              '查看课前资料',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w700,
-                color: AppColors.brand,
-              ),
+      pressedScale: 0.975,
+      builder: (context, state, child) {
+        return AnimatedContainer(
+          duration: AppMotion.fast,
+          curve: AppMotion.easeOut,
+          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+          decoration: BoxDecoration(
+            color: state.active ? const Color(0xFFE0EAFF) : AppColors.brandTint,
+            borderRadius: BorderRadius.circular(AppRadius.button + 4),
+            border: Border.all(
+              color: state.active
+                  ? const Color(0xFFC9DAFF)
+                  : const Color(0xFFD8E4FF),
             ),
-            SizedBox(width: 8),
-            Icon(Icons.arrow_forward_ios_rounded,
-                size: 14, color: AppColors.brand),
-          ],
-        ),
+            boxShadow: state.active ? AppShadows.control : null,
+          ),
+          child: child,
+        );
+      },
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            '查看课前资料',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: AppColors.brand,
+            ),
+          ),
+          SizedBox(width: 8),
+          Icon(
+            Icons.arrow_forward_ios_rounded,
+            size: 14,
+            color: AppColors.brand,
+          ),
+        ],
       ),
     );
   }
 }
 
+class _FloatingIllustration extends StatefulWidget {
+  final String asset;
+  const _FloatingIllustration({required this.asset});
+
+  @override
+  State<_FloatingIllustration> createState() => _FloatingIllustrationState();
+}
+
+class _FloatingIllustrationState extends State<_FloatingIllustration>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _float;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3200),
+    )..repeat(reverse: true);
+    _float = CurvedAnimation(parent: _controller, curve: AppMotion.easeInOut);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _float,
+      builder: (context, child) {
+        final dy = -4 * _float.value;
+        return Transform.translate(
+          offset: Offset(0, dy),
+          child: Transform.scale(scale: 1 + _float.value * 0.01, child: child),
+        );
+      },
+      child: Image.asset(
+        widget.asset,
+        fit: BoxFit.contain,
+        filterQuality: FilterQuality.high,
+      ),
+    );
+  }
+}

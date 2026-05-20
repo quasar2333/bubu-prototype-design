@@ -96,21 +96,40 @@ class AppShadows {
 
   /// 卡片轻阴影 —— 与原型一致的极淡冷灰。
   static const card = <BoxShadow>[
-    BoxShadow(
-      color: Color(0x0F1F2540), // 6% black-blue
-      blurRadius: 18,
-      offset: Offset(0, 6),
-    ),
+    BoxShadow(color: Color(0x0D1F2540), blurRadius: 18, offset: Offset(0, 6)),
+    BoxShadow(color: Color(0x08FFFFFF), blurRadius: 2, offset: Offset(0, -1)),
   ];
 
   /// 浮动 / 强调阴影。
   static const float = <BoxShadow>[
-    BoxShadow(
-      color: Color(0x141F2540),
-      blurRadius: 24,
-      offset: Offset(0, 10),
-    ),
+    BoxShadow(color: Color(0x141F2540), blurRadius: 24, offset: Offset(0, 10)),
   ];
+
+  /// 重点卡片的轻微抬升阴影。
+  static const lifted = <BoxShadow>[
+    BoxShadow(color: Color(0x181F2540), blurRadius: 28, offset: Offset(0, 12)),
+    BoxShadow(color: Color(0x0A1F2540), blurRadius: 8, offset: Offset(0, 3)),
+  ];
+
+  /// 胶囊和小按钮的细腻浮层阴影。
+  static const control = <BoxShadow>[
+    BoxShadow(color: Color(0x0F1F2540), blurRadius: 14, offset: Offset(0, 5)),
+  ];
+}
+
+class AppMotion {
+  AppMotion._();
+
+  static const press = Duration(milliseconds: 92);
+  static const fast = Duration(milliseconds: 140);
+  static const normal = Duration(milliseconds: 260);
+  static const page = Duration(milliseconds: 460);
+  static const route = Duration(milliseconds: 420);
+  static const stagger = Duration(milliseconds: 56);
+
+  static const pageCurve = Curves.easeOutCubic;
+  static const easeOut = Curves.easeOutCubic;
+  static const easeInOut = Curves.easeInOutCubic;
 }
 
 /// 平板设计稿基准尺寸：1024 × 768（横屏）。

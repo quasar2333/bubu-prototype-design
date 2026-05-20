@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>白板端悬浮球组件</title>
+    <link rel="stylesheet" crossorigin href="./assets/floating-ball-Cg2ujL5X.css">
+  </head>
+  <body class="wbf-demo-body">
+    <main class="wbf-demo-page demo-board" aria-label="白板授课界面">
+      <header class="board-topbar">
+        <div>
+          <strong>六年级 语文</strong>
+          <span>第 12 课 · 课堂授课中</span>
+        </div>
+        <div class="topbar-status" aria-label="课堂状态">
+          <span class="status-dot is-online"></span>
+          <span>32/36 在线</span>
+          <span class="status-dot is-recording"></span>
+          <span>录制 08:24</span>
+          <span>云端同步</span>
+        </div>
+      </header>
+
+      <section class="course-slide" aria-label="课件页面">
+        <div class="slide-page">
+          <span class="slide-kicker">课堂问题</span>
+          <h1>请圈出文中表现人物心理变化的句子</h1>
+          <div class="slide-content">
+            <p>“我站在窗前，看见雨水沿着玻璃慢慢滑落，心里忽然安静下来。”</p>
+            <p>思考：作者为什么从“焦急”等待转为“安静”？</p>
+          </div>
+          <div class="chalk-line chalk-line-one"></div>
+          <div class="chalk-line chalk-line-two"></div>
+        </div>
+      </section>
+
+      <nav class="page-control" aria-label="课件翻页">
+        <button type="button" aria-label="上一页">‹</button>
+        <span>12 / 36</span>
+        <button type="button" aria-label="下一页">›</button>
+      </nav>
+    </main>
+
+    <div id="whiteboard-floating-ball"></div>
+    <div id="ball-toast" class="wbf-toast" role="status" aria-live="polite"></div>
+
+    <script src="./floating-ball.js"></script>
+    <script>
+      const toast = document.querySelector("#ball-toast");
+
+      window.whiteboardBall = new WhiteboardFloatingBall("#whiteboard-floating-ball", {
+        open: true,
+        showEditor: true,
+        storageKey: "bubu-whiteboard-floating-ball-layout",
+        onAction(item) {
+          toast.textContent = `已触发：${item.label}`;
+          toast.classList.add("is-visible");
+          window.clearTimeout(window.__ballToastTimer);
+          window.__ballToastTimer = window.setTimeout(() => {
+            toast.classList.remove("is-visible");
+          }, 1400);
+        },
+      });
+    </script>
+  </body>
+</html>

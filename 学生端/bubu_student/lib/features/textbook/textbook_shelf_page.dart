@@ -1,6 +1,9 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../app/tokens.dart';
+import '../../core/widgets/motion.dart';
 import '../../core/widgets/status_chip.dart';
 import '../../core/widgets/tablet_frame.dart';
 import 'data/textbook_catalog.dart';
@@ -29,16 +32,16 @@ class _TextbookShelfPageState extends State<TextbookShelfPage> {
       TextbookCatalog.getFiltered(subject: _selectedSubject);
 
   TextbookResource get _recentTextbook => TextbookCatalog.grade5Up.firstWhere(
-        (item) => item.id == TextbookCatalog.recentReading.textbookId,
-        orElse: () => TextbookCatalog.grade5Up.first,
-      );
+    (item) => item.id == TextbookCatalog.recentReading.textbookId,
+    orElse: () => TextbookCatalog.grade5Up.first,
+  );
 
   void _openReader(TextbookResource textbook) {
     Navigator.of(context).push(
-      MaterialPageRoute(
+      bubuPageRoute(
         builder: (_) => TabletFrame(
           child: TextbookReaderPage(
-            subjectName: textbook.subject,
+            textbook: textbook,
             subjectColor: _subjectColor(textbook),
           ),
         ),
@@ -58,7 +61,9 @@ class _TextbookShelfPageState extends State<TextbookShelfPage> {
             _buildTopBar(context),
             Expanded(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.page),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.page,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -90,9 +95,10 @@ class _TextbookShelfPageState extends State<TextbookShelfPage> {
         ),
         child: Row(
           children: [
-            InkWell(
+            BubuPressable(
               onTap: () => Navigator.of(context).pop(),
               borderRadius: BorderRadius.circular(8),
+              pressedScale: 0.96,
               child: const Padding(
                 padding: EdgeInsets.all(4),
                 child: Icon(
@@ -123,6 +129,10 @@ class _TextbookShelfPageState extends State<TextbookShelfPage> {
               ],
             ),
             const Spacer(),
+            if (kDebugMode) ...[
+              _buildDebugImportButton(context),
+              const SizedBox(width: 10),
+            ],
             const StatusGroupChip(
               padding: EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               items: [
@@ -177,6 +187,104 @@ class _TextbookShelfPageState extends State<TextbookShelfPage> {
     );
   }
 
+  Widget _buildDebugImportButton(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () => _showImportGuide(context),
+      icon: const Icon(Icons.upload_file_rounded, size: 16),
+      label: const Text('导入教材'),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.brand,
+        side: const BorderSide(color: AppColors.brand, width: 1.2),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700),
+      ),
+    );
+  }
+
+  void _showImportGuide(BuildContext context) {
+    const command =
+        'python tool/import_textbooks.py "D:\\Downloads\\教材素材包 (2).zip" --workers 6 --lossless';
+    showModalBottomSheet<void>(
+      context: context,
+      showDragHandle: true,
+      backgroundColor: Colors.white,
+      builder: (sheetContext) {
+        return SafeArea(
+          top: false,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(24, 6, 24, 24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.upload_file_rounded,
+                      color: AppColors.brand,
+                    ),
+                    const SizedBox(width: 8),
+                    const Text(
+                      '调试导入教材',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textTitle,
+                      ),
+                    ),
+                    const Spacer(),
+                    IconButton(
+                      tooltip: '复制命令',
+                      onPressed: () {
+                        Clipboard.setData(const ClipboardData(text: command));
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('已复制教材导入命令'),
+                            duration: Duration(seconds: 1),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.copy_rounded),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  '入口：tool/import_textbooks.py；配置：tool/textbook_import_manifest.json。导入后会更新 assets/images/textbook_manifest.json 与生成目录文件。',
+                  style: TextStyle(
+                    fontSize: 13,
+                    height: 1.45,
+                    color: AppColors.textBody,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandSurface,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: const SelectableText(
+                    command,
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.4,
+                      color: AppColors.textTitle,
+                      fontFamily: 'monospace',
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Widget _buildTitleRow() {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -206,7 +314,7 @@ class _TextbookShelfPageState extends State<TextbookShelfPage> {
             borderRadius: BorderRadius.circular(999),
           ),
           child: Text(
-            '已接入 ${TextbookCatalog.grade5Up.length} 本真实封面',
+            '已接入 ${TextbookCatalog.grade5Up.length} 本真实教材',
             style: const TextStyle(
               fontSize: 12,
               color: AppColors.brand,
@@ -227,45 +335,65 @@ class _TextbookShelfPageState extends State<TextbookShelfPage> {
           final subject = _subjects[index];
           final count = TextbookCatalog.getFiltered(subject: subject).length;
           return Padding(
-            padding: EdgeInsets.only(right: index < _subjects.length - 1 ? 10 : 0),
-            child: InkWell(
+            padding: EdgeInsets.only(
+              right: index < _subjects.length - 1 ? 10 : 0,
+            ),
+            child: BubuPressable(
               onTap: () => setState(() => _selectedSubjectIndex = index),
               borderRadius: BorderRadius.circular(20),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-                decoration: BoxDecoration(
-                  color: selected ? AppColors.brand : AppColors.cardBg,
-                  borderRadius: BorderRadius.circular(20),
-                  border: selected ? null : Border.all(color: AppColors.border),
-                  boxShadow: selected ? AppShadows.card : null,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
+              pressedScale: 0.975,
+              builder: (context, state, child) {
+                return AnimatedContainer(
+                  duration: AppMotion.normal,
+                  curve: AppMotion.easeOut,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
+                  decoration: BoxDecoration(
+                    color: selected ? AppColors.brand : AppColors.cardBg,
+                    borderRadius: BorderRadius.circular(20),
+                    border: selected
+                        ? null
+                        : Border.all(
+                            color: state.active
+                                ? AppColors.borderStrong
+                                : AppColors.border,
+                          ),
+                    boxShadow: selected || state.active
+                        ? AppShadows.control
+                        : null,
+                  ),
+                  child: child,
+                );
+              },
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AnimatedDefaultTextStyle(
+                    duration: AppMotion.fast,
+                    curve: AppMotion.easeOut,
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: selected ? Colors.white : AppColors.textBody,
+                    ),
+                    child: Text(subject),
+                  ),
+                  if (count > 0) ...[
+                    const SizedBox(width: 6),
                     Text(
-                      subject,
+                      '$count',
                       style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: selected ? Colors.white : AppColors.textBody,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w700,
+                        color: selected
+                            ? Colors.white.withValues(alpha: 0.82)
+                            : AppColors.textHint,
                       ),
                     ),
-                    if (count > 0) ...[
-                      const SizedBox(width: 6),
-                      Text(
-                        '$count',
-                        style: TextStyle(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w700,
-                          color: selected
-                              ? Colors.white.withValues(alpha: 0.82)
-                              : AppColors.textHint,
-                        ),
-                      ),
-                    ],
                   ],
-                ),
+                ],
               ),
             ),
           );
@@ -319,7 +447,11 @@ class _TextbookShelfPageState extends State<TextbookShelfPage> {
             child: const Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.access_time_rounded, size: 18, color: AppColors.brand),
+                Icon(
+                  Icons.access_time_rounded,
+                  size: 18,
+                  color: AppColors.brand,
+                ),
                 SizedBox(width: 6),
                 Text(
                   '最近阅读',
@@ -399,24 +531,25 @@ class _TextbookCoverCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final hasProgress = textbook.id == TextbookCatalog.recentReading.textbookId ||
-        textbook.subject == '语文';
-    final progressText = textbook.id == TextbookCatalog.recentReading.textbookId
+    final hasProgress = textbook.id == TextbookCatalog.recentReading.textbookId;
+    final progressText = hasProgress
         ? '最近阅读  第${TextbookCatalog.recentReading.currentPage}页'
-        : hasProgress
-            ? '最近阅读  第32页'
-            : '未开始';
+        : '已导入  ${textbook.pageCountLabel}';
 
-    return InkWell(
+    return BubuPressable(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.card - 4),
+      pressedScale: 0.972,
+      builder: (context, state, child) => child,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Expanded(
             child: Hero(
               tag: 'textbook-${textbook.id}',
-              child: Container(
+              child: AnimatedContainer(
+                duration: AppMotion.normal,
+                curve: AppMotion.easeOut,
                 width: double.infinity,
                 decoration: BoxDecoration(
                   color: color.withValues(alpha: 0.08),
@@ -452,9 +585,7 @@ class _TextbookCoverCard extends StatelessWidget {
           if (hasProgress) ...[
             const SizedBox(height: 4),
             LinearProgressIndicator(
-              value: textbook.id == TextbookCatalog.recentReading.textbookId
-                  ? TextbookCatalog.recentReading.percent.clamp(0, 1)
-                  : 0.23,
+              value: TextbookCatalog.recentReading.percent.clamp(0, 1),
               backgroundColor: AppColors.border,
               valueColor: const AlwaysStoppedAnimation(AppColors.brand),
               borderRadius: BorderRadius.circular(3),
@@ -471,7 +602,7 @@ class _TextbookCoverCard extends StatelessWidget {
     if (assetPath != null && assetPath.isNotEmpty) {
       return Image.asset(
         assetPath,
-        fit: BoxFit.cover,
+        fit: BoxFit.contain,
         filterQuality: FilterQuality.high,
       );
     }
@@ -522,7 +653,7 @@ class _CoverThumb extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: assetPath == null
           ? Icon(Icons.menu_book, size: 20, color: color)
-          : Image.asset(assetPath, fit: BoxFit.cover),
+          : Image.asset(assetPath, fit: BoxFit.contain),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/widgets/bottom_tab_bar.dart';
+import '../core/widgets/motion.dart';
 import '../core/widgets/system_status_bar.dart';
 import '../core/widgets/tablet_frame.dart';
 import '../data/mock_data.dart';
@@ -20,16 +21,41 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _index = 0;
+  late final PageController _pageController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _index);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   void _openTextbookShelf() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const TabletFrame(child: TextbookShelfPage())),
+      bubuPageRoute(
+        builder: (_) => const TabletFrame(child: TextbookShelfPage()),
+      ),
     );
   }
 
   void _openCourseware() {
     Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const TabletFrame(child: CoursewarePage())),
+      bubuPageRoute(builder: (_) => const TabletFrame(child: CoursewarePage())),
+    );
+  }
+
+  void _goToTab(int index) {
+    if (index == _index) return;
+    setState(() => _index = index);
+    _pageController.animateToPage(
+      index,
+      duration: AppMotion.page,
+      curve: AppMotion.pageCurve,
     );
   }
 
@@ -59,11 +85,19 @@ class _AppShellState extends State<AppShell> {
               time: MockData.statusTime,
               date: MockData.statusDate,
             ),
-            Expanded(child: pages[_index]),
-            BubuBottomTabBar(
-              currentIndex: _index,
-              onTap: (i) => setState(() => _index = i),
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                physics: const PageScrollPhysics(),
+                onPageChanged: (i) {
+                  if (i != _index) setState(() => _index = i);
+                },
+                children: [
+                  for (final page in pages) RepaintBoundary(child: page),
+                ],
+              ),
             ),
+            BubuBottomTabBar(currentIndex: _index, onTap: _goToTab),
           ],
         ),
       ),
@@ -81,8 +115,11 @@ class _ComingSoonPage extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(Icons.construction_outlined,
-              size: 56, color: AppColors.textHint),
+          Icon(
+            Icons.construction_outlined,
+            size: 56,
+            color: AppColors.textHint,
+          ),
           const SizedBox(height: 16),
           Text(
             '$label · 待复刻',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/tokens.dart';
+import '../../core/widgets/motion.dart';
 import '../../core/widgets/status_chip.dart';
 import '../../data/mock_data.dart';
 import 'widgets/study_card.dart';
@@ -15,11 +16,7 @@ class StudyPage extends StatelessWidget {
   final VoidCallback? onTextbookTap;
   final VoidCallback? onCoursewareTap;
 
-  const StudyPage({
-    super.key,
-    this.onTextbookTap,
-    this.onCoursewareTap,
-  });
+  const StudyPage({super.key, this.onTextbookTap, this.onCoursewareTap});
 
   @override
   Widget build(BuildContext context) {
@@ -27,36 +24,50 @@ class StudyPage extends StatelessWidget {
       color: AppColors.pageBg,
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
-          AppSpacing.page, AppSpacing.lg, AppSpacing.page, AppSpacing.lg,
+          AppSpacing.page,
+          AppSpacing.lg,
+          AppSpacing.page,
+          AppSpacing.lg,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // — 顶部用户信息（与首页复用风格）—
-            _buildUserHeader(),
+            BubuEntrance(child: _buildUserHeader()),
             const SizedBox(height: AppSpacing.xxl),
             // — 大标题 —
-            const Text(
-              '学习',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.w800,
-                color: AppColors.textTitle,
-                height: 1.15,
+            const BubuEntrance(
+              delay: AppMotion.stagger,
+              child: Text(
+                '学习',
+                style: TextStyle(
+                  fontSize: 32,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textTitle,
+                  height: 1.15,
+                ),
               ),
             ),
             const SizedBox(height: 6),
-            const Text(
-              '课本、笔记、课件和自主学习',
-              style: TextStyle(
-                fontSize: 15,
-                color: AppColors.textMuted,
-                height: 1.3,
+            const BubuEntrance(
+              delay: Duration(milliseconds: 110),
+              child: Text(
+                '课本、笔记、课件和自主学习',
+                style: TextStyle(
+                  fontSize: 15,
+                  color: AppColors.textMuted,
+                  height: 1.3,
+                ),
               ),
             ),
             const SizedBox(height: AppSpacing.xxl),
             // — 2×2 卡片网格 —
-            Expanded(child: _buildCardGrid()),
+            Expanded(
+              child: BubuEntrance(
+                delay: const Duration(milliseconds: 150),
+                child: _buildCardGrid(context),
+              ),
+            ),
           ],
         ),
       ),
@@ -127,36 +138,52 @@ class StudyPage extends StatelessWidget {
   }
 
   Widget _buildTimetableButton() {
-    return InkWell(
+    return BubuPressable(
+      onTap: () {},
       borderRadius: BorderRadius.circular(AppRadius.button + 2),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
-        decoration: BoxDecoration(
-          color: AppColors.cardBg,
-          borderRadius: BorderRadius.circular(AppRadius.button + 2),
-          border: Border.all(color: AppColors.brand, width: 1.4),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.calendar_today_rounded,
-                size: 18, color: AppColors.brand),
-            SizedBox(width: 6),
-            Text(
-              '课表',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.brand,
-              ),
+      pressedScale: 0.975,
+      builder: (context, state, child) {
+        return AnimatedContainer(
+          duration: AppMotion.fast,
+          curve: AppMotion.easeOut,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+          decoration: BoxDecoration(
+            color: state.active ? AppColors.brandSurface : AppColors.cardBg,
+            borderRadius: BorderRadius.circular(AppRadius.button + 2),
+            border: Border.all(color: AppColors.brand, width: 1.4),
+            boxShadow: state.active ? AppShadows.control : null,
+          ),
+          child: child,
+        );
+      },
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.brand),
+          SizedBox(width: 6),
+          Text(
+            '课表',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.brand,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCardGrid() {
+  void _showComingSoon(BuildContext context, String title) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('$title 功能即将上线'),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  Widget _buildCardGrid(BuildContext context) {
     return GridView.count(
       crossAxisCount: 2,
       mainAxisSpacing: AppSpacing.lg,
@@ -173,14 +200,15 @@ class StudyPage extends StatelessWidget {
           recentColor: AppColors.subjectBlue,
           onTap: onTextbookTap,
         ),
-        const StudyCard(
-          iconWidget: NotebookIcon(),
+        StudyCard(
+          iconWidget: const NotebookIcon(),
           iconColor: AppColors.subjectPurple,
           iconBgColor: AppColors.subjectPurpleBg,
           title: '课堂笔记',
           subtitle: '查看课堂记录和学科笔记',
           recentText: '最近笔记：8.2 一元一次不等式',
           recentColor: AppColors.subjectPurple,
+          onTap: () => _showComingSoon(context, '课堂笔记'),
         ),
         StudyCard(
           iconWidget: const CoursewareIcon(),
@@ -192,14 +220,15 @@ class StudyPage extends StatelessWidget {
           recentColor: AppColors.subjectOrange,
           onTap: onCoursewareTap,
         ),
-        const StudyCard(
-          iconWidget: SelfStudyIcon(),
+        StudyCard(
+          iconWidget: const SelfStudyIcon(),
           iconColor: AppColors.subjectGreen,
           iconBgColor: AppColors.subjectGreenBg,
           title: '自主学习',
           subtitle: '按学科预习、复习和自测',
           recentText: '推荐：数学基础巩固',
           recentColor: AppColors.subjectGreen,
+          onTap: () => _showComingSoon(context, '自主学习'),
         ),
       ],
     );

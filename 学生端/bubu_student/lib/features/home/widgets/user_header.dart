@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/tokens.dart';
+import '../../../core/widgets/motion.dart';
 import '../../../core/widgets/status_chip.dart';
 import '../../../data/mock_data.dart';
 
@@ -9,11 +10,7 @@ class HomeUserHeader extends StatelessWidget {
   final StudentProfile student;
   final VoidCallback? onTimetableTap;
 
-  const HomeUserHeader({
-    super.key,
-    required this.student,
-    this.onTimetableTap,
-  });
+  const HomeUserHeader({super.key, required this.student, this.onTimetableTap});
 
   @override
   Widget build(BuildContext context) {
@@ -86,32 +83,38 @@ class _TimetableButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return BubuPressable(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.button + 2),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
-        decoration: BoxDecoration(
-          color: AppColors.cardBg,
-          borderRadius: BorderRadius.circular(AppRadius.button + 2),
-          border: Border.all(color: AppColors.brand, width: 1.4),
-        ),
-        child: const Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.calendar_today_rounded,
-                size: 18, color: AppColors.brand),
-            SizedBox(width: 6),
-            Text(
-              '课表',
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: AppColors.brand,
-              ),
+      pressedScale: 0.975,
+      builder: (context, state, child) {
+        return AnimatedContainer(
+          duration: AppMotion.fast,
+          curve: AppMotion.easeOut,
+          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
+          decoration: BoxDecoration(
+            color: state.active ? AppColors.brandSurface : AppColors.cardBg,
+            borderRadius: BorderRadius.circular(AppRadius.button + 2),
+            border: Border.all(color: AppColors.brand, width: 1.4),
+            boxShadow: state.active ? AppShadows.control : null,
+          ),
+          child: child,
+        );
+      },
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.calendar_today_rounded, size: 18, color: AppColors.brand),
+          SizedBox(width: 6),
+          Text(
+            '课表',
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+              color: AppColors.brand,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

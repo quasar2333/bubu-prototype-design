@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>白板端桌面悬浮组件</title>
+    <script type="module" crossorigin src="./assets/desktop-Uf_gSh0o.js"></script>
+    <link rel="modulepreload" crossorigin href="./assets/index-DN9bzYKf.js">
+    <link rel="stylesheet" crossorigin href="./assets/index-CqcKWzZm.css">
+    <link rel="stylesheet" crossorigin href="./assets/floating-ball-Cg2ujL5X.css">
+  </head>
+  <body class="desktop-overlay-body">
+    <div id="desktop-strip-root"></div>
+    <div id="desktop-ball-root"></div>
+    <div id="desktop-toast" class="wbf-toast" role="status" aria-live="polite"></div>
+
+    <script src="./floating-ball.js"></script>
+    <script>
+      const toast = document.querySelector("#desktop-toast");
+
+      window.desktopFloatingBall = new window.WhiteboardFloatingBall("#desktop-ball-root", {
+        open: true,
+        showEditor: true,
+        scale: 0.78,
+        position: { x: 18, y: 18 },
+        storageKey: "bubu-whiteboard-floating-ball-desktop",
+        onAction(item) {
+          toast.textContent = `悬浮球：${item.label}`;
+          toast.classList.add("is-visible");
+          window.clearTimeout(window.__desktopToastTimer);
+          window.__desktopToastTimer = window.setTimeout(() => {
+            toast.classList.remove("is-visible");
+          }, 1300);
+        },
+      });
+
+      const interactiveSelector = ".floating-strip-host, .floating-strip, .floating-strip__layout-tools, .strip-resize-frame, .wbf-shell, .wbf-toast";
+
+      function syncMousePassthrough(event) {
+        const target = event.target;
+        const isInteractive = Boolean(target && target.closest?.(interactiveSelector));
+        window.desktopOverlay?.setMousePassthrough(!isInteractive);
+      }
+
+      window.addEventListener("pointermove", syncMousePassthrough, true);
+      window.addEventListener("mousemove", syncMousePassthrough, true);
+      window.addEventListener("mouseleave", () => {
+        window.desktopOverlay?.setMousePassthrough(true);
+      });
+      window.addEventListener("DOMContentLoaded", () => {
+        window.desktopOverlay?.setMousePassthrough(true);
+      });
+    </script>
+  </body>
+</html>

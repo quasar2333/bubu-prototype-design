@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../app/tokens.dart';
+import '../../../core/widgets/motion.dart';
 
 /// 学习主页的入口卡片组件。
 ///
@@ -33,82 +34,93 @@ class StudyCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
+    return BubuPressable(
       onTap: onTap,
       borderRadius: BorderRadius.circular(AppRadius.card),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        decoration: BoxDecoration(
-          color: AppColors.cardBg,
-          borderRadius: BorderRadius.circular(AppRadius.card),
-          border: Border.all(color: AppColors.border),
-          boxShadow: AppShadows.card,
-        ),
-        child: Row(
-          children: [
-            // 图标区：优先使用自定义 Widget，否则用圆角方块 + Icon
-            iconWidget ?? Container(
-              width: 72,
-              height: 72,
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                borderRadius: BorderRadius.circular(AppRadius.iconTile),
-              ),
-              child: Icon(icon ?? Icons.book, size: 36, color: iconColor),
+      pressedScale: 0.976,
+      builder: (context, state, child) {
+        return AnimatedContainer(
+          duration: AppMotion.normal,
+          curve: AppMotion.easeOut,
+          padding: const EdgeInsets.all(AppSpacing.xl),
+          decoration: BoxDecoration(
+            color: AppColors.cardBg,
+            borderRadius: BorderRadius.circular(AppRadius.card),
+            border: Border.all(
+              color: state.active ? AppColors.borderStrong : AppColors.border,
             ),
-            const SizedBox(width: AppSpacing.lg),
-            // 文字区
-            Expanded(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
-                      color: AppColors.textTitle,
+            boxShadow: state.active ? AppShadows.lifted : AppShadows.card,
+          ),
+          child: child,
+        );
+      },
+      child: Row(
+        children: [
+          // 图标区：优先使用自定义 Widget，否则用圆角方块 + Icon
+          iconWidget ??
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: iconBgColor,
+                  borderRadius: BorderRadius.circular(AppRadius.iconTile),
+                ),
+                child: Icon(icon ?? Icons.book, size: 36, color: iconColor),
+              ),
+          const SizedBox(width: AppSpacing.lg),
+          // 文字区
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textTitle,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+                if (recentText != null) ...[
+                  const SizedBox(height: 10),
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 5,
+                    ),
+                    decoration: BoxDecoration(
+                      color: recentColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      recentText!,
+                      style: TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: recentColor,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: AppColors.textMuted,
-                    ),
-                  ),
-                  if (recentText != null) ...[
-                    const SizedBox(height: 10),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      decoration: BoxDecoration(
-                        color: recentColor.withValues(alpha: 0.08),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        recentText!,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: recentColor,
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
-              ),
+              ],
             ),
-            // 箭头
-            Icon(
-              Icons.chevron_right_rounded,
-              color: AppColors.textHint,
-              size: 24,
-            ),
-          ],
-        ),
+          ),
+          // 箭头
+          Icon(
+            Icons.chevron_right_rounded,
+            color: AppColors.textHint,
+            size: 24,
+          ),
+        ],
       ),
     );
   }
@@ -171,7 +183,11 @@ class NotebookIcon extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Icon(Icons.auto_stories_rounded, size: 38, color: AppColors.subjectPurple),
+          Icon(
+            Icons.auto_stories_rounded,
+            size: 38,
+            color: AppColors.subjectPurple,
+          ),
           Positioned(
             top: 10,
             right: 12,
@@ -230,8 +246,11 @@ class CoursewareIcon extends StatelessWidget {
                 width: 2,
               ),
             ),
-            child: Icon(Icons.play_arrow_rounded,
-                size: 22, color: AppColors.subjectOrange),
+            child: Icon(
+              Icons.play_arrow_rounded,
+              size: 22,
+              color: AppColors.subjectOrange,
+            ),
           ),
         ],
       ),
@@ -255,7 +274,11 @@ class SelfStudyIcon extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Icon(Icons.auto_stories_rounded, size: 36, color: AppColors.subjectGreen),
+          Icon(
+            Icons.auto_stories_rounded,
+            size: 36,
+            color: AppColors.subjectGreen,
+          ),
           // 书签装饰
           Positioned(
             top: 12,

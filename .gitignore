@@ -1,2 +1,10 @@
 # 教材素材打包文件（发群里用，不推送）
 教材素材包.zip
+
+# Local dependency folders
+node_modules/
+**/node_modules/
+
+# Build outputs
+build/
+dist/

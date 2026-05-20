@@ -1,0 +1,135 @@
+
+> whiteboard-floating-strip@0.1.0 desktop
+> npm run build && electron .
+
+
+> whiteboard-floating-strip@0.1.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+<script src="./floating-ball.js"> in "/same-screen.html" can't be bundled without type="module" attribute
+<script src="./floating-ball.js"> in "/desktop.html" can't be bundled without type="module" attribute
+<script src="./floating-ball.js"> in "/demo.html" can't be bundled without type="module" attribute
+[32m✓[39m 1582 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                         [39m[1m[2m  0.50 kB[22m[1m[22m[2m │ gzip:  0.34 kB[22m
+[2mdist/[22m[32msame-screen.html                   [39m[1m[2m  1.47 kB[22m[1m[22m[2m │ gzip:  0.72 kB[22m
+[2mdist/[22m[32mdesktop.html                       [39m[1m[2m  2.25 kB[22m[1m[22m[2m │ gzip:  0.94 kB[22m
+[2mdist/[22m[32mdemo.html                          [39m[1m[2m  2.28 kB[22m[1m[22m[2m │ gzip:  1.23 kB[22m
+[2mdist/[22m[35massets/floating-ball-Cg2ujL5X.css  [39m[1m[2m 12.32 kB[22m[1m[22m[2m │ gzip:  3.61 kB[22m
+[2mdist/[22m[35massets/index-CqcKWzZm.css          [39m[1m[2m 22.89 kB[22m[1m[22m[2m │ gzip:  5.68 kB[22m
+[2mdist/[22m[36massets/desktop-Uf_gSh0o.js         [39m[1m[2m  0.65 kB[22m[1m[22m[2m │ gzip:  0.44 kB[22m
+[2mdist/[22m[36massets/main-BL8CrAv3.js            [39m[1m[2m  8.31 kB[22m[1m[22m[2m │ gzip:  2.88 kB[22m
+[2mdist/[22m[36massets/index-DN9bzYKf.js           [39m[1m[2m156.82 kB[22m[1m[22m[2m │ gzip: 50.20 kB[22m
+[32m✓ built in 2.07s[39m
+
+
+> whiteboard-floating-strip@0.1.0 desktop
+> npm run build && electron .
+
+
+> whiteboard-floating-strip@0.1.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+<script src="./floating-ball.js"> in "/desktop.html" can't be bundled without type="module" attribute
+transforming...
+<script src="./floating-ball.js"> in "/demo.html" can't be bundled without type="module" attribute
+<script src="./floating-ball.js"> in "/same-screen.html" can't be bundled without type="module" attribute
+[32m✓[39m 1582 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                         [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:  0.35 kB[22m
+[2mdist/[22m[32msame-screen.html                   [39m[1m[2m  1.51 kB[22m[1m[22m[2m │ gzip:  0.73 kB[22m
+[2mdist/[22m[32mdesktop.html                       [39m[1m[2m  2.31 kB[22m[1m[22m[2m │ gzip:  0.95 kB[22m
+[2mdist/[22m[32mdemo.html                          [39m[1m[2m  2.35 kB[22m[1m[22m[2m │ gzip:  1.24 kB[22m
+[2mdist/[22m[35massets/floating-ball-Cg2ujL5X.css  [39m[1m[2m 12.32 kB[22m[1m[22m[2m │ gzip:  3.61 kB[22m
+[2mdist/[22m[35massets/index-CqcKWzZm.css          [39m[1m[2m 22.89 kB[22m[1m[22m[2m │ gzip:  5.68 kB[22m
+[2mdist/[22m[36massets/desktop-Uf_gSh0o.js         [39m[1m[2m  0.65 kB[22m[1m[22m[2m │ gzip:  0.44 kB[22m
+[2mdist/[22m[36massets/main-BL8CrAv3.js            [39m[1m[2m  8.31 kB[22m[1m[22m[2m │ gzip:  2.88 kB[22m
+[2mdist/[22m[36massets/index-DN9bzYKf.js           [39m[1m[2m156.82 kB[22m[1m[22m[2m │ gzip: 50.20 kB[22m
+[32m✓ built in 3.82s[39m
+
+
+> whiteboard-floating-strip@0.1.0 desktop
+> npm run build && electron .
+
+
+> whiteboard-floating-strip@0.1.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+<script src="./floating-ball.js"> in "/same-screen.html" can't be bundled without type="module" attribute
+<script src="./floating-ball.js"> in "/demo.html" can't be bundled without type="module" attribute
+<script src="./floating-ball.js"> in "/desktop.html" can't be bundled without type="module" attribute
+[32m✓[39m 1582 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                         [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:  0.35 kB[22m
+[2mdist/[22m[32msame-screen.html                   [39m[1m[2m  1.51 kB[22m[1m[22m[2m │ gzip:  0.73 kB[22m
+[2mdist/[22m[32mdesktop.html                       [39m[1m[2m  2.31 kB[22m[1m[22m[2m │ gzip:  0.95 kB[22m
+[2mdist/[22m[32mdemo.html                          [39m[1m[2m  2.35 kB[22m[1m[22m[2m │ gzip:  1.24 kB[22m
+[2mdist/[22m[35massets/floating-ball-Cg2ujL5X.css  [39m[1m[2m 12.32 kB[22m[1m[22m[2m │ gzip:  3.61 kB[22m
+[2mdist/[22m[35massets/index-CqcKWzZm.css          [39m[1m[2m 22.89 kB[22m[1m[22m[2m │ gzip:  5.68 kB[22m
+[2mdist/[22m[36massets/desktop-Uf_gSh0o.js         [39m[1m[2m  0.65 kB[22m[1m[22m[2m │ gzip:  0.44 kB[22m
+[2mdist/[22m[36massets/main-BL8CrAv3.js            [39m[1m[2m  8.31 kB[22m[1m[22m[2m │ gzip:  2.88 kB[22m
+[2mdist/[22m[36massets/index-DN9bzYKf.js           [39m[1m[2m156.82 kB[22m[1m[22m[2m │ gzip: 50.20 kB[22m
+[32m✓ built in 2.53s[39m
+
+
+> whiteboard-floating-strip@0.1.0 desktop
+> npm run build && electron .
+
+
+> whiteboard-floating-strip@0.1.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+<script src="./floating-ball.js"> in "/desktop.html" can't be bundled without type="module" attribute
+transforming...
+<script src="./floating-ball.js"> in "/same-screen.html" can't be bundled without type="module" attribute
+<script src="./floating-ball.js"> in "/demo.html" can't be bundled without type="module" attribute
+[32m✓[39m 1582 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                         [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:  0.35 kB[22m
+[2mdist/[22m[32msame-screen.html                   [39m[1m[2m  1.51 kB[22m[1m[22m[2m │ gzip:  0.73 kB[22m
+[2mdist/[22m[32mdesktop.html                       [39m[1m[2m  2.31 kB[22m[1m[22m[2m │ gzip:  0.95 kB[22m
+[2mdist/[22m[32mdemo.html                          [39m[1m[2m  2.35 kB[22m[1m[22m[2m │ gzip:  1.24 kB[22m
+[2mdist/[22m[35massets/floating-ball-Cg2ujL5X.css  [39m[1m[2m 12.32 kB[22m[1m[22m[2m │ gzip:  3.61 kB[22m
+[2mdist/[22m[35massets/index-CqcKWzZm.css          [39m[1m[2m 22.89 kB[22m[1m[22m[2m │ gzip:  5.68 kB[22m
+[2mdist/[22m[36massets/desktop-Uf_gSh0o.js         [39m[1m[2m  0.65 kB[22m[1m[22m[2m │ gzip:  0.44 kB[22m
+[2mdist/[22m[36massets/main-BL8CrAv3.js            [39m[1m[2m  8.31 kB[22m[1m[22m[2m │ gzip:  2.88 kB[22m
+[2mdist/[22m[36massets/index-DN9bzYKf.js           [39m[1m[2m156.82 kB[22m[1m[22m[2m │ gzip: 50.20 kB[22m
+[32m✓ built in 2.29s[39m
+
+
+> whiteboard-floating-strip@0.1.0 desktop
+> npm run build && electron .
+
+
+> whiteboard-floating-strip@0.1.0 build
+> vite build
+
+[36mvite v5.4.21 [32mbuilding for production...[36m[39m
+transforming...
+<script src="./floating-ball.js"> in "/same-screen.html" can't be bundled without type="module" attribute
+<script src="./floating-ball.js"> in "/demo.html" can't be bundled without type="module" attribute
+<script src="./floating-ball.js"> in "/desktop.html" can't be bundled without type="module" attribute
+[32m✓[39m 1582 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                         [39m[1m[2m  0.52 kB[22m[1m[22m[2m │ gzip:  0.35 kB[22m
+[2mdist/[22m[32msame-screen.html                   [39m[1m[2m  1.51 kB[22m[1m[22m[2m │ gzip:  0.73 kB[22m
+[2mdist/[22m[32mdesktop.html                       [39m[1m[2m  2.31 kB[22m[1m[22m[2m │ gzip:  0.95 kB[22m
+[2mdist/[22m[32mdemo.html                          [39m[1m[2m  2.35 kB[22m[1m[22m[2m │ gzip:  1.24 kB[22m
+[2mdist/[22m[35massets/floating-ball-Cg2ujL5X.css  [39m[1m[2m 12.32 kB[22m[1m[22m[2m │ gzip:  3.61 kB[22m
+[2mdist/[22m[35massets/index-CqcKWzZm.css          [39m[1m[2m 22.89 kB[22m[1m[22m[2m │ gzip:  5.68 kB[22m
+[2mdist/[22m[36massets/desktop-Uf_gSh0o.js         [39m[1m[2m  0.65 kB[22m[1m[22m[2m │ gzip:  0.44 kB[22m
+[2mdist/[22m[36massets/main-BL8CrAv3.js            [39m[1m[2m  8.31 kB[22m[1m[22m[2m │ gzip:  2.88 kB[22m
+[2mdist/[22m[36massets/index-DN9bzYKf.js           [39m[1m[2m156.82 kB[22m[1m[22m[2m │ gzip: 50.20 kB[22m
+[32m✓ built in 3.12s[39m
+

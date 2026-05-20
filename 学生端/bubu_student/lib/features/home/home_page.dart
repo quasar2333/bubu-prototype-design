@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/tokens.dart';
+import '../../core/widgets/motion.dart';
 import '../../data/mock_data.dart';
 import '../textbook/textbook_shelf_page.dart';
 import 'widgets/current_class_card.dart';
@@ -20,11 +21,7 @@ class HomePage extends StatelessWidget {
   final VoidCallback? onTextbookTap;
   final VoidCallback? onCoursewareTap;
 
-  const HomePage({
-    super.key,
-    this.onTextbookTap,
-    this.onCoursewareTap,
-  });
+  const HomePage({super.key, this.onTextbookTap, this.onCoursewareTap});
 
   @override
   Widget build(BuildContext context) {
@@ -41,35 +38,43 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const HomeUserHeader(student: MockData.student),
-            CurrentClassCard(
-              info: MockData.currentClass,
-              onViewMaterials: onCoursewareTap,
+            const BubuEntrance(
+              child: HomeUserHeader(student: MockData.student),
             ),
-            HomeShortcutGrid(
-              shortcuts: MockData.shortcuts,
-              onTap: (shortcut) {
-                if (shortcut.title == '电子课本') {
-                  if (onTextbookTap != null) {
-                    onTextbookTap!();
+            BubuEntrance(
+              delay: AppMotion.stagger,
+              child: CurrentClassCard(
+                info: MockData.currentClass,
+                onViewMaterials: onCoursewareTap,
+              ),
+            ),
+            BubuEntrance(
+              delay: const Duration(milliseconds: 140),
+              child: HomeShortcutGrid(
+                shortcuts: MockData.shortcuts,
+                onTap: (shortcut) {
+                  if (shortcut.title == '电子课本') {
+                    if (onTextbookTap != null) {
+                      onTextbookTap!();
+                    } else {
+                      Navigator.of(context).push(
+                        bubuPageRoute(
+                          builder: (_) => const TextbookShelfPage(),
+                        ),
+                      );
+                    }
+                  } else if (shortcut.title == '课件查看') {
+                    onCoursewareTap?.call();
                   } else {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const TextbookShelfPage(),
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('${shortcut.title} 功能即将上线'),
+                        duration: const Duration(seconds: 1),
                       ),
                     );
                   }
-                } else if (shortcut.title == '课件查看') {
-                  onCoursewareTap?.call();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${shortcut.title} 功能即将上线'),
-                      duration: const Duration(seconds: 1),
-                    ),
-                  );
-                }
-              },
+                },
+              ),
             ),
           ],
         ),

@@ -26,6 +26,20 @@ flutter run -d <device-id>
 > Web/Windows 端会自动套一个 1024×768 的「平板外框」以贴合设计稿；
 > Android 真机/模拟器锁定横屏 (`sensorLandscape`)，全屏铺满。
 
+## 教材导入
+
+调试入口在电子课本书架右上角的「导入教材」按钮（仅 Debug 构建显示）。它对应的复用脚本是：
+
+```powershell
+python tool/import_textbooks.py "D:\Downloads\教材素材包 (2).zip" --workers 6 --lossless
+```
+
+- 教材定义维护在 `tool/textbook_import_manifest.json`。
+- 脚本支持 ZIP、PDF 目录或单个 PDF，按教材并发渲染。
+- 默认渲染倍率 `4.0`、最长边 `3200`、WebP 质量 `96`；对最终调试包建议加 `--lossless`。
+- 导入后会同步 `assets/images/textbook_manifest.json` 和 `lib/features/textbook/data/textbook_catalog.generated.dart`。
+- 页码不再把封面当正文第 1 页；每本书用 `bodyStartPageIndex` 标记正文第 1 页对应的资源图。
+
 ## 目录结构
 
 ```bash

@@ -44,10 +44,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
  
-# 教材素材（本地资源，不推送）
+# 鏁欐潗绱犳潗锛堟湰鍦拌祫婧愶紝涓嶆帹閫侊級
 assets/images/textbook_pages/
 assets/images/textbook_covers/
 
-# Playwright 测试工具
+# Playwright 娴嬭瘯宸ュ叿
 .playwright-cli/
 
