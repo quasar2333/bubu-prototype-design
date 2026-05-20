@@ -105,6 +105,27 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // 预加载当前页前后3页的图片到缓存
+    _precacheNearbyPages(_currentPageIndex);
+  }
+
+  /// 预加载指定翻页索引前后各3页的图片
+  void _precacheNearbyPages(int spreadIndex) {
+    final leftPage = spreadIndex * 2;
+    for (int i = -3; i <= 4; i++) {
+      final pageNum = leftPage + i;
+      if (pageNum >= 0 && pageNum < _demoRealPageCount) {
+        precacheImage(
+          AssetImage(_pageAssetPath(pageNum)),
+          context,
+        );
+      }
+    }
+  }
+
+  @override
   void dispose() {
     _fabAnimController.dispose();
     _thumbnailScrollController.dispose();
@@ -271,9 +292,12 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
                           return _buildPage(index);
                         },
                         onPageChanged: (leftPageIndex, rightPageIndex) {
+                          final newSpread = leftPageIndex ~/ 2;
                           setState(() {
-                            _currentPageIndex = leftPageIndex ~/ 2;
+                            _currentPageIndex = newSpread;
                           });
+                          // 翻页后预加载前后页面
+                          _precacheNearbyPages(newSpread);
                         },
                       ),
                     ),
@@ -550,43 +574,49 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
 
   Widget _buildPage(int pageNum) {
     final header = pageNum % 2 == 0 ? '人民教育出版社' : '';
-    return Container(
-      margin: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(4),
-        boxShadow: const [
-          BoxShadow(
-              color: Color(0x0A000000), blurRadius: 8, offset: Offset(0, 2)),
-        ],
-      ),
-      child: Stack(
-        children: [
-          _buildRealPageOrFallback(pageNum, header),
-          if (_strokes[pageNum] != null && _strokes[pageNum]!.isNotEmpty)
-            CustomPaint(
-              size: Size.infinite,
-              painter: _StrokePainter(
-                strokes: _strokes[pageNum] ?? [],
-                currentPoints: [],
-                currentColor: _penColor,
-                currentWidth: _penWidth,
+    final pageStrokes = _strokes[pageNum];
+    final hasStrokes = pageStrokes != null && pageStrokes.isNotEmpty;
+    return RepaintBoundary(
+      child: Container(
+        margin: const EdgeInsets.all(4),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.all(Radius.circular(4)),
+          // 简化阴影：使用 spreadRadius 代替高 blurRadius
+          boxShadow: [
+            BoxShadow(
+                color: Color(0x08000000), blurRadius: 4, offset: Offset(0, 1)),
+          ],
+        ),
+        child: Stack(
+          children: [
+            _buildRealPageOrFallback(pageNum, header),
+            // 仅在有笔迹时才创建 CustomPaint，完全避免空绘制开销
+            if (hasStrokes)
+              CustomPaint(
+                size: Size.infinite,
+                painter: _StrokePainter(
+                  strokes: pageStrokes!,
+                  currentPoints: const [],
+                  currentColor: _penColor,
+                  currentWidth: _penWidth,
+                ),
+              ),
+            // 页码
+            Positioned(
+              bottom: 12,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Text(
+                  '${pageNum + 1}',
+                  style: const TextStyle(
+                      fontSize: 12, color: AppColors.textMuted),
+                ),
               ),
             ),
-          // 页码
-          Positioned(
-            bottom: 12,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                '${pageNum + 1}',
-                style: const TextStyle(
-                    fontSize: 12, color: AppColors.textMuted),
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -600,7 +630,9 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
         child: Image.asset(
           assetPath,
           fit: BoxFit.contain,
-          filterQuality: FilterQuality.high,
+          filterQuality: FilterQuality.medium,
+          // 启用图片缓存标记
+          gaplessPlayback: true,
           errorBuilder: (_, _, _) => _buildFallbackTextbookPage(
             pageNum,
             header,
