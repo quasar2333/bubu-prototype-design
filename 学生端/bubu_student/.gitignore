@@ -43,3 +43,11 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+ 
+# 教材素材（本地资源，不推送）
+assets/images/textbook_pages/
+assets/images/textbook_covers/
+
+# Playwright 测试工具
+.playwright-cli/
+

@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../core/widgets/bottom_tab_bar.dart';
 import '../core/widgets/system_status_bar.dart';
+import '../core/widgets/tablet_frame.dart';
 import '../data/mock_data.dart';
+import '../features/courseware/courseware_page.dart';
 import '../features/home/home_page.dart';
+import '../features/study/study_page.dart';
+import '../features/textbook/textbook_shelf_page.dart';
 import 'tokens.dart';
 
 /// 学生端整体壳：上 系统状态栏 + 中 业务页面 + 下 底部 Tab。
@@ -17,11 +21,29 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   int _index = 0;
 
+  void _openTextbookShelf() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const TabletFrame(child: TextbookShelfPage())),
+    );
+  }
+
+  void _openCourseware() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const TabletFrame(child: CoursewarePage())),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final pages = <Widget>[
-      const HomePage(),
-      const _ComingSoonPage(label: '学习'),
+      HomePage(
+        onTextbookTap: _openTextbookShelf,
+        onCoursewareTap: _openCourseware,
+      ),
+      StudyPage(
+        onTextbookTap: _openTextbookShelf,
+        onCoursewareTap: _openCourseware,
+      ),
       const _ComingSoonPage(label: '作业'),
       const _ComingSoonPage(label: '我的'),
     ];

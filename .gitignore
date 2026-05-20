@@ -1,11 +1,2 @@
-node_modules/
-dist/
-.vite/
-.env
-.env.*
-*.log
-desktop-screenshot.png
-screenshot_current.png
-screenshot_inline.jpg
-screenshot_mobile.jpg
-fake_hacker_fullscreen.ps1
+# 教材素材打包文件（发群里用，不推送）
+教材素材包.zip
