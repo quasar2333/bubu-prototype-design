@@ -1,9 +1,0 @@
-feat(阅读器): 性能优化 + PDF导入脚本
-
-- precacheImage 预加载当前页前后3页
-- RepaintBoundary 隔离每页独立重绘
-- filterQuality high→medium 降低渲染开销
-- BoxShadow blurRadius 8→4 简化阴影计算
-- 涂鸦层无笔迹时完全移除 CustomPaint
-- gaplessPlayback 启用图片缓存标记
-- 新增 tools/pdf_to_pages.py PDF→PNG 批量转换脚本

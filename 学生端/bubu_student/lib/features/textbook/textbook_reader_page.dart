@@ -576,47 +576,44 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
     final header = pageNum % 2 == 0 ? '人民教育出版社' : '';
     final pageStrokes = _strokes[pageNum];
     final hasStrokes = pageStrokes != null && pageStrokes.isNotEmpty;
-    return RepaintBoundary(
-      child: Container(
-        margin: const EdgeInsets.all(4),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(4)),
-          // 简化阴影：使用 spreadRadius 代替高 blurRadius
-          boxShadow: [
-            BoxShadow(
-                color: Color(0x08000000), blurRadius: 4, offset: Offset(0, 1)),
-          ],
-        ),
-        child: Stack(
-          children: [
-            _buildRealPageOrFallback(pageNum, header),
-            // 仅在有笔迹时才创建 CustomPaint，完全避免空绘制开销
-            if (hasStrokes)
-              CustomPaint(
-                size: Size.infinite,
-                painter: _StrokePainter(
-                  strokes: pageStrokes!,
-                  currentPoints: const [],
-                  currentColor: _penColor,
-                  currentWidth: _penWidth,
-                ),
-              ),
-            // 页码
-            Positioned(
-              bottom: 12,
-              left: 0,
-              right: 0,
-              child: Center(
-                child: Text(
-                  '${pageNum + 1}',
-                  style: const TextStyle(
-                      fontSize: 12, color: AppColors.textMuted),
-                ),
+    return Container(
+      margin: const EdgeInsets.all(4),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.all(Radius.circular(4)),
+        boxShadow: [
+          BoxShadow(
+              color: Color(0x08000000), blurRadius: 4, offset: Offset(0, 1)),
+        ],
+      ),
+      child: Stack(
+        children: [
+          _buildRealPageOrFallback(pageNum, header),
+          // 仅在有笔迹时才创建 CustomPaint，完全避免空绘制开销
+          if (hasStrokes)
+            CustomPaint(
+              size: Size.infinite,
+              painter: _StrokePainter(
+                strokes: pageStrokes!,
+                currentPoints: const [],
+                currentColor: _penColor,
+                currentWidth: _penWidth,
               ),
             ),
-          ],
-        ),
+          // 页码
+          Positioned(
+            bottom: 12,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Text(
+                '${pageNum + 1}',
+                style: const TextStyle(
+                    fontSize: 12, color: AppColors.textMuted),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

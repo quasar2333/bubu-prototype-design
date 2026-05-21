@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/services.dart';
 
 import 'app/app_shell.dart';
@@ -7,6 +8,8 @@ import 'core/widgets/tablet_frame.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+  // 启用触控重采样：将高频触摸事件对齐到帧时序，消除平板拖拽起步抖动
+  GestureBinding.instance.resamplingEnabled = true;
   // 锁定横屏（与 Android Manifest 双重保险，覆盖 hot reload / Web 场景）。
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.landscapeLeft,
