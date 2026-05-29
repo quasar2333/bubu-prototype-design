@@ -1,4 +1,4 @@
-﻿import { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
   ChevronRight, Search, ZoomIn, ZoomOut, RotateCw, FileText, ChevronLeft,
@@ -10,17 +10,14 @@ const students = [
   { id: 10102, name: '王思涵', status: '已批阅', color: 'emerald' },
   { id: 10103, name: '张子涵', status: '待批阅', color: 'amber' },
   { id: 10104, name: '陈宇航', status: '已批阅', color: 'emerald' },
-  { id: 10105, name: '刘雨桐', status: '需复核', color: 'rose' },
   { id: 10106, name: '赵天宇', status: '已批阅', color: 'emerald' },
-  { id: 10107, name: '周欣怡', status: '需复核', color: 'rose' },
   { id: 10108, name: '吴佳琪', status: '待批阅', color: 'amber' },
   { id: 10109, name: '黄梓豪', status: '已批阅', color: 'emerald' }
 ]
 
 const statusBg = {
   amber: 'bg-amber-50 text-amber-700',
-  emerald: 'bg-emerald-50 text-emerald-700',
-  rose: 'bg-rose-50 text-rose-700'
+  emerald: 'bg-emerald-50 text-emerald-700'
 }
 
 const evaluations = [
@@ -32,7 +29,7 @@ const evaluations = [
 export default function HomeworkReview() {
   const [leftTab, setLeftTab] = useState('学生') // 学生 | 题目
   const [rightTab, setRightTab] = useState('批注') // 批注 | 评语 | 分析
-  const [statusFilter, setStatusFilter] = useState('全部') // 全部 | 待批 | 已批 | 复核
+  const [statusFilter, setStatusFilter] = useState('全部') // 全部 | 待批 | 已批
   const [keyword, setKeyword] = useState('')
   const [activeStudentId, setActiveStudentId] = useState(10101)
   const [score, setScore] = useState(8)
@@ -47,7 +44,7 @@ export default function HomeworkReview() {
   const filteredStudents = useMemo(() => {
     return students.filter(s => {
       if (statusFilter !== '全部') {
-        const map = { '待批': '待批阅', '已批': '已批阅', '复核': '需复核' }
+        const map = { '待批': '待批阅', '已批': '已批阅' }
         if (s.status !== map[statusFilter]) return false
       }
       if (keyword.trim() && !s.name.includes(keyword.trim()) && !String(s.id).includes(keyword.trim())) return false
@@ -98,7 +95,7 @@ export default function HomeworkReview() {
             />
           </div>
           <div className="flex gap-1 mb-2 text-xs">
-            {[['全部', 45], ['待批', 18], ['已批', 24], ['复核', 3]].map(([t, n]) => (
+            {[['全部', 42], ['待批', 18], ['已批', 24]].map(([t, n]) => (
               <FilterPill key={t} on={statusFilter === t} onClick={() => setStatusFilter(t)}>{t} ({n})</FilterPill>
             ))}
           </div>
@@ -121,14 +118,13 @@ export default function HomeworkReview() {
                     <div className="text-sm text-slate-800">{s.name}</div>
                     <div className="text-[10px] text-slate-400">{s.id}</div>
                   </div>
-                  <span className={`pill ${statusBg[s.color]}`}>{s.status}</span>
                 </div>
               )
             })}
           </div>
 
           <div className="border-t border-slate-100 mt-2 pt-2 flex items-center justify-between text-xs text-slate-500">
-            <span>共 45 人</span>
+            <span>共 42 人</span>
             <div className="flex items-center gap-1">
               <button className="w-6 h-6 hover:bg-slate-100 rounded flex items-center justify-center"><ChevronLeft className="w-3 h-3" /></button>
               <span>1/5</span>
@@ -181,18 +177,6 @@ export default function HomeworkReview() {
               </div>
               <div className="absolute right-2 bottom-2 text-[10px] text-slate-400">书写区域识别率：92%</div>
             </div>
-
-            {/* OCR 识别 */}
-            <details open className="border border-slate-100 rounded p-3 text-xs">
-              <summary className="text-slate-600 cursor-pointer flex items-center justify-between">
-                <span>OCR 识别结果 <span className="ml-2 text-slate-400">置信度: 88%</span></span>
-              </summary>
-              <pre className="text-slate-600 mt-2 whitespace-pre-wrap font-mono leading-snug">{`ax² − 4x + 3 > 0
-Δ = b² − 4ac = 16 − 12a
-① 当 a > 4/3, Δ < 0, 二次函数开口向上, 与 x 轴无交点, 故 ax² − 4x + 3 > 0 恒成立。
-② 当 a = 4/3, Δ = 0, ax² − 4x + 3 = (x − a/2)², 故 ax² − 4x + 3 ≥ 0 恒成立。
-③ 当 a < 4/3, Δ > 0, x₁ = (1−√(1−3a))/a, x₂ = (1+√(1−3a))/a, 由图像可知不等式的解集为 (−∞,x₁) ∪ (x₂,+∞)。`}</pre>
-            </details>
 
             {/* 标准答案 */}
             <details className="border border-slate-100 rounded p-3 text-xs">
@@ -276,15 +260,6 @@ export default function HomeworkReview() {
             ))}
           </div>
           <div className="text-[10px] text-slate-400 mb-2">已选 {totalRubric} / 4 项量规</div>
-
-          <div className="text-sm font-medium text-slate-700 mb-2 flex items-center justify-between">
-            OCR 识别提醒 <span className="text-xs text-brand-600 hover:underline">查看详情</span>
-          </div>
-          <div className="text-xs space-y-1 border border-slate-100 rounded p-2 bg-slate-50/60 mb-3">
-            <div className="flex items-center justify-between"><span className="text-slate-500">整体识别率</span><span className="text-emerald-600 font-medium">88%</span></div>
-            <div className="flex items-center justify-between"><span className="text-slate-500">可疑区域</span><span className="text-slate-700">1 处</span></div>
-            <div className="flex items-center justify-between"><span className="text-slate-500">手写清晰度</span><span className="text-slate-700">中等</span></div>
-          </div>
 
           <div className="border border-amber-100 bg-amber-50 rounded-lg p-3 text-xs">
             <div className="flex items-center gap-1.5 text-amber-700 font-medium mb-1">

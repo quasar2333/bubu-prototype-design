@@ -1,25 +1,28 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Plus, Upload, FileText, Search, RefreshCw, RotateCcw, Grid3x3, List,
-  Edit3, Eye, Send, Copy, Trash2, CheckCircle2, AlertTriangle, X,
+  Plus, Upload, Search, RefreshCw, Grid3x3, List,
+  Edit3, Eye, Copy, Trash2, CheckCircle2, AlertTriangle, X,
   ChevronRight, ChevronLeft
 } from 'lucide-react'
 
 const items = [
-  { title: '8.2 一元一次不等式', pages: 18, subject: '数学 · 初二 · 3班', updated: '2026-05-15 14:32', status: '已同步', interact: true, gradient: 'from-blue-100 to-indigo-200' },
-  { title: '7.3 平面直角坐标系', pages: 22, subject: '数学 · 初二 · 3班', updated: '2026-05-14 16:20', status: '已同步', interact: true, gradient: 'from-emerald-100 to-teal-200' },
-  { title: '7.2 一次函数的图像', pages: 16, subject: '数学 · 初二 · 3班', updated: '2026-05-12 10:15', status: '已同步', interact: true, gradient: 'from-amber-100 to-orange-200' },
-  { title: '概率初步复习', pages: 14, subject: '数学 · 初二 · 3班', updated: '2026-05-10 09:45', status: '已同步', interact: true, gradient: 'from-rose-100 to-pink-200' },
-  { title: '二次根式练习', pages: 12, subject: '数学 · 初二 · 3班', updated: '2026-05-08 17:30', status: '已同步', interact: false, gradient: 'from-violet-100 to-purple-200' },
-  { title: '期中复习课', pages: 28, subject: '数学 · 初二 · 3班', updated: '2026-05-07 11:05', status: '已同步', interact: true, gradient: 'from-sky-100 to-cyan-200' }
+  { title: '8.2 一元一次不等式', pages: 18, subject: '数学', updated: '2026-05-15 14:32', status: '已同步', interact: true, gradient: 'from-blue-100 to-indigo-200' },
+  { title: '7.3 平面直角坐标系', pages: 22, subject: '数学', updated: '2026-05-14 16:20', status: '已同步', interact: true, gradient: 'from-emerald-100 to-teal-200' },
+  { title: '7.2 一次函数的图像', pages: 16, subject: '数学', updated: '2026-05-12 10:15', status: '同步失败', interact: true, gradient: 'from-amber-100 to-orange-200' },
+  { title: '概率初步复习', pages: 14, subject: '数学', updated: '2026-05-10 09:45', status: '已同步', interact: true, gradient: 'from-rose-100 to-pink-200' },
+  { title: '二次根式练习', pages: 12, subject: '数学', updated: '2026-05-08 17:30', status: '上传中', progress: 30, interact: false, gradient: 'from-violet-100 to-purple-200' },
+  { title: '期中复习课', pages: 28, subject: '数学', updated: '2026-05-07 11:05', status: '上传中', progress: 65, interact: true, gradient: 'from-sky-100 to-cyan-200' }
 ]
 
 export default function Courseware() {
   const [keyword, setKeyword] = useState('')
   const [view, setView] = useState('list') // grid | list
   const [sortOrder, setSortOrder] = useState('desc')
-  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [subjectFilter, setSubjectFilter] = useState('all')
+  const [interactFilter, setInteractFilter] = useState('all')
+  const [syncFilter, setSyncFilter] = useState('all')
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const [selected, setSelected] = useState(new Set())
 
   const filtered = useMemo(() => {
@@ -27,13 +30,22 @@ export default function Courseware() {
     if (keyword.trim()) {
       result = result.filter(it => it.title.includes(keyword.trim()))
     }
+    if (subjectFilter !== 'all') {
+      result = result.filter(it => it.subject === subjectFilter)
+    }
+    if (interactFilter !== 'all') {
+      result = result.filter(it => interactFilter === 'interactive' ? it.interact : !it.interact)
+    }
+    if (syncFilter !== 'all') {
+      result = result.filter(it => it.status === syncFilter)
+    }
     result.sort((a, b) => {
       const tA = new Date(a.updated).getTime()
       const tB = new Date(b.updated).getTime()
       return sortOrder === 'desc' ? tB - tA : tA - tB
     })
     return result
-  }, [keyword, sortOrder])
+  }, [keyword, subjectFilter, interactFilter, syncFilter, sortOrder])
 
   const toggleSel = (i) => {
     const ns = new Set(selected)
@@ -41,7 +53,6 @@ export default function Courseware() {
     setSelected(ns)
   }
   const clearSel = () => setSelected(new Set())
-  const reset = () => { setKeyword(''); setSortOrder('desc') }
 
   return (
     <div className={`p-6 gap-5 h-full ${sidebarOpen ? 'grid grid-cols-[1fr_280px]' : 'relative'}`}>
@@ -51,12 +62,11 @@ export default function Courseware() {
         <div className="flex gap-3">
           <Link to="/editor" className="btn-primary"><Plus className="w-4 h-4" /> 新建课件</Link>
           <Link to="/courseware/import" className="btn-ghost"><Upload className="w-4 h-4" /> 导入课件</Link>
-          <button className="btn-ghost"><FileText className="w-4 h-4" /> 从模板创建</button>
         </div>
 
         {/* 筛选区 */}
         <div className="card p-4">
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 max-w-[320px]">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
@@ -71,7 +81,42 @@ export default function Courseware() {
                 </button>
               )}
             </div>
-            <button onClick={reset} className="btn-ghost h-9"><RotateCcw className="w-3.5 h-3.5" /> 重置</button>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 whitespace-nowrap">学科:</span>
+              <select
+                className="input h-8 text-xs"
+                value={subjectFilter}
+                onChange={e => setSubjectFilter(e.target.value)}
+              >
+                <option value="all">全部学科</option>
+                <option value="数学">数学</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 whitespace-nowrap">互动:</span>
+              <select
+                className="input h-8 text-xs"
+                value={interactFilter}
+                onChange={e => setInteractFilter(e.target.value)}
+              >
+                <option value="all">全部</option>
+                <option value="interactive">含互动</option>
+                <option value="plain">无互动</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-slate-500 whitespace-nowrap">云空间:</span>
+              <select
+                className="input h-8 text-xs"
+                value={syncFilter}
+                onChange={e => setSyncFilter(e.target.value)}
+              >
+                <option value="all">全部状态</option>
+                <option value="已同步">已同步</option>
+                <option value="上传中">上传中</option>
+                <option value="同步失败">同步失败</option>
+              </select>
+            </div>
             <div className="flex items-center gap-2">
               <span className="text-xs text-slate-500 whitespace-nowrap">时间排序:</span>
               <select
@@ -107,7 +152,7 @@ export default function Courseware() {
         {selected.size > 0 && (
           <div className="card p-3 flex items-center gap-3 bg-brand-50 border-brand-200">
             <span className="text-sm text-brand-700">已选择 <strong>{selected.size}</strong> 个课件</span>
-            <button className="btn-ghost h-8 text-xs"><Send className="w-3 h-3" /> 批量发送</button>
+            <button className="btn-ghost h-8 text-xs"><Upload className="w-3 h-3" /> 批量上传到云空间</button>
             <button className="btn-ghost h-8 text-xs"><Copy className="w-3 h-3" /> 批量复制</button>
             <button className="btn-ghost h-8 text-xs text-red-500 hover:bg-red-50"><Trash2 className="w-3 h-3" /> 批量删除</button>
             <button onClick={clearSel} className="ml-auto text-xs text-slate-500 hover:text-slate-700">取消选择</button>
@@ -140,17 +185,14 @@ export default function Courseware() {
                   </div>
                   <div className="p-3 space-y-1">
                     <div className="text-sm font-medium text-slate-800 truncate">{it.title}</div>
-                    <div className="text-xs text-slate-400">{it.subject}</div>
                     <div className="text-xs text-slate-400">共 {it.pages} 页</div>
                     <div className="text-xs text-slate-400">更新时间：{it.updated}</div>
-                    <div className="flex items-center gap-1 text-xs text-emerald-600">
-                      <CheckCircle2 className="w-3 h-3" /> {it.status}
-                    </div>
+                    <SyncStatus item={it} />
                   </div>
                   <div className="border-t border-slate-100 px-2 py-2 flex items-center justify-between text-xs text-slate-500" onClick={e => e.stopPropagation()}>
                     <CardAction to="/editor" icon={<Edit3 className="w-3 h-3" />} label="编辑" />
                     <CardAction icon={<Eye className="w-3 h-3" />} label="预览" />
-                    <CardAction icon={<Send className="w-3 h-3" />} label="发送到白板" />
+                    <CardAction icon={<Upload className="w-3 h-3" />} label="上传到云空间" />
                     <CardAction icon={<Copy className="w-3 h-3" />} label="复制" />
                     <CardAction icon={<Trash2 className="w-3 h-3" />} label="删除" danger />
                   </div>
@@ -165,9 +207,9 @@ export default function Courseware() {
                 <tr className="border-b border-slate-100 text-xs text-slate-500">
                   <th className="py-2 px-3 text-left w-10"></th>
                   <th className="py-2 px-3 text-left">课件名称</th>
-                  <th className="py-2 px-3 text-left">学科 / 班级</th>
                   <th className="py-2 px-3 text-center">页数</th>
                   <th className="py-2 px-3 text-center">互动</th>
+                  <th className="py-2 px-3 text-left">云空间</th>
                   <th className="py-2 px-3 text-left">更新时间</th>
                   <th className="py-2 px-3 text-center">操作</th>
                 </tr>
@@ -181,15 +223,16 @@ export default function Courseware() {
                         <input type="checkbox" checked={isSel} readOnly className="accent-brand-600" />
                       </td>
                       <td className="py-2 px-3 text-slate-800 font-medium">{it.title}</td>
-                      <td className="py-2 px-3 text-slate-500">{it.subject}</td>
                       <td className="py-2 px-3 text-center text-slate-500">{it.pages}</td>
                       <td className="py-2 px-3 text-center">
                         {it.interact ? <span className="pill bg-emerald-100 text-emerald-700">含互动</span> : <span className="pill bg-slate-100 text-slate-500">无</span>}
                       </td>
+                      <td className="py-2 px-3"><SyncStatus item={it} /></td>
                       <td className="py-2 px-3 text-slate-500">{it.updated}</td>
                       <td className="py-2 px-3 text-center text-xs" onClick={e => e.stopPropagation()}>
                         <Link to="/editor" className="text-brand-600 hover:underline mr-2">编辑</Link>
                         <button className="text-brand-600 hover:underline mr-2">预览</button>
+                        <button className="text-brand-600 hover:underline mr-2">上传到云空间</button>
                         <button className="text-red-500 hover:underline">删除</button>
                       </td>
                     </tr>
@@ -227,32 +270,6 @@ export default function Courseware() {
           >
             <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
           </button>
-          <div className="card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-semibold text-slate-800">云端同步</span>
-              <button className="text-xs text-brand-600 flex items-center gap-1 hover:underline">
-                <RefreshCw className="w-3 h-3" /> 刷新
-              </button>
-            </div>
-
-            <Section title="同步成功 (18)" defaultOpen>
-              <Row green text="8.2 一元一次不等式" extra="今天 14:32" />
-              <Row green text="7.3 平面直角坐标系" extra="今天 14:20" />
-              <Row green text="概率初步复习" extra="今天 09:45" />
-              <a className="text-xs text-brand-600 hover:underline mt-2 inline-block">查看全部成功记录</a>
-            </Section>
-
-            <Section title="上传中 (2)">
-              <ProgressRow label="期中复习课" progress={65} status="正在上传 65%" />
-              <ProgressRow label="二次根式练习" progress={30} status="正在上传 30%" />
-            </Section>
-
-            <Section title="同步失败 (1)">
-              <Row red text="7.1 整式的乘除" extra="重试" extraLink />
-              <div className="text-[11px] text-red-500 ml-5 mt-1">失败原因：网络异常</div>
-            </Section>
-          </div>
-
           <div className="card p-4">
             <div className="font-semibold text-slate-800 mb-3">存储空间</div>
             <div className="text-sm text-slate-700">已使用 <span className="font-semibold text-brand-600">6.12 GB</span> / 20 GB</div>
@@ -302,50 +319,40 @@ function CardAction({ icon, label, danger, to }) {
   )
 }
 
+function SyncStatus({ item }) {
+  if (item.status === '上传中') {
+    return (
+      <div className="flex items-center gap-2 text-xs text-brand-600">
+        <RefreshCw className="w-3 h-3 animate-spin" />
+        <span>上传中{item.progress ? ` ${item.progress}%` : ''}</span>
+        {item.progress && (
+          <div className="h-1 w-14 overflow-hidden rounded-full bg-brand-100">
+            <div className="h-full bg-brand-500" style={{ width: `${item.progress}%` }} />
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (item.status === '同步失败') {
+    return (
+      <div className="flex items-center gap-1 text-xs text-red-500">
+        <AlertTriangle className="w-3 h-3" /> 同步失败
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-1 text-xs text-emerald-600">
+      <CheckCircle2 className="w-3 h-3" /> 已同步
+    </div>
+  )
+}
+
 function PageBtn({ children, off }) {
   return (
     <button className={`w-8 h-8 rounded-md text-sm ${off ? 'text-slate-500 hover:bg-slate-100' : 'bg-brand-500 text-white'}`}>
       {children}
     </button>
-  )
-}
-
-function Section({ title, children, defaultOpen }) {
-  return (
-    <div className="border-t border-slate-100 pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
-      <div className="text-xs text-slate-600 font-medium mb-2 flex items-center justify-between">
-        {title}
-        <svg className={`w-3 h-3 text-slate-400 transition ${defaultOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.4" /></svg>
-      </div>
-      {children}
-    </div>
-  )
-}
-
-function Row({ text, extra, green, red, extraLink }) {
-  return (
-    <div className="flex items-center gap-2 text-sm py-1">
-      {green && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
-      {red && <AlertTriangle className="w-3.5 h-3.5 text-red-500" />}
-      <span className="text-slate-700 truncate flex-1">{text}</span>
-      <span className={`text-xs ${extraLink ? 'text-brand-600 hover:underline cursor-pointer' : 'text-slate-400'}`}>{extra}</span>
-    </div>
-  )
-}
-
-function ProgressRow({ label, progress, status }) {
-  return (
-    <div className="py-1.5">
-      <div className="flex items-center gap-2 text-sm">
-        <RefreshCw className="w-3.5 h-3.5 text-brand-500 animate-spin" />
-        <span className="text-slate-700 truncate flex-1">{label}</span>
-      </div>
-      <div className="flex items-center gap-2 mt-1 ml-5">
-        <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
-          <div className="h-full bg-brand-500" style={{ width: `${progress}%` }} />
-        </div>
-        <span className="text-[11px] text-slate-400 whitespace-nowrap">{status}</span>
-      </div>
-    </div>
   )
 }
