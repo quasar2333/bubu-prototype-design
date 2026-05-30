@@ -113,7 +113,7 @@ const layerDefaults = {
   media: { x: 512, y: 92, w: 190, h: 118 },
   formula: { x: 78, y: 302, w: 260 },
   question: { x: 56, y: 286, w: 640 },
-  interaction: { x: 56, y: 292, w: 640 },
+  interaction: { x: 360, y: 326, w: 340, h: 86 },
   mind: { x: 262, y: 82, w: 260 }
 }
 
@@ -254,15 +254,18 @@ const initialSlides = [
 
 const canvasTools = [
   { key: 'select', icon: MousePointer2, label: '选择' },
-  { key: 'text', icon: Type, label: '文本' },
   { key: 'image', icon: ImageIcon, label: '图片' },
+  { key: 'audio', icon: Music, label: '音频' },
+  { key: 'video', icon: Video, label: '视频' },
+  { key: 'interaction', icon: Sparkles, label: '互动' }
+]
+
+const optionalToolHint = [
+  { key: 'text', icon: Type, label: '文本' },
   { key: 'shape', icon: Shapes, label: '形状' },
   { key: 'formula', icon: Sigma, label: '公式' },
   { key: 'chart', icon: BarChart3, label: '图表' },
   { key: 'table', icon: Table, label: '表格' },
-  { key: 'interaction', icon: Sparkles, label: '互动' },
-  { key: 'audio', icon: Music, label: '音频' },
-  { key: 'video', icon: Video, label: '视频' },
   { key: 'mind', icon: GitBranch, label: '思维导图' },
   { key: 'more', icon: MoreHorizontal, label: '更多' }
 ]
@@ -406,7 +409,8 @@ export default function CoursewareEditor() {
       body: detail.layerBody,
       x: Math.max(8, Math.min(point.x ?? d.x, 660)),
       y: Math.max(8, Math.min(point.y ?? d.y, 350)),
-      w: d.w
+      w: point.w ?? d.w,
+      h: point.h ?? d.h
     }
   }
 
@@ -426,7 +430,7 @@ export default function CoursewareEditor() {
         ['学情', detail.track]
       ],
       bind: { type, label: detail.label },
-      layers: [makeInteractionLayer(type)],
+      layers: [makeInteractionLayer(type, { x: 56, y: 326, w: 640, h: 86 })],
       caption: `${detail.label} 已作为可编辑互动页加入课件，可在右侧继续配置规则。`
     }
   }
@@ -478,6 +482,7 @@ export default function CoursewareEditor() {
     if (tool.key === 'select') return
     if (tool.key === 'interaction') {
       setRightTab('interact')
+      setInteractionPanelOpen(true)
       showToast('选择或拖拽右侧互动卡片')
       return
     }
@@ -642,6 +647,38 @@ export default function CoursewareEditor() {
     window.addEventListener('pointerup', up, { once: true })
   }
 
+  const startLayerResize = (event, layer) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setSelectedLayerId(layer.id)
+    const canvas = canvasRef.current
+    const node = event.currentTarget.closest('[data-layer-id]')
+    if (!canvas || !node) return
+    const startX = event.clientX
+    const startY = event.clientY
+    const startWidth = node.offsetWidth
+    const startHeight = node.offsetHeight
+    const maxWidth = canvas.clientWidth - Number(layer.x || 0) - 8
+    const maxHeight = canvas.clientHeight - Number(layer.y || 0) - 8
+    let nextWidth = startWidth
+    let nextHeight = startHeight
+
+    const move = (moveEvent) => {
+      nextWidth = Math.max(120, Math.min(maxWidth, startWidth + moveEvent.clientX - startX))
+      nextHeight = Math.max(64, Math.min(maxHeight, startHeight + moveEvent.clientY - startY))
+      node.style.width = `${Math.round(nextWidth)}px`
+      node.style.height = `${Math.round(nextHeight)}px`
+    }
+    const up = () => {
+      window.removeEventListener('pointermove', move)
+      window.removeEventListener('pointerup', up)
+      updateLayer(layer.id, { w: Math.round(nextWidth), h: Math.round(nextHeight) })
+      showToast('已缩放元素')
+    }
+    window.addEventListener('pointermove', move)
+    window.addEventListener('pointerup', up, { once: true })
+  }
+
   const handleDrop = (event) => {
     event.preventDefault()
     try {
@@ -789,10 +826,10 @@ export default function CoursewareEditor() {
         <button className="text-slate-700 hover:text-brand-600">插入</button>
         <button className="text-slate-700 hover:text-brand-600" onClick={() => { setRightTab('interact'); setInteractionPanelOpen(true) }}>互动</button>
         <button className="text-slate-700 hover:text-brand-600" onClick={() => { setRightTab('subject'); setInteractionPanelOpen(true) }}>学科工具</button>
-        <button className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" onClick={() => showToast('已撤销上一步')}>
+        <button title="撤销" aria-label="撤销" className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" onClick={() => showToast('已撤销上一步')}>
           <Undo2 className="w-4 h-4 text-slate-500" />
         </button>
-        <button className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" onClick={() => showToast('已重做上一步')}>
+        <button title="重做" aria-label="重做" className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" onClick={() => showToast('已重做上一步')}>
           <Redo2 className="w-4 h-4 text-slate-500" />
         </button>
         <div className="ml-auto flex items-center gap-2">
@@ -817,7 +854,7 @@ export default function CoursewareEditor() {
               className={cx(
                 'w-14 h-12 rounded-md text-[11px] transition flex flex-col items-center justify-center gap-1',
                 active ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-50',
-                index === 1 && 'ml-2'
+                index === 1 && 'ml-4'
               )}
             >
               <Icon className="w-4 h-4" />
@@ -825,6 +862,23 @@ export default function CoursewareEditor() {
             </button>
           )
         })}
+        <div className="ml-4 h-10 border-l border-slate-200" />
+        <div className="flex items-center gap-1 text-[11px] text-slate-400">
+          {optionalToolHint.map((tool) => {
+            const Icon = tool.icon
+            return (
+              <button
+                key={tool.key}
+                onClick={() => showToast(`${tool.label} 属于非必须工具，本阶段保留入口不展开`)}
+                className="h-10 min-w-10 rounded-md px-2 flex flex-col items-center justify-center gap-0.5 hover:bg-slate-50 hover:text-slate-500"
+                title={`${tool.label}：MVP 非必须`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span>{tool.label}</span>
+              </button>
+            )
+          })}
+        </div>
         {selectedLayer && (
           <div className="ml-auto flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs">
             <Move className="w-3.5 h-3.5 text-slate-500" />
@@ -839,7 +893,7 @@ export default function CoursewareEditor() {
         )}
       </div>
 
-      <div className={cx('flex-1 grid min-h-0', interactionPanelOpen ? 'grid-cols-[240px_330px_minmax(640px,1fr)]' : 'grid-cols-[240px_52px_minmax(640px,1fr)]')}>
+      <div className={cx('flex-1 grid min-h-0', interactionPanelOpen ? 'grid-cols-[240px_minmax(640px,1fr)_380px]' : 'grid-cols-[240px_minmax(640px,1fr)_52px]')}>
         <aside className="order-1 bg-white border-r border-slate-100 flex flex-col min-h-0">
           <div className="p-4 border-b border-slate-100">
             <div className="flex items-center justify-between">
@@ -898,7 +952,7 @@ export default function CoursewareEditor() {
           </div>
         </aside>
 
-        <main className="order-3 min-w-0 flex flex-col bg-slate-100">
+        <main className="order-2 min-w-0 flex flex-col bg-slate-100">
           <div className="h-10 bg-white border-b border-slate-100 flex items-center px-4 text-xs">
             <Layers3 className="w-3.5 h-3.5 text-slate-500 mr-1.5" />
             <span className="font-semibold text-slate-700">第 {activeIndex + 1} 页 · {activeSlide.name}</span>
@@ -928,10 +982,24 @@ export default function CoursewareEditor() {
                     setSelectedLayerId(layer.id)
                   }}
                   onDragStart={startLayerDrag}
+                  onResizeStart={startLayerResize}
                   onChange={updateLayer}
                   onConfig={() => openInteractionConfig(layer)}
                 />
               ))}
+              {!(activeSlide.layers || []).some((layer) => layer.kind === 'interaction') && (
+                <div className="pointer-events-none absolute left-[72px] right-[72px] bottom-[78px] rounded-xl border-2 border-dashed border-brand-400 bg-brand-50/30 px-8 py-5 text-slate-700">
+                  <div className="flex items-center justify-center gap-5">
+                    <div className="grid h-14 w-14 place-items-center rounded-full border border-brand-200 bg-white text-brand-600 shadow-sm">
+                      <Sparkles className="h-7 w-7" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold">拖拽互动模块到此处</div>
+                      <div className="mt-1 text-sm text-slate-500">支持随堂练、抽人回答、典型答案展示</div>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="mt-3 w-full max-w-[800px] rounded-lg border border-slate-200 bg-white p-3 flex items-start gap-3 text-xs">
@@ -976,28 +1044,28 @@ export default function CoursewareEditor() {
           </div>
         </main>
 
-        <aside className="order-2 bg-white border-r border-slate-100 flex flex-col min-h-0">
+        <aside className="order-3 bg-white border-l border-slate-100 flex flex-col min-h-0">
           {!interactionPanelOpen ? (
             <button
               onClick={() => setInteractionPanelOpen(true)}
               className="h-full w-full flex flex-col items-center justify-start gap-3 pt-4 text-brand-600 hover:bg-brand-50"
-              title="展开互动组件面板"
+              title="展开互动模块设置"
             >
               <Sparkles className="w-5 h-5" />
-              <span className="[writing-mode:vertical-rl] text-xs font-semibold tracking-widest">互动组件面板</span>
+              <span className="[writing-mode:vertical-rl] text-xs font-semibold tracking-widest">互动模块设置</span>
             </button>
           ) : (
             <>
           <div className="p-3 border-b border-slate-100 flex-none">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-semibold text-sm">互动组件面板</div>
-                <div className="mt-1 text-[11px] text-slate-500">可收缩；拖拽组件到画布中</div>
+                <div className="font-semibold text-sm">互动模块设置</div>
+                <div className="mt-1 text-[11px] text-slate-500">选择模块后配置题源、触发和回收学情</div>
               </div>
               <button
                 onClick={() => setInteractionPanelOpen(false)}
                 className="w-7 h-7 rounded-md hover:bg-slate-100 flex items-center justify-center"
-                title="收起互动组件面板"
+                title="收起互动模块设置"
               >
                 <X className="w-3.5 h-3.5 text-slate-400" />
               </button>
@@ -1023,6 +1091,22 @@ export default function CoursewareEditor() {
           </div>
 
           <div className="flex-1 min-h-0 overflow-auto p-3">
+            <div className="mb-3 rounded-lg border border-blue-100 bg-blue-50 p-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-semibold text-slate-700">当前页面互动</div>
+                <button onClick={() => setRightTab('interact')} className="text-[11px] text-brand-600 hover:underline">刷新</button>
+              </div>
+              <div className="mt-2 space-y-2">
+                {slideBindLabels(activeSlide).length ? slideBindLabels(activeSlide).map((label) => (
+                  <div key={label} className="flex items-center justify-between rounded-md border border-emerald-100 bg-white px-2.5 py-2 text-xs">
+                    <span className="font-semibold text-emerald-700">{label}</span>
+                    <span className="text-emerald-500">已配置</span>
+                  </div>
+                )) : (
+                  <div className="rounded-md border border-dashed border-blue-200 bg-white px-3 py-3 text-center text-xs text-slate-500">暂无互动，拖拽下方卡片到画布</div>
+                )}
+              </div>
+            </div>
             {rightTab === 'interact' && (
               <div className="space-y-2">
                 {Object.entries(INTERACTIONS).map(([type, item]) => {
@@ -1215,7 +1299,7 @@ function SlideBase({ slide, pageNumber }) {
   )
 }
 
-function Layer({ layer, selected, onSelect, onDragStart, onChange, onConfig, preview }) {
+function Layer({ layer, selected, onSelect, onDragStart, onResizeStart, onChange, onConfig, preview }) {
   const style = {
     left: layer.x,
     top: layer.y,
@@ -1236,6 +1320,7 @@ function Layer({ layer, selected, onSelect, onDragStart, onChange, onConfig, pre
     return (
       <div data-layer-id={layer.id} style={style} onPointerDown={stop} className={cx(common, 'border-2 border-brand-500 bg-brand-50/40')}>
         {!preview && <DragHandle layer={layer} onDragStart={onDragStart} />}
+        {!preview && selected && <ResizeHandle layer={layer} onResizeStart={onResizeStart} />}
       </div>
     )
   }
@@ -1244,6 +1329,7 @@ function Layer({ layer, selected, onSelect, onDragStart, onChange, onConfig, pre
     return (
       <div data-layer-id={layer.id} style={style} onPointerDown={stop} className={cx(common, 'border-slate-300 bg-slate-50 p-3 text-center text-xs text-slate-500 grid place-items-center')}>
         {!preview && <DragHandle layer={layer} onDragStart={onDragStart} />}
+        {!preview && selected && <ResizeHandle layer={layer} onResizeStart={onResizeStart} />}
         <div>
           <ImageIcon className="mx-auto mb-2 h-6 w-6 text-slate-400" />
           <div className="font-semibold text-slate-700">{layer.title}</div>
@@ -1257,6 +1343,7 @@ function Layer({ layer, selected, onSelect, onDragStart, onChange, onConfig, pre
     return (
       <div data-layer-id={layer.id} style={style} onPointerDown={stop} className={cx(common, 'border-blue-100 bg-blue-50 px-4 py-3 text-blue-700')}>
         {!preview && <DragHandle layer={layer} onDragStart={onDragStart} />}
+        {!preview && selected && <ResizeHandle layer={layer} onResizeStart={onResizeStart} />}
         <div className="text-xs font-semibold text-blue-500">{layer.title}</div>
         <EditableText preview={preview} className="mt-1 text-lg font-bold" value={layer.body} onBlur={(value) => onChange(layer.id, { body: value })} />
       </div>
@@ -1268,6 +1355,7 @@ function Layer({ layer, selected, onSelect, onDragStart, onChange, onConfig, pre
     return (
       <div data-layer-id={layer.id} style={style} onPointerDown={stop} className={cx(common, 'border-violet-100 bg-white p-3')}>
         {!preview && <DragHandle layer={layer} onDragStart={onDragStart} />}
+        {!preview && selected && <ResizeHandle layer={layer} onResizeStart={onResizeStart} />}
         <div className="text-xs font-semibold text-violet-700">{layer.title}</div>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {nodes.map((node) => <span key={node} className="rounded-full bg-violet-50 px-2 py-1 text-[11px] font-semibold text-violet-700">{node}</span>)}
@@ -1282,6 +1370,7 @@ function Layer({ layer, selected, onSelect, onDragStart, onChange, onConfig, pre
     return (
       <div data-layer-id={layer.id} style={style} onPointerDown={stop} onDoubleClick={() => !preview && onConfig(layer.type)} className={cx(common, 'border-emerald-300 bg-emerald-50/70 p-4 text-emerald-900')}>
         {!preview && <DragHandle layer={layer} onDragStart={onDragStart} />}
+        {!preview && selected && <ResizeHandle layer={layer} onResizeStart={onResizeStart} />}
         {!preview && (
           <button
             onPointerDown={(event) => event.stopPropagation()}
@@ -1304,6 +1393,7 @@ function Layer({ layer, selected, onSelect, onDragStart, onChange, onConfig, pre
   return (
     <div data-layer-id={layer.id} style={style} onPointerDown={stop} className={cx(common, 'border-slate-200 bg-white p-3')}>
       {!preview && <DragHandle layer={layer} onDragStart={onDragStart} />}
+      {!preview && selected && <ResizeHandle layer={layer} onResizeStart={onResizeStart} />}
       <EditableText preview={preview} className="text-base font-bold text-brand-700" value={layer.title} onBlur={(value) => onChange(layer.id, { title: value })} />
       <EditableText preview={preview} className="mt-1 text-xs leading-5 text-slate-600" value={layer.body} onBlur={(value) => onChange(layer.id, { body: value })} />
     </div>
@@ -1318,6 +1408,18 @@ function DragHandle({ layer, onDragStart }) {
       title="拖动"
     >
       <GripVertical className="h-3.5 w-3.5" />
+    </button>
+  )
+}
+
+function ResizeHandle({ layer, onResizeStart }) {
+  return (
+    <button
+      onPointerDown={(event) => onResizeStart(event, layer)}
+      className="absolute -bottom-2.5 -right-2.5 h-6 w-6 rounded-md border border-brand-200 bg-white text-brand-600 shadow-md grid place-items-center cursor-nwse-resize"
+      title="缩放"
+    >
+      <Maximize2 className="h-3.5 w-3.5" />
     </button>
   )
 }
