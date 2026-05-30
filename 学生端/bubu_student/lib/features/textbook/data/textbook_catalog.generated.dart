@@ -94,8 +94,7 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-up-yingyu-pep.webp",
     pagePattern: "assets/images/textbook_pages/g5-up-yingyu-pep_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/03_英语_人教版（PEP）（三年级起点）（主编：吴欣）/英语_人教版（PEP）（三年级起点）（主编：吴欣）_上册_义务教育教科书·英语（PEP）（三年级起点）五年级上册.pdf",
+    sourcePdf: "五年级人教版各科全量_打包源/03_英语_人教版（PEP）（三年级起点）（主编：吴欣）/英语_人教版（PEP）（三年级起点）（主编：吴欣）_上册_义务教育教科书·英语（PEP）（三年级起点）五年级上册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-down-yingyu-pep",
@@ -107,10 +106,8 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     bodyStartPageIndex: 5,
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-down-yingyu-pep.webp",
-    pagePattern:
-        "assets/images/textbook_pages/g5-down-yingyu-pep_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/03_英语_人教版（PEP）（三年级起点）（主编：吴欣）/英语_人教版（PEP）（三年级起点）（主编：吴欣）_下册_义务教育教科书·英语（三年级起点）五年级下册.pdf",
+    pagePattern: "assets/images/textbook_pages/g5-down-yingyu-pep_page_###.webp",
+    sourcePdf: "五年级人教版各科全量_打包源/03_英语_人教版（PEP）（三年级起点）（主编：吴欣）/英语_人教版（PEP）（三年级起点）（主编：吴欣）_下册_义务教育教科书·英语（三年级起点）五年级下册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-up-yingyu-1qidian",
@@ -122,10 +119,8 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     bodyStartPageIndex: 5,
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-up-yingyu-1qidian.webp",
-    pagePattern:
-        "assets/images/textbook_pages/g5-up-yingyu-1qidian_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/03_英语_人教版（一年级起点）（主编：吴欣）/英语_人教版（一年级起点）（主编：吴欣）_上册_义务教育教科书·英语（一年级起点）五年级上册.pdf",
+    pagePattern: "assets/images/textbook_pages/g5-up-yingyu-1qidian_page_###.webp",
+    sourcePdf: "五年级人教版各科全量_打包源/03_英语_人教版（一年级起点）（主编：吴欣）/英语_人教版（一年级起点）（主编：吴欣）_上册_义务教育教科书·英语（一年级起点）五年级上册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-down-yingyu-1qidian",
@@ -137,10 +132,8 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     bodyStartPageIndex: 4,
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-down-yingyu-1qidian.webp",
-    pagePattern:
-        "assets/images/textbook_pages/g5-down-yingyu-1qidian_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/03_英语_人教版（一年级起点）（主编：吴欣）/英语_人教版（一年级起点）（主编：吴欣）_下册_义务教育教科书·英语（一年级起点）五年级下册.pdf",
+    pagePattern: "assets/images/textbook_pages/g5-down-yingyu-1qidian_page_###.webp",
+    sourcePdf: "五年级人教版各科全量_打包源/03_英语_人教版（一年级起点）（主编：吴欣）/英语_人教版（一年级起点）（主编：吴欣）_下册_义务教育教科书·英语（一年级起点）五年级下册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-up-yingyu-jingtong",
@@ -152,10 +145,8 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     bodyStartPageIndex: 7,
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-up-yingyu-jingtong.webp",
-    pagePattern:
-        "assets/images/textbook_pages/g5-up-yingyu-jingtong_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/03_英语_人教版（精通）（三年级起点）（主编：郝建平）/英语_人教版（精通）（三年级起点）（主编：郝建平）_上册_义务教育教科书·英语（精通）（三年级起点）五年级上册.pdf",
+    pagePattern: "assets/images/textbook_pages/g5-up-yingyu-jingtong_page_###.webp",
+    sourcePdf: "五年级人教版各科全量_打包源/03_英语_人教版（精通）（三年级起点）（主编：郝建平）/英语_人教版（精通）（三年级起点）（主编：郝建平）_上册_义务教育教科书·英语（精通）（三年级起点）五年级上册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-down-yingyu-jingtong",
@@ -167,10 +158,8 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     bodyStartPageIndex: 7,
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-down-yingyu-jingtong.webp",
-    pagePattern:
-        "assets/images/textbook_pages/g5-down-yingyu-jingtong_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/03_英语_人教版（精通）（三年级起点）（主编：郝建平）/英语_人教版（精通）（三年级起点）（主编：郝建平）_下册_义务教育教科书·英语（三年级起点）五年级下册.pdf",
+    pagePattern: "assets/images/textbook_pages/g5-down-yingyu-jingtong_page_###.webp",
+    sourcePdf: "五年级人教版各科全量_打包源/03_英语_人教版（精通）（三年级起点）（主编：郝建平）/英语_人教版（精通）（三年级起点）（主编：郝建平）_下册_义务教育教科书·英语（三年级起点）五年级下册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-up-daode",
@@ -183,8 +172,7 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-up-daode.webp",
     pagePattern: "assets/images/textbook_pages/g5-up-daode_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/04_道德与法治_统编版/道德与法治_统编版_上册_义务教育教科书·道德与法治五年级上册.pdf",
+    sourcePdf: "五年级人教版各科全量_打包源/04_道德与法治_统编版/道德与法治_统编版_上册_义务教育教科书·道德与法治五年级上册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-down-daode",
@@ -197,8 +185,7 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-down-daode.webp",
     pagePattern: "assets/images/textbook_pages/g5-down-daode_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/04_道德与法治_统编版/道德与法治_统编版_下册_义务教育教科书·道德与法治五年级下册.pdf",
+    sourcePdf: "五年级人教版各科全量_打包源/04_道德与法治_统编版/道德与法治_统编版_下册_义务教育教科书·道德与法治五年级下册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-up-kexue",
@@ -262,10 +249,8 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     bodyStartPageIndex: 5,
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-up-yinyue-wuxianpu.webp",
-    pagePattern:
-        "assets/images/textbook_pages/g5-up-yinyue-wuxianpu_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/07_音乐_人教版（五线谱）/音乐_人教版（五线谱）_上册_义务教育教科书·音乐（五线谱）五年级上册.pdf",
+    pagePattern: "assets/images/textbook_pages/g5-up-yinyue-wuxianpu_page_###.webp",
+    sourcePdf: "五年级人教版各科全量_打包源/07_音乐_人教版（五线谱）/音乐_人教版（五线谱）_上册_义务教育教科书·音乐（五线谱）五年级上册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-down-yinyue-wuxianpu",
@@ -277,10 +262,8 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     bodyStartPageIndex: 5,
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-down-yinyue-wuxianpu.webp",
-    pagePattern:
-        "assets/images/textbook_pages/g5-down-yinyue-wuxianpu_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/07_音乐_人教版（五线谱）/音乐_人教版（五线谱）_下册_义务教育教科书·音乐（五线谱）五年级下册.pdf",
+    pagePattern: "assets/images/textbook_pages/g5-down-yinyue-wuxianpu_page_###.webp",
+    sourcePdf: "五年级人教版各科全量_打包源/07_音乐_人教版（五线谱）/音乐_人教版（五线谱）_下册_义务教育教科书·音乐（五线谱）五年级下册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-up-yinyue-jianpu",
@@ -292,10 +275,8 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     bodyStartPageIndex: 5,
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-up-yinyue-jianpu.webp",
-    pagePattern:
-        "assets/images/textbook_pages/g5-up-yinyue-jianpu_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/07_音乐_人教版（简谱）/音乐_人教版（简谱）_上册_义务教育教科书·音乐（简谱）五年级上册.pdf",
+    pagePattern: "assets/images/textbook_pages/g5-up-yinyue-jianpu_page_###.webp",
+    sourcePdf: "五年级人教版各科全量_打包源/07_音乐_人教版（简谱）/音乐_人教版（简谱）_上册_义务教育教科书·音乐（简谱）五年级上册.pdf",
   ),
   TextbookManifestEntry(
     id: "g5-down-yinyue-jianpu",
@@ -307,9 +288,20 @@ const List<TextbookManifestEntry> generatedTextbookManifest = [
     bodyStartPageIndex: 5,
     coverPageIndex: 0,
     cover: "assets/images/textbook_covers/g5-down-yinyue-jianpu.webp",
-    pagePattern:
-        "assets/images/textbook_pages/g5-down-yinyue-jianpu_page_###.webp",
-    sourcePdf:
-        "五年级人教版各科全量_打包源/07_音乐_人教版（简谱）/音乐_人教版（简谱）_下册_义务教育教科书·音乐（简谱）五年级下册.pdf",
+    pagePattern: "assets/images/textbook_pages/g5-down-yinyue-jianpu_page_###.webp",
+    sourcePdf: "五年级人教版各科全量_打包源/07_音乐_人教版（简谱）/音乐_人教版（简谱）_下册_义务教育教科书·音乐（简谱）五年级下册.pdf",
+  ),
+  TextbookManifestEntry(
+    id: "g5-full-xinxikeji",
+    subject: "信息科技",
+    grade: 5,
+    semester: "全一册",
+    edition: "未标注版本",
+    pageCount: 49,
+    bodyStartPageIndex: 1,
+    coverPageIndex: 0,
+    cover: "assets/images/textbook_covers/g5-full-xinxikeji.webp",
+    pagePattern: "assets/images/textbook_pages/g5-full-xinxikeji_page_###.webp",
+    sourcePdf: "国家中小学智慧教育平台：义务教育信息科技课程教学指南 身边的算法 五年级全一册（预览页资源）",
   ),
 ];

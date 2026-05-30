@@ -1,62 +1,52 @@
-﻿import { useState, useMemo } from 'react'
+import { useState, useMemo } from 'react'
 import {
   Search, Plus, Upload, Download, Filter, Star, Eye, Heart,
-  FileText, Layers, Image as ImageIcon, Video, Database, ChevronDown,
-  Folder, Users, MessageCircle, Bookmark, X
+  FileText, Layers, Database, ChevronDown,
+  Folder, MessageCircle, Bookmark, X
 } from 'lucide-react'
 
 const categories = [
-  { name: '全部资源', count: 1284, active: true },
-  { name: '我的收藏', count: 86 },
-  { name: '我的上传', count: 42 },
-  { name: '推荐资源', count: 156 },
-  { name: '最新更新', count: 28 }
+  { name: '全部资源', count: 1056, active: true },
+  { name: '我的收藏', count: 74 },
+  { name: '我的上传', count: 36 },
+  { name: '推荐资源', count: 128 },
+  { name: '最新更新', count: 22 }
 ]
 
 const tags = ['一元一次不等式', '解集', '数轴表示', '应用题', '函数', '几何', '统计', '代数']
 
-const grades = ['初一', '初二', '初三', '高一', '高二', '高三']
-
 const resourceTypes = [
   { icon: FileText, label: '课件', n: 458, color: 'brand' },
   { icon: Layers, label: '教案', n: 286, color: 'emerald' },
-  { icon: Database, label: '题库', n: 312, color: 'amber' },
-  { icon: ImageIcon, label: '素材', n: 152, color: 'violet' },
-  { icon: Video, label: '微课', n: 76, color: 'rose' }
+  { icon: Database, label: '校本专属题库', n: 312, color: 'amber' }
 ]
 
 const resTypeColor = {
   brand: 'bg-brand-50 text-brand-600',
   emerald: 'bg-emerald-50 text-emerald-600',
-  amber: 'bg-amber-50 text-amber-600',
-  violet: 'bg-violet-50 text-violet-600',
-  rose: 'bg-rose-50 text-rose-600'
+  amber: 'bg-amber-50 text-amber-600'
 }
 
 const items = [
   { type: '课件', tag: 'brand', title: '一元一次不等式 (第1课时) 精品课件', author: '张老师 · 数学组', date: '2026-05-12', star: 4.8, views: 286, likes: 62, hot: true },
   { type: '题库', tag: 'amber', title: '一元一次不等式 50 题精选 (含解析)', author: '王老师 · 数学组', date: '2026-05-10', star: 4.6, views: 198, likes: 45, hot: false },
   { type: '教案', tag: 'emerald', title: '不等式与数轴表示教学设计 (人教版)', author: '李老师 · 数学组', date: '2026-05-08', star: 4.7, views: 142, likes: 38, hot: false },
-  { type: '微课', tag: 'rose', title: '数轴上不等式解集表示动画 (5min)', author: '陈老师 · 信息中心', date: '2026-05-05', star: 4.9, views: 412, likes: 88, hot: true },
-  { type: '素材', tag: 'violet', title: '数学常用图形素材包 (vector)', author: '赵老师 · 美术组', date: '2026-05-02', star: 4.5, views: 156, likes: 32, hot: false },
-  { type: '课件', tag: 'brand', title: '8.2 一元一次不等式 (导学案版)', author: '刘老师 · 数学组', date: '2026-04-28', star: 4.4, views: 124, likes: 28, hot: false }
+  { type: '课件', tag: 'brand', title: '8.2 一元一次不等式 (导学案版)', author: '刘老师 · 数学组', date: '2026-04-28', star: 4.4, views: 124, likes: 28, hot: false },
+  { type: '题库', tag: 'amber', title: '不等式性质专项练习 80 题', author: '教研组 · 数学', date: '2026-04-25', star: 4.5, views: 178, likes: 41, hot: false },
+  { type: '教案', tag: 'emerald', title: '数轴表示与解集教学方案', author: '陈老师 · 数学组', date: '2026-04-20', star: 4.3, views: 98, likes: 22, hot: false }
 ]
 
 const tagColors = {
   brand: 'bg-brand-50 text-brand-600',
   emerald: 'bg-emerald-50 text-emerald-600',
-  amber: 'bg-amber-50 text-amber-600',
-  violet: 'bg-violet-50 text-violet-600',
-  rose: 'bg-rose-50 text-rose-600'
+  amber: 'bg-amber-50 text-amber-600'
 }
 
 export default function SchoolResource() {
-  const [view, setView] = useState('list') // list | grid
+  const [view, setView] = useState('list')
   const [activeCategory, setActiveCategory] = useState('全部资源')
-  const [activeSubject, setActiveSubject] = useState('数学')
-  const [activeGrade, setActiveGrade] = useState('初二')
   const [activeTag, setActiveTag] = useState('一元一次不等式')
-  const [activeType, setActiveType] = useState(null) // 选中某个类型卡片
+  const [activeType, setActiveType] = useState(null)
   const [keyword, setKeyword] = useState('')
   const [favorites, setFavorites] = useState({ 0: true, 3: true })
   const [bookmarks, setBookmarks] = useState({})
@@ -76,8 +66,6 @@ export default function SchoolResource() {
   const toggleBookmark = (idx) => setBookmarks({ ...bookmarks, [idx]: !bookmarks[idx] })
   const reset = () => {
     setActiveCategory('全部资源')
-    setActiveSubject('数学')
-    setActiveGrade('初二')
     setActiveTag('一元一次不等式')
     setActiveType(null)
     setKeyword('')
@@ -85,7 +73,6 @@ export default function SchoolResource() {
 
   return (
     <div className="p-6 space-y-4">
-      {/* 顶栏 */}
       <div className="flex items-center justify-between">
         <div>
           <div className="text-lg font-semibold text-slate-800">校本资源中心</div>
@@ -98,8 +85,7 @@ export default function SchoolResource() {
         </div>
       </div>
 
-      {/* 5 类资源数量统计 */}
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-3 gap-3">
         {resourceTypes.map(t => {
           const Icon = t.icon
           const isActive = activeType === t.label
@@ -121,8 +107,7 @@ export default function SchoolResource() {
         })}
       </div>
 
-      <div className="grid grid-cols-[240px_1fr] gap-4">
-        {/* 左侧筛选 */}
+      <div className="grid grid-cols-[220px_1fr] gap-4">
         <div className="card p-4 space-y-4">
           <div>
             <div className="text-sm font-semibold text-slate-800 mb-2">资源分类</div>
@@ -143,28 +128,6 @@ export default function SchoolResource() {
           </div>
 
           <div>
-            <div className="text-sm font-semibold text-slate-800 mb-2">学科年级</div>
-            <div className="flex flex-wrap gap-1.5">
-              {['数学', '语文', '英语', '物理', '化学'].map(s => (
-                <button
-                  key={s}
-                  onClick={() => setActiveSubject(s)}
-                  className={`pill ${activeSubject === s ? 'bg-brand-50 text-brand-600 font-medium' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                >{s}</button>
-              ))}
-            </div>
-            <div className="flex flex-wrap gap-1.5 mt-2">
-              {grades.map(g => (
-                <button
-                  key={g}
-                  onClick={() => setActiveGrade(g)}
-                  className={`pill ${activeGrade === g ? 'bg-brand-50 text-brand-600 font-medium' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-                >{g}</button>
-              ))}
-            </div>
-          </div>
-
-          <div>
             <div className="text-sm font-semibold text-slate-800 mb-2">知识点</div>
             <div className="flex flex-wrap gap-1.5">
               {tags.map(t => (
@@ -177,22 +140,10 @@ export default function SchoolResource() {
             </div>
           </div>
 
-          <div>
-            <div className="text-sm font-semibold text-slate-800 mb-2">教研组</div>
-            <div className="space-y-1.5 text-sm">
-              <CheckRow label="数学教研组" defaultOn />
-              <CheckRow label="八年级备课组" defaultOn />
-              <CheckRow label="九年级备课组" />
-              <CheckRow label="信息中心" />
-            </div>
-          </div>
-
           <button onClick={reset} className="w-full btn-ghost h-9">重置筛选</button>
         </div>
 
-        {/* 右侧资源列表 */}
         <div className="space-y-3">
-          {/* 搜索 + 排序 */}
           <div className="card p-3 flex items-center gap-3">
             <div className="relative flex-1">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -215,7 +166,6 @@ export default function SchoolResource() {
             </div>
           </div>
 
-          {/* 已激活筛选展示 */}
           {(activeType || activeCategory !== '全部资源' || keyword) && (
             <div className="card p-3 flex items-center gap-2 flex-wrap text-xs">
               <span className="text-slate-500">已选筛选：</span>
@@ -225,7 +175,6 @@ export default function SchoolResource() {
             </div>
           )}
 
-          {/* 资源卡片 */}
           {visible.length === 0 ? (
             <div className="card p-12 text-center text-sm text-slate-400">没有找到匹配的资源</div>
           ) : view === 'list' ? (
@@ -303,31 +252,20 @@ export default function SchoolResource() {
               })}
             </div>
           )}
+        </div>
+      </div>
 
-          {/* 分页 */}
-          <div className="flex items-center justify-between text-xs text-slate-500">
-            <span>共 {visible.length} / 1,284 条资源 · 当前第 1 页</span>
-            <div className="flex items-center gap-1">
-              {[1, 2, 3, 4, 5].map(n => (
-                <button key={n} className={`w-7 h-7 rounded text-sm ${n === 1 ? 'bg-brand-600 text-white' : 'border border-slate-200 hover:border-brand-300'}`}>{n}</button>
-              ))}
-              <span className="text-slate-400">···</span>
-              <button className="w-10 h-7 rounded border border-slate-200 text-sm">86</button>
-            </div>
-          </div>
+      <div className="flex items-center justify-between text-xs text-slate-500">
+        <span>共 {visible.length} / 1,056 条资源 · 当前第 1 页</span>
+        <div className="flex items-center gap-1">
+          {[1, 2, 3, 4, 5].map(n => (
+            <button key={n} className={`w-7 h-7 rounded text-sm ${n === 1 ? 'bg-brand-600 text-white' : 'border border-slate-200 hover:border-brand-300'}`}>{n}</button>
+          ))}
+          <span className="text-slate-400">···</span>
+          <button className="w-10 h-7 rounded border border-slate-200 text-sm">68</button>
         </div>
       </div>
     </div>
-  )
-}
-
-function CheckRow({ label, defaultOn }) {
-  const [on, setOn] = useState(!!defaultOn)
-  return (
-    <label className="flex items-center gap-2 cursor-pointer select-none" onClick={(e) => { e.preventDefault(); setOn(o => !o) }}>
-      <input type="checkbox" checked={on} readOnly className="accent-brand-600 pointer-events-none" />
-      <span className="text-slate-700 text-sm flex-1">{label}</span>
-    </label>
   )
 }
 
@@ -341,4 +279,3 @@ function FilterTag({ label, onRemove }) {
     </span>
   )
 }
-

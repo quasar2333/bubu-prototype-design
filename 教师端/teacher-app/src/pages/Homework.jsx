@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Plus, Layers, FileEdit, AlertTriangle, FileText, Send, Clock, PieChart,
+  Plus, FileEdit, AlertTriangle, FileText, Send, Clock, PieChart,
   CheckCircle2, Edit3, Eye, MoreHorizontal
 } from 'lucide-react'
 
@@ -24,15 +24,13 @@ export default function Homework() {
   return (
     <div className="p-6 grid grid-cols-[1fr_320px] gap-5">
       <div className="space-y-4 min-w-0">
-        <div className="grid grid-cols-4 gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <ActionCard primary icon={<Plus className="w-4 h-4" />} label="新建作业" to="/homework/layered" />
-          <ActionCard icon={<Layers className="w-4 h-4" />} label="从题库组卷" />
           <ActionCard icon={<FileEdit className="w-4 h-4" />} label="从课件生成作业" />
           <ActionCard icon={<AlertTriangle className="w-4 h-4 text-orange-500" />} label="从错题生成作业" />
         </div>
 
-        <div className="grid grid-cols-5 gap-3">
-          <MiniStat icon={<FileText className="w-6 h-6 text-brand-500" />} label="草稿" value="3" delta="较上周 +1" />
+        <div className="grid grid-cols-4 gap-3">
           <MiniStat icon={<Send className="w-6 h-6 text-emerald-500" />} label="已发布" value="12" delta="较上周 +2" />
           <MiniStat icon={<Clock className="w-6 h-6 text-amber-500" />} label="待批阅" value="32" delta="较上周 +8" />
           <MiniStat icon={<PieChart className="w-6 h-6 text-violet-500" />} label="本周提交率" value="84%" delta="较上周 +6%" />

@@ -13,6 +13,7 @@ class TextbookCatalog {
     '道德与法治': 0xFF9D5AF5,
     '美术': 0xFFF5943A,
     '音乐': 0xFFE54D70,
+    '信息科技': 0xFF0F8B8D,
   };
 
   static List<String> get allSubjects {

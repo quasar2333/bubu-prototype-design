@@ -278,5 +278,19 @@
     "bodyStartPageIndex": 5,
     "coverPageIndex": 0,
     "bodyPageCount": 68
+  },
+  {
+    "id": "g5-full-xinxikeji",
+    "subject": "信息科技",
+    "semester": "全一册",
+    "edition": "未标注版本",
+    "pageCount": 49,
+    "cover": "assets/images/textbook_covers/g5-full-xinxikeji.webp",
+    "pagePattern": "assets/images/textbook_pages/g5-full-xinxikeji_page_###.webp",
+    "sourcePdf": "国家中小学智慧教育平台：义务教育信息科技课程教学指南 身边的算法 五年级全一册（预览页资源）",
+    "grade": 5,
+    "bodyStartPageIndex": 1,
+    "coverPageIndex": 0,
+    "bodyPageCount": 48
   }
 ]

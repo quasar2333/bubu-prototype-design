@@ -34,11 +34,13 @@ class TextbookReaderPage extends StatefulWidget {
 class _TextbookReaderPageState extends State<TextbookReaderPage>
     with TickerProviderStateMixin {
   int _currentPageIndex = 0;
+  bool _singlePageMode = false;
   bool _fabExpanded = false;
   String? _fabSubmenu;
   bool _thumbnailExpanded = false;
   final ScrollController _thumbnailScrollController = ScrollController();
   final PageFlipController _flipController = PageFlipController();
+  final GlobalKey _singlePageKey = GlobalKey();
 
   // -- 缩放相关 --
   final TransformationController _zoomController = TransformationController();
@@ -76,6 +78,7 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
   static const double _fabOuterRingRadius = 130.0;
   static const double _fabTotalSize = _fabOuterRingRadius * 2 + 20;
   static const double _fabDockInset = (_fabTotalSize - _fabButtonSize) / 2;
+  static const double _singlePageAspectRatio = 1274 / 1800;
 
   late final AnimationController _fabAnimController;
   late final Animation<double> _fabExpandAnimation;
@@ -194,6 +197,9 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
   }
 
   _PageHit? _pageHitFromGlobal(Offset globalPosition) {
+    if (_singlePageMode) {
+      return _singlePageHitFromGlobal(globalPosition);
+    }
     final hit = _flipController.hitTestVisiblePage(globalPosition);
     if (hit == null) return null;
     const pageInset = 4.0;
@@ -210,6 +216,35 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
         (hit.localPosition.dy - pageInset)
             .clamp(0.0, pageSize.height)
             .toDouble(),
+      ),
+      pageSize: pageSize,
+    );
+  }
+
+  _PageHit? _singlePageHitFromGlobal(Offset globalPosition) {
+    if (_totalPages <= 0) return null;
+    final context = _singlePageKey.currentContext;
+    if (context == null) return null;
+    final render = context.findRenderObject();
+    if (render is! RenderBox || !render.hasSize) return null;
+    final local = render.globalToLocal(globalPosition);
+    if (local.dx < 0 ||
+        local.dy < 0 ||
+        local.dx > render.size.width ||
+        local.dy > render.size.height) {
+      return null;
+    }
+
+    const pageInset = 4.0;
+    final pageSize = Size(
+      max(1.0, render.size.width - pageInset * 2),
+      max(1.0, render.size.height - pageInset * 2),
+    );
+    return _PageHit(
+      pageNum: _currentPageIndex.clamp(0, _totalPages - 1).toInt(),
+      localPosition: Offset(
+        (local.dx - pageInset).clamp(0.0, pageSize.width).toDouble(),
+        (local.dy - pageInset).clamp(0.0, pageSize.height).toDouble(),
       ),
       pageSize: pageSize,
     );
@@ -441,23 +476,34 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
   }
 
   void _goToPage(int index) {
+    if (_totalPages <= 0) return;
     final target = index.clamp(0, _totalPages - 1).toInt();
-    final spreadStart = _spreadStartForPage(target);
-    if (spreadStart == _currentPageIndex) return;
+    final displayStart = _displayStartForPage(target);
+    if (displayStart == _currentPageIndex) return;
     setState(() {
-      _currentPageIndex = spreadStart;
+      _currentPageIndex = displayStart;
     });
-    _flipController.goToPage(target);
-    _precachePagesAround(spreadStart);
+    if (!_singlePageMode) {
+      _flipController.goToPage(target);
+    }
+    _precachePagesAround(displayStart);
   }
 
   void _flipLeft() {
+    if (_singlePageMode) {
+      _goToPage(_currentPageIndex - 1);
+      return;
+    }
     if (_flipController.hasPreviousPage) {
       _flipController.previousPage();
     }
   }
 
   void _flipRight() {
+    if (_singlePageMode) {
+      _goToPage(_currentPageIndex + 1);
+      return;
+    }
     if (_flipController.hasNextPage) {
       _flipController.nextPage();
     }
@@ -479,8 +525,15 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
     return pageIndex.isEven ? max(1, pageIndex - 1) : pageIndex;
   }
 
+  int _displayStartForPage(int pageIndex) {
+    return _singlePageMode ? pageIndex : _spreadStartForPage(pageIndex);
+  }
+
   List<int> _visiblePageIndexes() {
     if (_totalPages <= 0) return const [];
+    if (_singlePageMode) {
+      return [_currentPageIndex.clamp(0, _totalPages - 1).toInt()];
+    }
     if (_currentPageIndex <= 0) return const [0];
     final rightPage = _currentPageIndex + 1;
     if (rightPage < _totalPages) {
@@ -492,6 +545,34 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
   String _currentPageRangeLabel() {
     final pages = _visiblePageIndexes();
     return widget.textbook.pageRangeLabel(pages);
+  }
+
+  EdgeInsets _readerContentPadding() {
+    if (!_singlePageMode) return EdgeInsets.zero;
+    return EdgeInsets.only(
+      left: 52,
+      right: 52,
+      top: 48,
+      bottom: _thumbnailExpanded ? 150 : 64,
+    );
+  }
+
+  void _setSinglePageMode(bool value) {
+    if (_singlePageMode == value) return;
+    if (_totalPages <= 0) return;
+    final currentVisiblePage = _targetAnnotationPage();
+    final nextPage = value
+        ? currentVisiblePage
+        : _spreadStartForPage(currentVisiblePage);
+
+    setState(() {
+      _singlePageMode = value;
+      _currentPageIndex = nextPage;
+      _currentZoom = 1.0;
+      _activeTouchPositions.clear();
+      _zoomController.value = Matrix4.identity();
+    });
+    _precachePagesAround(nextPage);
   }
 
   void _undo() {
@@ -557,6 +638,7 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
               viewportSize,
             );
           }
+          final readerPadding = _readerContentPadding();
           return Stack(
             clipBehavior: Clip.none,
             children: [
@@ -597,49 +679,57 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
                       });
                     }
                   },
-                  child: InteractiveViewer(
-                    transformationController: _zoomController,
-                    minScale: 1.0,
-                    maxScale: 3.0,
-                    panEnabled: !_annotationMode && _currentZoom > 1.05,
-                    scaleEnabled: !_annotationMode,
-                    onInteractionUpdate: (details) {
-                      setState(
-                        () => _currentZoom = _zoomController.value
-                            .getMaxScaleOnAxis(),
-                      );
-                    },
-                    onInteractionEnd: (_) =>
-                        _settleViewerTransform(viewportSize),
-                    child: AbsorbPointer(
-                      absorbing: _shouldAbsorbPageInput,
-                      child: TurnablePage(
-                        controller: _flipController,
-                        pageCount: _totalPages,
-                        pageViewMode: PageViewMode.double,
-                        autoResponseSize: true,
-                        paperBoundaryDecoration:
-                            PaperBoundaryDecoration.vintage,
-                        settings: FlipSettings(
-                          startPageIndex: _currentPageIndex,
-                          usePortrait: false,
-                          showCover: true,
-                          drawShadow: !(_drawingMode || _eraserMode),
-                          maxShadowOpacity: 0.6,
-                          flippingTime: 600,
-                          showPageCorners: !(_drawingMode || _eraserMode),
-                          enableUserInteraction: !_shouldAbsorbPageInput,
-                        ),
-                        builder: (context, index, constraints) {
-                          return _buildPage(index);
-                        },
-                        onPageChanged: (leftPageIndex, rightPageIndex) {
-                          setState(() {
-                            _currentPageIndex = leftPageIndex;
-                          });
-                          _precachePagesAround(leftPageIndex);
-                        },
-                      ),
+                  child: Padding(
+                    padding: readerPadding,
+                    child: InteractiveViewer(
+                      transformationController: _zoomController,
+                      minScale: 1.0,
+                      maxScale: 3.0,
+                      panEnabled: !_annotationMode && _currentZoom > 1.05,
+                      scaleEnabled: !_annotationMode,
+                      onInteractionUpdate: (details) {
+                        setState(
+                          () => _currentZoom = _zoomController.value
+                              .getMaxScaleOnAxis(),
+                        );
+                      },
+                      onInteractionEnd: (_) =>
+                          _settleViewerTransform(viewportSize),
+                      child: _singlePageMode
+                          ? _buildSinglePageStage()
+                          : AbsorbPointer(
+                              absorbing: _shouldAbsorbPageInput,
+                              child: TurnablePage(
+                                key: const ValueKey('reader-double-page'),
+                                controller: _flipController,
+                                pageCount: _totalPages,
+                                pageViewMode: PageViewMode.double,
+                                autoResponseSize: true,
+                                paperBoundaryDecoration:
+                                    PaperBoundaryDecoration.vintage,
+                                settings: FlipSettings(
+                                  startPageIndex: _currentPageIndex,
+                                  usePortrait: false,
+                                  showCover: true,
+                                  drawShadow: !(_drawingMode || _eraserMode),
+                                  maxShadowOpacity: 0.6,
+                                  flippingTime: 600,
+                                  showPageCorners:
+                                      !(_drawingMode || _eraserMode),
+                                  enableUserInteraction:
+                                      !_shouldAbsorbPageInput,
+                                ),
+                                builder: (context, index, constraints) {
+                                  return _buildPage(index);
+                                },
+                                onPageChanged: (leftPageIndex, rightPageIndex) {
+                                  setState(() {
+                                    _currentPageIndex = leftPageIndex;
+                                  });
+                                  _precachePagesAround(leftPageIndex);
+                                },
+                              ),
+                            ),
                     ),
                   ),
                 ),
@@ -815,6 +905,8 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
               ),
             ),
             const Spacer(),
+            _buildReaderModeToggle(),
+            const SizedBox(width: 10),
             const StatusGroupChip(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               items: [
@@ -834,6 +926,78 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
         ), // Row
       ), // SafeArea
     ); // Container
+  }
+
+  Widget _buildReaderModeToggle() {
+    return Container(
+      padding: const EdgeInsets.all(3),
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.94),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: AppColors.border),
+        boxShadow: AppShadows.control,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildModeButton(
+            icon: Icons.auto_stories_rounded,
+            label: '双页',
+            selected: !_singlePageMode,
+            onTap: () => _setSinglePageMode(false),
+          ),
+          _buildModeButton(
+            icon: Icons.crop_portrait_rounded,
+            label: '单页',
+            selected: _singlePageMode,
+            onTap: () => _setSinglePageMode(true),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildModeButton({
+    required IconData icon,
+    required String label,
+    required bool selected,
+    required VoidCallback onTap,
+  }) {
+    return Tooltip(
+      message: selected ? '$label显示' : '切换到$label显示',
+      child: InkWell(
+        onTap: selected ? null : onTap,
+        borderRadius: BorderRadius.circular(15),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOutCubic,
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.brand : Colors.transparent,
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 16,
+                color: selected ? Colors.white : AppColors.textMuted,
+              ),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  color: selected ? Colors.white : AppColors.textBody,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Widget _buildPageArrow({
@@ -863,6 +1027,26 @@ class _TextbookReaderPageState extends State<TextbookReaderPage>
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildSinglePageStage() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final pageHeight = min(
+          constraints.maxHeight,
+          constraints.maxWidth / _singlePageAspectRatio,
+        );
+        final pageWidth = pageHeight * _singlePageAspectRatio;
+        return Center(
+          child: SizedBox(
+            key: _singlePageKey,
+            width: pageWidth,
+            height: pageHeight,
+            child: _buildPage(_currentPageIndex),
+          ),
+        );
+      },
     );
   }
 
