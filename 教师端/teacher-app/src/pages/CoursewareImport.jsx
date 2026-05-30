@@ -11,6 +11,9 @@ const steps = [
   { n: 3, title: '解析完成', sub: '预览解析结果，可进入编辑', state: 'wait' }
 ]
 
+const SUPPORTED_EXTENSIONS = ['ppt', 'pptx', 'doc', 'docx', 'xls', 'xlsx', 'pdf', 'mp4', 'mov', 'avi', 'mkv']
+const ACCEPT_TYPES = '.ppt,.pptx,.doc,.docx,.xls,.xlsx,.pdf,.mp4,.mov,.avi,.mkv,application/pdf,video/mp4,video/quicktime'
+
 export default function CoursewareImport() {
   const [selectedFile, setSelectedFile] = useState({ name: '8.2 一元一次不等式.pptx', size: '126 MB' })
   const [isDragging, setIsDragging] = useState(false)
@@ -43,8 +46,9 @@ export default function CoursewareImport() {
 
   const chooseFile = file => {
     if (!file) return
-    if (!file.name.toLowerCase().endsWith('.pptx')) {
-      setError('MVP 阶段仅支持 PPTX 文件，请重新选择')
+    const extension = file.name.toLowerCase().split('.').pop()
+    if (!SUPPORTED_EXTENSIONS.includes(extension)) {
+      setError('支持 Office(PPT/PPTX/DOC/DOCX/XLS/XLSX)、PDF 与常见视频文件，请重新选择')
       return
     }
     setError('')
@@ -95,12 +99,12 @@ export default function CoursewareImport() {
             }}
           >
             <Cloud className="w-14 h-14 text-brand-400 mb-3" />
-            <div className="text-base text-slate-700 mb-2">拖拽 PPTX 到这里</div>
-            <div className="text-xs text-slate-400 mb-4">MVP 阶段仅接入 PPTX 导入与播放兼容</div>
+            <div className="text-base text-slate-700 mb-2">拖拽 Office / PDF / 视频到这里</div>
+            <div className="text-xs text-slate-400 mb-4">导入后转为可编辑课件页或可播放素材页，进入 T04 编辑器继续插互动</div>
             <input
               ref={inputRef}
               type="file"
-              accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+              accept={ACCEPT_TYPES}
               className="hidden"
               onChange={event => chooseFile(event.target.files?.[0])}
             />
@@ -122,8 +126,10 @@ export default function CoursewareImport() {
           <div className="mt-5">
             <div className="text-sm text-slate-700 font-medium mb-3">支持的文件格式</div>
             <div className="grid grid-cols-2 gap-3 text-xs">
-              <FormatTag color="orange" icon={<FileType2 className="w-4 h-4" />} title="PPTX" desc="演示文稿" />
-              <FormatTag muted color="slate" icon={<FileText className="w-4 h-4" />} title="PDF/图片" desc="暂不支持" />
+              <FormatTag color="orange" icon={<FileType2 className="w-4 h-4" />} title="PPT / PPTX" desc="转为可编辑课件页" />
+              <FormatTag color="blue" icon={<FileText className="w-4 h-4" />} title="Word / Excel" desc="提取结构与附件页" />
+              <FormatTag color="violet" icon={<FileText className="w-4 h-4" />} title="PDF" desc="转为分页预览 + 标注层" />
+              <FormatTag color="emerald" icon={<FilePlus className="w-4 h-4" />} title="视频" desc="插入播放页，可绑定互动" />
             </div>
             <div className="text-xs text-slate-400 mt-2">· 单个文件大小不超过 200MB</div>
           </div>
@@ -168,9 +174,9 @@ export default function CoursewareImport() {
           <div className="text-xs text-slate-400 mb-3">共 18 页</div>
 
           <div className="space-y-2 text-sm">
-            <ResultRow icon="📄" label="18 页" desc="课件页数" color="brand" />
-            <ResultRow icon="✓" label="6 道" desc="已识别题目" color="emerald" />
-            <ResultRow icon="⭐" label="可进入互动化配置" desc="可对题目进行互动化设置" color="amber" />
+            <ResultRow icon="📄" label="18 页" desc="课件页 / PDF 页 / 文档结构页" color="brand" />
+            <ResultRow icon="✓" label="6 道" desc="已识别题目与可互动区域" color="emerald" />
+            <ResultRow icon="⭐" label="可进入 T04 编辑器" desc="继续编辑画布并插入互动卡片" color="amber" />
           </div>
         </div>
       </div>
