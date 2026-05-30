@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  Plus, Upload, FileText, Search, RefreshCw, RotateCcw, Grid3x3, List,
-  Edit3, Eye, Send, Copy, Trash2, CheckCircle2, AlertTriangle, X,
+  Plus, Upload, FileText, Search, RotateCcw, Grid3x3, List,
+  Edit3, Eye, Send, Copy, Trash2, CheckCircle2, X,
   ChevronRight, ChevronLeft, CalendarDays
 } from 'lucide-react'
 
@@ -282,32 +282,6 @@ export default function Courseware() {
             <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
           </button>
           <div className="card p-4">
-            <div className="flex items-center justify-between mb-3">
-              <span className="font-semibold text-slate-800">云端同步</span>
-              <button className="text-xs text-brand-600 flex items-center gap-1 hover:underline">
-                <RefreshCw className="w-3 h-3" /> 刷新
-              </button>
-            </div>
-
-            <Section title="同步成功 (18)" defaultOpen>
-              <Row green text="8.2 一元一次不等式" extra="今天 14:32" />
-              <Row green text="7.3 平面直角坐标系" extra="今天 14:20" />
-              <Row green text="概率初步复习" extra="今天 09:45" />
-              <a className="text-xs text-brand-600 hover:underline mt-2 inline-block">查看全部成功记录</a>
-            </Section>
-
-            <Section title="上传中 (2)">
-              <ProgressRow label="期中复习课" progress={65} status="正在上传 65%" />
-              <ProgressRow label="二次根式练习" progress={30} status="正在上传 30%" />
-            </Section>
-
-            <Section title="同步失败 (1)">
-              <Row red text="7.1 整式的乘除" extra="重试" extraLink />
-              <div className="text-[11px] text-red-500 ml-5 mt-1">失败原因：网络异常</div>
-            </Section>
-          </div>
-
-          <div className="card p-4">
             <div className="font-semibold text-slate-800 mb-3">存储空间</div>
             <div className="text-sm text-slate-700">已使用 <span className="font-semibold text-brand-600">6.12 GB</span> / 20 GB</div>
             <div className="h-2 bg-slate-100 rounded-full mt-2 overflow-hidden">
@@ -339,7 +313,6 @@ export default function Courseware() {
     </div>
   )
 }
-
 function CoursewareThumb({ title }) {
   return (
     <div className="w-28 h-24 rounded-lg bg-white/80 border border-white/70 shadow-sm p-2 flex flex-col gap-1.5">
@@ -388,45 +361,5 @@ function PageBtn({ children, off }) {
     <button className={`w-8 h-8 rounded-md text-sm ${off ? 'text-slate-500 hover:bg-slate-100' : 'bg-brand-500 text-white'}`}>
       {children}
     </button>
-  )
-}
-
-function Section({ title, children, defaultOpen }) {
-  return (
-    <div className="border-t border-slate-100 pt-3 mt-3 first:border-t-0 first:pt-0 first:mt-0">
-      <div className="text-xs text-slate-600 font-medium mb-2 flex items-center justify-between">
-        {title}
-        <svg className={`w-3 h-3 text-slate-400 transition ${defaultOpen ? 'rotate-180' : ''}`} viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.4" /></svg>
-      </div>
-      {children}
-    </div>
-  )
-}
-
-function Row({ text, extra, green, red, extraLink }) {
-  return (
-    <div className="flex items-center gap-2 text-sm py-1">
-      {green && <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />}
-      {red && <AlertTriangle className="w-3.5 h-3.5 text-red-500" />}
-      <span className="text-slate-700 truncate flex-1">{text}</span>
-      <span className={`text-xs ${extraLink ? 'text-brand-600 hover:underline cursor-pointer' : 'text-slate-400'}`}>{extra}</span>
-    </div>
-  )
-}
-
-function ProgressRow({ label, progress, status }) {
-  return (
-    <div className="py-1.5">
-      <div className="flex items-center gap-2 text-sm">
-        <RefreshCw className="w-3.5 h-3.5 text-brand-500 animate-spin" />
-        <span className="text-slate-700 truncate flex-1">{label}</span>
-      </div>
-      <div className="flex items-center gap-2 mt-1 ml-5">
-        <div className="flex-1 h-1 bg-slate-100 rounded-full overflow-hidden">
-          <div className="h-full bg-brand-500" style={{ width: `${progress}%` }} />
-        </div>
-        <span className="text-[11px] text-slate-400 whitespace-nowrap">{status}</span>
-      </div>
-    </div>
   )
 }

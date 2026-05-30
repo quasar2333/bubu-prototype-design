@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { readImportedDeck } from '../lib/importEngine'
 import {
   BookOpen, Minus, Square, X, Undo2, Redo2, Play, Send, Plus,
   Type, Image as ImageIcon, Shapes, Sigma, BarChart3, Table, Sparkles, Music,
@@ -252,22 +253,47 @@ const initialSlides = [
   }
 ]
 
-const canvasTools = [
+function buildSlidesFromDeck(deck) {
+  return deck.pages.map((p, i) => ({
+    id: `imp-${i + 1}`,
+    name: `第 ${i + 1} 页`,
+    time: 2,
+    tag: '导入',
+    tagTone: 'blue',
+    title: '',
+    subtitle: '',
+    bgImage: p.dataUrl,
+    videoUrl: p.videoUrl,
+    layers: [],
+    caption: `${deck.name} · 第 ${i + 1}/${deck.pageCount} 页`
+  }))
+}
+
+function bootEditor() {
+  try {
+    if (typeof window !== 'undefined' && sessionStorage.getItem('bubu:enter-imported') === '1') {
+      sessionStorage.removeItem('bubu:enter-imported')
+      const deck = readImportedDeck()
+      if (deck && deck.pages && deck.pages.length) {
+        return { slides: buildSlidesFromDeck(deck), deckName: deck.name }
+      }
+    }
+  } catch {}
+  return { slides: initialSlides, deckName: null }
+}
+
+const toolbar = [
   { key: 'select', icon: MousePointer2, label: '选择' },
   { key: 'image', icon: ImageIcon, label: '图片' },
   { key: 'audio', icon: Music, label: '音频' },
   { key: 'video', icon: Video, label: '视频' },
-  { key: 'interaction', icon: Sparkles, label: '互动' }
-]
-
-const optionalToolHint = [
+  { key: 'interaction', icon: Sparkles, label: '互动' },
   { key: 'text', icon: Type, label: '文本' },
   { key: 'shape', icon: Shapes, label: '形状' },
   { key: 'formula', icon: Sigma, label: '公式' },
   { key: 'chart', icon: BarChart3, label: '图表' },
   { key: 'table', icon: Table, label: '表格' },
-  { key: 'mind', icon: GitBranch, label: '思维导图' },
-  { key: 'more', icon: MoreHorizontal, label: '更多' }
+  { key: 'mind', icon: GitBranch, label: '思维导图' }
 ]
 
 const subjectTools = [
@@ -294,9 +320,14 @@ const resourceRows = [
 ]
 
 export default function CoursewareEditor() {
-  const [slides, setSlides] = useState(initialSlides)
-  const [activeSlideId, setActiveSlideId] = useState(initialSlides[0].id)
+  const bootRef = useRef(null)
+  if (!bootRef.current) bootRef.current = bootEditor()
+  const { slides: bootSlides, deckName } = bootRef.current
+  const [slides, setSlides] = useState(bootSlides)
+  const [activeSlideId, setActiveSlideId] = useState(bootSlides[0]?.id)
   const [activeTool, setActiveTool] = useState('select')
+  const [dragActive, setDragActive] = useState(false)
+  const [history, setHistory] = useState({ past: [], future: [] })
   const [rightTab, setRightTab] = useState('interact')
   const [interactionPanelOpen, setInteractionPanelOpen] = useState(true)
   const [configTab, setConfigTab] = useState('basic')
@@ -311,6 +342,7 @@ export default function CoursewareEditor() {
   const interactionDragRef = useRef(null)
   const saveTimer = useRef(null)
   const toastTimer = useRef(null)
+  const slidesRef = useRef(slides)
 
   const activeIndex = slides.findIndex((slide) => slide.id === activeSlideId)
   const activeSlide = slides[activeIndex] || slides[0]
@@ -323,6 +355,8 @@ export default function CoursewareEditor() {
     const binds = slides.reduce((sum, slide) => sum + slideBindLabels(slide).length, 0)
     return { minutes, binds }
   }, [slides])
+
+  useEffect(() => { slidesRef.current = slides }, [slides])
 
   useEffect(() => {
     return () => {
@@ -343,9 +377,35 @@ export default function CoursewareEditor() {
     toastTimer.current = setTimeout(() => setToast(''), 2200)
   }
 
+  const recordHistory = () => {
+    const snapshot = slidesRef.current
+    setHistory((h) => ({ past: [...h.past, snapshot], future: [] }))
+  }
+
   const commitSlides = (updater) => {
+    recordHistory()
     setSlides((prev) => updater(prev))
     markChanged()
+  }
+
+  const undo = () => {
+    if (!history.past.length) { showToast('没有可以撤销的步骤'); return }
+    const previous = history.past[history.past.length - 1]
+    setHistory((h) => ({ past: h.past.slice(0, -1), future: [slidesRef.current, ...h.future] }))
+    setSlides(previous)
+    setSelectedLayerId(null)
+    markChanged()
+    showToast('已撤销上一步')
+  }
+
+  const redo = () => {
+    if (!history.future.length) { showToast('没有可以重做的步骤'); return }
+    const next = history.future[0]
+    setHistory((h) => ({ past: [...h.past, slidesRef.current], future: h.future.slice(1) }))
+    setSlides(next)
+    setSelectedLayerId(null)
+    markChanged()
+    showToast('已重做下一步')
   }
 
   const replaceActiveSlide = (patcher) => {
@@ -360,6 +420,7 @@ export default function CoursewareEditor() {
   }
 
   const insertSlideAfterCurrent = (config, toastText, afterSlideId = activeSlideId) => {
+    recordHistory()
     const slide = {
       id: uid('slide'),
       time: 4,
@@ -487,7 +548,7 @@ export default function CoursewareEditor() {
       return
     }
     if (tool.key === 'more') {
-      showToast('更多工具已收起到右侧资源区')
+      showToast('更多工具开发中')
       return
     }
     addToolLayer(tool.key)
@@ -730,6 +791,7 @@ export default function CoursewareEditor() {
       if (moved) {
         drag.moved = true
         document.body.style.cursor = 'grabbing'
+        setDragActive(true)
       }
     }
 
@@ -737,6 +799,7 @@ export default function CoursewareEditor() {
       window.removeEventListener('pointermove', move)
       window.removeEventListener('pointerup', up)
       document.body.style.cursor = ''
+      setDragActive(false)
 
       const drag = interactionDragRef.current
       interactionDragRef.current = null
@@ -807,7 +870,7 @@ export default function CoursewareEditor() {
       <div className="h-10 bg-white border-b border-slate-200 flex items-center px-3 gap-2">
         <BookOpen className="w-4 h-4 text-brand-600" />
         <span className="text-sm font-semibold">T04 课件编辑器</span>
-        <span className="text-xs text-slate-400">8.2 一元一次不等式</span>
+        <span className="text-xs text-slate-400 max-w-[280px] truncate">{deckName || '8.2 一元一次不等式'}</span>
         <div className="ml-auto flex items-center gap-1">
           <Link to="/courseware" className="w-8 h-8 hover:bg-slate-100 flex items-center justify-center" title="最小化">
             <Minus className="w-4 h-4 text-slate-500" />
@@ -826,10 +889,10 @@ export default function CoursewareEditor() {
         <button className="text-slate-700 hover:text-brand-600">插入</button>
         <button className="text-slate-700 hover:text-brand-600" onClick={() => { setRightTab('interact'); setInteractionPanelOpen(true) }}>互动</button>
         <button className="text-slate-700 hover:text-brand-600" onClick={() => { setRightTab('subject'); setInteractionPanelOpen(true) }}>学科工具</button>
-        <button title="撤销" aria-label="撤销" className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" onClick={() => showToast('已撤销上一步')}>
+        <button title="撤销 (上一步)" aria-label="撤销" disabled={!history.past.length} onClick={undo} className={cx('w-8 h-8 rounded-md flex items-center justify-center', history.past.length ? 'hover:bg-slate-100' : 'opacity-40 cursor-not-allowed')}>
           <Undo2 className="w-4 h-4 text-slate-500" />
         </button>
-        <button title="重做" aria-label="重做" className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" onClick={() => showToast('已重做上一步')}>
+        <button title="重做 (下一步)" aria-label="重做" disabled={!history.future.length} onClick={redo} className={cx('w-8 h-8 rounded-md flex items-center justify-center', history.future.length ? 'hover:bg-slate-100' : 'opacity-40 cursor-not-allowed')}>
           <Redo2 className="w-4 h-4 text-slate-500" />
         </button>
         <div className="ml-auto flex items-center gap-2">
@@ -842,8 +905,8 @@ export default function CoursewareEditor() {
         </div>
       </div>
 
-      <div className="bg-white border-b border-slate-100 px-4 py-2 flex items-center gap-2">
-        {canvasTools.map((tool, index) => {
+      <div className="bg-white border-b border-slate-100 px-4 py-2 flex items-center gap-1">
+        {toolbar.map((tool) => {
           const Icon = tool.icon
           const active = activeTool === tool.key
           return (
@@ -853,8 +916,7 @@ export default function CoursewareEditor() {
               onClick={() => handleToolClick(tool)}
               className={cx(
                 'w-14 h-12 rounded-md text-[11px] transition flex flex-col items-center justify-center gap-1',
-                active ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-50',
-                index === 1 && 'ml-4'
+                active ? 'bg-brand-50 text-brand-700' : 'text-slate-600 hover:bg-slate-50'
               )}
             >
               <Icon className="w-4 h-4" />
@@ -862,23 +924,6 @@ export default function CoursewareEditor() {
             </button>
           )
         })}
-        <div className="ml-4 h-10 border-l border-slate-200" />
-        <div className="flex items-center gap-1 text-[11px] text-slate-400">
-          {optionalToolHint.map((tool) => {
-            const Icon = tool.icon
-            return (
-              <button
-                key={tool.key}
-                onClick={() => showToast(`${tool.label} 属于非必须工具，本阶段保留入口不展开`)}
-                className="h-10 min-w-10 rounded-md px-2 flex flex-col items-center justify-center gap-0.5 hover:bg-slate-50 hover:text-slate-500"
-                title={`${tool.label}：MVP 非必须`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span>{tool.label}</span>
-              </button>
-            )
-          })}
-        </div>
         {selectedLayer && (
           <div className="ml-auto flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs">
             <Move className="w-3.5 h-3.5 text-slate-500" />
@@ -967,8 +1012,9 @@ export default function CoursewareEditor() {
           <div className="flex-1 min-h-0 overflow-auto p-6 flex flex-col items-center">
             <div
               ref={canvasRef}
-              onDragOver={(event) => event.preventDefault()}
-              onDrop={handleDrop}
+              onDragOver={(event) => { event.preventDefault(); setDragActive(true) }}
+              onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDragActive(false) }}
+              onDrop={(event) => { setDragActive(false); handleDrop(event) }}
               className="relative w-full max-w-[800px] aspect-video bg-white border border-slate-200 rounded-lg shadow-soft overflow-hidden"
               onPointerDown={() => setSelectedLayerId(null)}
             >
@@ -987,14 +1033,14 @@ export default function CoursewareEditor() {
                   onConfig={() => openInteractionConfig(layer)}
                 />
               ))}
-              {!(activeSlide.layers || []).some((layer) => layer.kind === 'interaction') && (
-                <div className="pointer-events-none absolute left-[72px] right-[72px] bottom-[78px] rounded-xl border-2 border-dashed border-brand-400 bg-brand-50/30 px-8 py-5 text-slate-700">
+              {dragActive && (
+                <div className="pointer-events-none absolute inset-3 z-30 rounded-xl border-2 border-dashed border-brand-400 bg-brand-50/70 backdrop-blur-[1px] grid place-items-center text-slate-700">
                   <div className="flex items-center justify-center gap-5">
                     <div className="grid h-14 w-14 place-items-center rounded-full border border-brand-200 bg-white text-brand-600 shadow-sm">
                       <Sparkles className="h-7 w-7" />
                     </div>
                     <div>
-                      <div className="text-lg font-bold">拖拽互动模块到此处</div>
+                      <div className="text-lg font-bold">松开以插入互动模块到本页</div>
                       <div className="mt-1 text-sm text-slate-500">支持随堂练、抽人回答、典型答案展示</div>
                     </div>
                   </div>
@@ -1242,6 +1288,23 @@ export default function CoursewareEditor() {
 }
 
 function SlideBase({ slide, pageNumber }) {
+  if (slide.videoUrl) {
+    return (
+      <div className="absolute inset-0 bg-slate-950">
+        <video src={slide.videoUrl} controls className="h-full w-full bg-black object-contain" />
+        <div className="absolute left-4 top-4 rounded-full border border-white/20 bg-black/45 px-3 py-1 text-xs font-semibold text-white">视频页</div>
+        <div className="absolute bottom-3 right-4 text-[40px] font-black leading-none text-white/20">{String(pageNumber).padStart(2, '0')}</div>
+      </div>
+    )
+  }
+  if (slide.bgImage) {
+    return (
+      <div className="absolute inset-0 bg-white">
+        <img src={slide.bgImage} alt={slide.name} draggable={false} className="w-full h-full object-contain" />
+        <div className="absolute bottom-3 right-4 text-[40px] font-black leading-none text-brand-50/80">{String(pageNumber).padStart(2, '0')}</div>
+      </div>
+    )
+  }
   return (
     <div className="absolute inset-0 p-9">
       <div className="absolute right-4 top-4 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[11px] font-semibold text-emerald-700">

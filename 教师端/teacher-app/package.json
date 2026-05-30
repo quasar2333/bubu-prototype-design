@@ -10,9 +10,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "electron": "npm run build && electron .",
-    "electron:smoke": "npm run build && electron . --smoke-test",
-    "electron:pack": "npm run build && electron-builder --dir"
+    "electron": "vite build --mode electron && electron .",
+    "electron:smoke": "vite build --mode electron && electron . --smoke-test",
+    "electron:pack": "vite build --mode electron && electron-builder --dir"
   },
   "build": {
     "appId": "com.bubu.teacher",
@@ -34,6 +34,7 @@
   "dependencies": {
     "electron-store": "^11.0.2",
     "lucide-react": "^0.460.0",
+    "pdfjs-dist": "^6.0.227",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router-dom": "^6.27.0"
