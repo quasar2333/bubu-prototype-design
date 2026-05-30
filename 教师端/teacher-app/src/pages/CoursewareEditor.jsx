@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  BookOpen, Minus, Square, X, Undo2, Redo2, Play, Send, Plus,
+  BookOpen, Minus, Square, X, Undo2, Redo2, Play, Plus,
   Type, Image as ImageIcon, Shapes, Sigma, BarChart3, Table, Sparkles, Music,
   Video, GitBranch, MoreHorizontal, CheckCircle2, Cloud, Maximize2, FileText,
-  GripVertical, Clock3, Layers3, Users, FlaskConical, CircleDot,
+  GripVertical, Clock3, Layers3, FlaskConical,
   Shuffle, Trash2, Copy, MousePointer2, Ruler,
   DraftingCompass, Calculator, Move, PanelRight, Save
 } from 'lucide-react'
@@ -13,16 +13,6 @@ const uid = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().to
 const cx = (...classes) => classes.filter(Boolean).join(' ')
 
 const INTERACTIONS = {
-  listen: {
-    label: '听写',
-    icon: Music,
-    tone: 'blue',
-    desc: '乱序下发，OCR 自动判错，错词入复习',
-    trigger: '翻到此页自动触发',
-    collect: '实时统计',
-    track: '错词分布 / 耗时 / 修改次数',
-    layerBody: '词语、短句或概念解释下发到学生平板，提交后自动回收。'
-  },
   quiz: {
     label: '随堂练',
     icon: FileText,
@@ -33,26 +23,6 @@ const INTERACTIONS = {
     track: '正确率 / 错误选项 / 步骤卡点',
     layerBody: '本页题目下发到学生端，白板同步显示作答进度和统计结果。'
   },
-  pick: {
-    label: '抽人回答',
-    icon: Shuffle,
-    tone: 'amber',
-    desc: '随机单人 / 多人，名单高亮，平板进入回答态',
-    trigger: '教师手动点击',
-    collect: '抽中记录与回答结果回收',
-    track: '抽中分布 / 应答正确率',
-    layerBody: '抽中后学生平板进入回答态，其他学生端保持旁听。'
-  },
-  discuss: {
-    label: '分组讨论',
-    icon: Users,
-    tone: 'violet',
-    desc: '共享画板，小组结论，白板分屏展示',
-    trigger: '翻页触发或教师手动',
-    collect: '小组成果自动归档',
-    track: '组内贡献 / 讨论热度',
-    layerBody: '各组在共享画板提交结论，白板端可分屏展示。'
-  },
   lab: {
     label: '实验',
     icon: FlaskConical,
@@ -62,31 +32,10 @@ const INTERACTIONS = {
     collect: '实验数据自动汇总',
     track: '数据质量 / 结论表达',
     layerBody: '学生端按步骤记录实验数据，提交后自动生成全班汇总图。'
-  },
-  circle: {
-    label: '圈选提问',
-    icon: CircleDot,
-    tone: 'rose',
-    desc: '圈选课件区域，AI 即时讲解或生成追问',
-    trigger: '教师圈选课件内容',
-    collect: '圈选内容沉淀为讲评素材',
-    track: '追问质量 / 应答情况',
-    layerBody: '教师圈选本页任意区域，AI 生成追问并可推送给全班。'
   }
 }
 
 const CONFIG_FIELDS = {
-  listen: {
-    basic: [
-      { key: 'trigger', label: '触发时机', kind: 'single', options: ['翻到此页自动触发', '教师手动点击'], default: '翻到此页自动触发' },
-      { key: 'content', label: '听写内容', kind: 'text', default: '不等式、解集、移项、系数化为 1' },
-      { key: 'mode', label: '听写模式', kind: 'single', options: ['概念解释', '原文听写', '口算播报'], default: '概念解释' }
-    ],
-    advanced: [
-      { key: 'antiCheat', label: '防作弊', kind: 'multi', options: ['每台平板乱序', '全屏锁定', '禁止截图'], default: ['每台平板乱序', '全屏锁定'] },
-      { key: 'collect', label: '回收方式', kind: 'multi', options: ['实时统计', '错词入复习', '推送订正'], default: ['实时统计', '错词入复习'] }
-    ]
-  },
   quiz: {
     basic: [
       { key: 'source', label: '题目来源', kind: 'single', options: ['当前课件题目', '智能题库', 'AI 变式', '手动录入'], default: '当前课件题目' },
@@ -98,26 +47,6 @@ const CONFIG_FIELDS = {
       { key: 'afterSubmit', label: '提交后', kind: 'multi', options: ['公布统计', '允许看解析', '收集学情'], default: ['公布统计', '收集学情'] }
     ]
   },
-  pick: {
-    basic: [
-      { key: 'range', label: '抽取范围', kind: 'single', options: ['全班', '未发言学生', '需关注学生', '自定义名单'], default: '全班' },
-      { key: 'count', label: '抽取人数', kind: 'text', default: '1 人，可追加 1 名同伴补充' }
-    ],
-    advanced: [
-      { key: 'push', label: '题目推送', kind: 'multi', options: ['白板显示题目', '抽中学生平板进入回答态', '全班可见'], default: ['白板显示题目', '抽中学生平板进入回答态'] },
-      { key: 'protect', label: '保护机制', kind: 'multi', options: ['允许求助同桌', '跳过一次', '老师确认后公布'], default: ['允许求助同桌'] }
-    ]
-  },
-  discuss: {
-    basic: [
-      { key: 'grouping', label: '分组方式', kind: 'single', options: ['沿用课堂小组', '按学情混合', '随机分组'], default: '沿用课堂小组' },
-      { key: 'topic', label: '讨论主题', kind: 'text', default: '不等式两边同乘负数时，符号为什么要改变？' }
-    ],
-    advanced: [
-      { key: 'output', label: '成果形式', kind: 'multi', options: ['小组画板', '一句话结论', '拍照上传'], default: ['小组画板', '一句话结论'] },
-      { key: 'display', label: '白板展示', kind: 'single', options: ['四组分屏', '只展示已提交', '老师推荐 1 组分享'], default: '四组分屏' }
-    ]
-  },
   lab: {
     basic: [
       { key: 'type', label: '实验类型', kind: 'single', options: ['虚拟仪器', '真实数据录入', '拍照记录'], default: '虚拟仪器' },
@@ -126,16 +55,6 @@ const CONFIG_FIELDS = {
     advanced: [
       { key: 'safety', label: '安全设置', kind: 'multi', options: ['只允许教师启动', '学生端步骤锁定', '异常数据提醒'], default: ['只允许教师启动', '学生端步骤锁定'] },
       { key: 'summary', label: '汇总方式', kind: 'single', options: ['全班数据自动成图', '导出表格', '生成实验结论页'], default: '全班数据自动成图' }
-    ]
-  },
-  circle: {
-    basic: [
-      { key: 'target', label: '圈选对象', kind: 'single', options: ['课件任意区域', '题干', '图片', '学生答案'], default: '课件任意区域' },
-      { key: 'aiAction', label: 'AI 动作', kind: 'multi', options: ['生成追问', '即时讲解', '生成同类题'], default: ['生成追问', '即时讲解'] }
-    ],
-    advanced: [
-      { key: 'audience', label: '下发范围', kind: 'single', options: ['白板展示', '推给全班', '只推给错答学生'], default: '白板展示' },
-      { key: 'saveTo', label: '保存去向', kind: 'multi', options: ['加入课件页', '沉淀为讲评素材', '入校本资源'], default: ['加入课件页', '沉淀为讲评素材'] }
     ]
   }
 }
@@ -191,7 +110,7 @@ const initialSlides = [
       ['表达', '未知数 x 参与比较'],
       ['目标', '找出满足条件的 x']
     ],
-    caption: '本页用于建立真实情境，后续页面可直接绑定随堂练或抽人回答。'
+    caption: '本页用于建立真实情境，后续页面可直接绑定随堂练或实验。'
   },
   {
     id: 'slide-review',
@@ -220,7 +139,7 @@ const initialSlides = [
       ['乘正数', '方向不变'],
       ['乘负数', '方向改变']
     ],
-    caption: '本页是高风险概念页，适合插入圈选提问或随堂练。'
+    caption: '本页是高风险概念页，适合插入随堂练或实验。'
   },
   {
     id: 'slide-example',
@@ -271,30 +190,6 @@ const initialSlides = [
     bullets: ['x > 2：空心圆点，向右', 'x ≥ 2：实心圆点，向右'],
     numberLine: true,
     caption: '板书页不默认绑定互动，便于教师现场圈画。'
-  },
-  {
-    id: 'slide-pick',
-    name: '抽人验收',
-    time: 3,
-    tag: '课堂调度',
-    tagTone: 'amber',
-    title: '说出这一步的依据',
-    subtitle: '从 -3x < 6 到 x > -2，为什么不等号方向改变？',
-    bullets: ['随机抽取 1 名学生回答', '可追加 1 名同伴补充', '教师确认后记录回答结果'],
-    bind: { type: 'pick', label: '抽人回答' },
-    layers: [
-      {
-        id: 'layer-pick-existing',
-        kind: 'interaction',
-        type: 'pick',
-        title: '第 7 页互动：抽人回答已绑定',
-        body: '抽中后，学生平板进入回答态，白板显示学生姓名和倒计时。',
-        x: 56,
-        y: 292,
-        w: 640
-      }
-    ],
-    caption: '抽人回答用于课堂验收，抽取范围和保护机制可在右侧配置。'
   },
   {
     id: 'slide-summary',
@@ -353,6 +248,7 @@ export default function CoursewareEditor() {
   const [activeSlideId, setActiveSlideId] = useState(initialSlides[0].id)
   const [activeTool, setActiveTool] = useState('select')
   const [rightTab, setRightTab] = useState('interact')
+  const [rightPanelOpen, setRightPanelOpen] = useState(true)
   const [configTab, setConfigTab] = useState('basic')
   const [selectedLayerId, setSelectedLayerId] = useState(null)
   const [interactionConfigs, setInteractionConfigs] = useState(makeInitialConfig)
@@ -471,7 +367,7 @@ export default function CoursewareEditor() {
     const detail = INTERACTIONS[type] || INTERACTIONS.quiz
     return {
       name: detail.label,
-      time: type === 'pick' ? 3 : 5,
+      time: 5,
       tag: '课堂互动',
       tagTone: detail.tone === 'rose' ? 'rose' : detail.tone === 'amber' ? 'amber' : 'emerald',
       title: detail.label,
@@ -534,11 +430,14 @@ export default function CoursewareEditor() {
     setActiveTool(tool.key)
     if (tool.key === 'select') return
     if (tool.key === 'interaction') {
+      setRightPanelOpen(true)
       setRightTab('interact')
       showToast('选择或拖拽右侧互动卡片')
       return
     }
     if (tool.key === 'more') {
+      setRightPanelOpen(true)
+      setRightTab('subject')
       showToast('更多工具已收起到右侧资源区')
       return
     }
@@ -810,16 +709,22 @@ export default function CoursewareEditor() {
     showToast('已打开课件预览')
   }
 
-  const sendToBoard = () => {
+  const saveLocal = () => {
+    clearTimeout(saveTimer.current)
+    setSaveState('已保存')
+    showToast('已保存到本地')
+  }
+
+  const uploadToCloud = () => {
     try {
-      localStorage.setItem('bubu-teacher-courseware-preview', JSON.stringify({
+      localStorage.setItem('bubu-teacher-courseware-cloud-upload', JSON.stringify({
         slide: activeIndex + 1,
         title: activeSlide.title,
         binds: slideBindLabels(activeSlide),
         updatedAt: Date.now()
       }))
     } catch {}
-    showToast('已发送到白板')
+    showToast('已上传到云空间')
   }
 
   return (
@@ -838,27 +743,6 @@ export default function CoursewareEditor() {
           <Link to="/courseware" className="w-8 h-8 hover:bg-red-100 flex items-center justify-center" title="关闭">
             <X className="w-4 h-4 text-slate-500" />
           </Link>
-        </div>
-      </div>
-
-      <div className="h-11 bg-white border-b border-slate-100 flex items-center px-4 gap-5 text-sm">
-        <button className="text-slate-700 hover:text-brand-600">文件</button>
-        <button className="text-slate-700 hover:text-brand-600">插入</button>
-        <button className="text-slate-700 hover:text-brand-600" onClick={() => setRightTab('interact')}>互动</button>
-        <button className="text-slate-700 hover:text-brand-600" onClick={() => setRightTab('subject')}>学科工具</button>
-        <button className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" onClick={() => showToast('已撤销上一步')}>
-          <Undo2 className="w-4 h-4 text-slate-500" />
-        </button>
-        <button className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" onClick={() => showToast('已重做上一步')}>
-          <Redo2 className="w-4 h-4 text-slate-500" />
-        </button>
-        <div className="ml-auto flex items-center gap-2">
-          <button onClick={openPreview} className="btn-ghost h-8 px-3">
-            <Play className="w-3.5 h-3.5 text-brand-500" /> 预览
-          </button>
-          <button onClick={sendToBoard} className="btn-primary h-8 px-3">
-            <Send className="w-3.5 h-3.5" /> 保存并上传
-          </button>
         </div>
       </div>
 
@@ -882,21 +766,40 @@ export default function CoursewareEditor() {
             </button>
           )
         })}
-        {selectedLayer && (
-          <div className="ml-auto flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs">
-            <Move className="w-3.5 h-3.5 text-slate-500" />
-            <span className="text-slate-600">已选中：{layerLabel(selectedLayer)}</span>
-            <button onClick={copySelectedLayer} className="w-7 h-7 rounded hover:bg-white flex items-center justify-center" title="复制">
-              <Copy className="w-3.5 h-3.5" />
+        <div className="ml-auto flex items-center gap-2">
+          {selectedLayer && (
+            <div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-2 py-1 text-xs">
+              <Move className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-slate-600">已选中：{layerLabel(selectedLayer)}</span>
+              <button onClick={copySelectedLayer} className="w-7 h-7 rounded hover:bg-white flex items-center justify-center" title="复制">
+                <Copy className="w-3.5 h-3.5" />
+              </button>
+              <button onClick={deleteSelectedLayer} className="w-7 h-7 rounded hover:bg-red-50 text-red-500 flex items-center justify-center" title="删除">
+                <Trash2 className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+          <div className="flex items-center gap-1 border-l border-slate-200 pl-3">
+            <button className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" title="撤销" onClick={() => showToast('已撤销上一步')}>
+              <Undo2 className="w-4 h-4 text-slate-500" />
             </button>
-            <button onClick={deleteSelectedLayer} className="w-7 h-7 rounded hover:bg-red-50 text-red-500 flex items-center justify-center" title="删除">
-              <Trash2 className="w-3.5 h-3.5" />
+            <button className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" title="重做" onClick={() => showToast('已重做上一步')}>
+              <Redo2 className="w-4 h-4 text-slate-500" />
+            </button>
+            <button onClick={openPreview} className="btn-ghost h-8 px-3 text-xs">
+              <Play className="w-3.5 h-3.5 text-brand-500" /> 预览
+            </button>
+            <button onClick={saveLocal} className="btn-ghost h-8 px-3 text-xs">
+              <Save className="w-3.5 h-3.5 text-brand-500" /> 保存
+            </button>
+            <button onClick={uploadToCloud} className="btn-primary h-8 px-3 text-xs">
+              <Cloud className="w-3.5 h-3.5" /> 上传
             </button>
           </div>
-        )}
+        </div>
       </div>
 
-      <div className="flex-1 grid grid-cols-[240px_minmax(640px,1fr)_330px] min-h-0">
+      <div className={cx('flex-1 grid min-h-0', rightPanelOpen ? 'grid-cols-[240px_minmax(640px,1fr)_330px]' : 'grid-cols-[240px_minmax(640px,1fr)]')}>
         <aside className="bg-white border-r border-slate-100 flex flex-col min-h-0">
           <div className="p-4 border-b border-slate-100">
             <div className="flex items-center justify-between">
@@ -960,11 +863,21 @@ export default function CoursewareEditor() {
             <Layers3 className="w-3.5 h-3.5 text-slate-500 mr-1.5" />
             <span className="font-semibold text-slate-700">第 {activeIndex + 1} 页 · {activeSlide.name}</span>
             <span className="ml-3 text-slate-400">{activeSlide.caption}</span>
-            {selectedLayer?.kind === 'interaction' && (
-              <button className="ml-auto text-brand-600 hover:underline" onClick={() => openInteractionConfig(selectedLayer)}>
-                配置互动
-              </button>
-            )}
+            <div className="ml-auto flex items-center gap-3">
+              {selectedLayer?.kind === 'interaction' && (
+                <button className="text-brand-600 hover:underline" onClick={() => openInteractionConfig(selectedLayer)}>
+                  配置互动
+                </button>
+              )}
+              {!rightPanelOpen && (
+                <button
+                  onClick={() => setRightPanelOpen(true)}
+                  className="inline-flex items-center gap-1 rounded-md border border-slate-200 px-2 py-1 text-slate-600 hover:bg-slate-50"
+                >
+                  <PanelRight className="w-3.5 h-3.5" /> 打开工具
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex-1 min-h-0 overflow-auto p-6 flex flex-col items-center">
@@ -1033,6 +946,7 @@ export default function CoursewareEditor() {
           </div>
         </main>
 
+        {rightPanelOpen && (
         <aside className="bg-white border-l border-slate-100 flex flex-col min-h-0">
           <div className="p-3 border-b border-slate-100 flex-none">
             <div className="flex items-center justify-between">
@@ -1040,7 +954,13 @@ export default function CoursewareEditor() {
                 <div className="font-semibold text-sm">互动与学科工具</div>
                 <div className="mt-1 text-[11px] text-slate-500">画布放模块，缩略图放整页</div>
               </div>
-              <Sparkles className="w-4 h-4 text-brand-500" />
+              <button
+                onClick={() => setRightPanelOpen(false)}
+                className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center"
+                title="关闭面板"
+              >
+                <X className="w-4 h-4 text-slate-500" />
+              </button>
             </div>
           </div>
 
@@ -1081,23 +1001,12 @@ export default function CoursewareEditor() {
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-semibold text-slate-800">{item.label}</span>
-                              {(type === 'quiz' || type === 'listen') && <span className="pill bg-emerald-100 text-emerald-700">高频</span>}
+                              {type === 'quiz' && <span className="pill bg-emerald-100 text-emerald-700">高频</span>}
                             </div>
                             <div className="text-xs text-slate-500 leading-5 mt-0.5">{item.desc}</div>
                           </div>
                         </div>
                       </div>
-                      <button
-                        onPointerDown={(event) => event.stopPropagation()}
-                        onClick={(event) => {
-                          event.stopPropagation()
-                          addInteractionToCurrentPage(type)
-                        }}
-                        className="mt-1 w-7 h-7 rounded-md text-brand-500 hover:bg-white hover:text-brand-700 flex items-center justify-center"
-                        title="插入当前页"
-                      >
-                        <Plus className="w-4 h-4" />
-                      </button>
                     </div>
                   )
                 })}
@@ -1126,6 +1035,7 @@ export default function CoursewareEditor() {
             )}
           </div>
         </aside>
+        )}
       </div>
 
       <div className="h-10 bg-white border-t border-slate-100 flex items-center px-4 text-xs text-slate-500">
