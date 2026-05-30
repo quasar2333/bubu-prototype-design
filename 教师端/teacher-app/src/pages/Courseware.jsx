@@ -3,37 +3,52 @@ import { Link } from 'react-router-dom'
 import {
   Plus, Upload, FileText, Search, RefreshCw, RotateCcw, Grid3x3, List,
   Edit3, Eye, Send, Copy, Trash2, CheckCircle2, AlertTriangle, X,
-  ChevronRight, ChevronLeft
+  ChevronRight, ChevronLeft, CalendarDays
 } from 'lucide-react'
 
 const items = [
-  { title: '8.2 一元一次不等式', pages: 18, subject: '数学 · 初二 · 3班', updated: '2026-05-15 14:32', status: '已同步', interact: true, gradient: 'from-blue-100 to-indigo-200' },
-  { title: '7.3 平面直角坐标系', pages: 22, subject: '数学 · 初二 · 3班', updated: '2026-05-14 16:20', status: '已同步', interact: true, gradient: 'from-emerald-100 to-teal-200' },
-  { title: '7.2 一次函数的图像', pages: 16, subject: '数学 · 初二 · 3班', updated: '2026-05-12 10:15', status: '已同步', interact: true, gradient: 'from-amber-100 to-orange-200' },
-  { title: '概率初步复习', pages: 14, subject: '数学 · 初二 · 3班', updated: '2026-05-10 09:45', status: '已同步', interact: true, gradient: 'from-rose-100 to-pink-200' },
-  { title: '二次根式练习', pages: 12, subject: '数学 · 初二 · 3班', updated: '2026-05-08 17:30', status: '已同步', interact: false, gradient: 'from-violet-100 to-purple-200' },
-  { title: '期中复习课', pages: 28, subject: '数学 · 初二 · 3班', updated: '2026-05-07 11:05', status: '已同步', interact: true, gradient: 'from-sky-100 to-cyan-200' }
+  { title: '8.2 一元一次不等式', pages: 18, subject: '数学', grade: '初二', className: '3班', textbook: '人教版', lesson: '第1课时', updated: '2026-05-15 14:32', status: '已同步', interact: true, gradient: 'from-blue-100 to-indigo-200' },
+  { title: '7.3 平面直角坐标系', pages: 22, subject: '数学', grade: '初二', className: '3班', textbook: '人教版', lesson: '第2课时', updated: '2026-05-14 16:20', status: '已同步', interact: true, gradient: 'from-emerald-100 to-teal-200' },
+  { title: '7.2 一次函数的图像', pages: 16, subject: '数学', grade: '初二', className: '3班', textbook: '人教版', lesson: '第1课时', updated: '2026-05-12 10:15', status: '已同步', interact: true, gradient: 'from-amber-100 to-orange-200' },
+  { title: '概率初步复习', pages: 14, subject: '数学', grade: '初二', className: '3班', textbook: '人教版', lesson: '复习课', updated: '2026-05-10 09:45', status: '已同步', interact: true, gradient: 'from-rose-100 to-pink-200' },
+  { title: '二次根式练习', pages: 12, subject: '数学', grade: '初二', className: '3班', textbook: '人教版', lesson: '练习课', updated: '2026-05-08 17:30', status: '已同步', interact: false, gradient: 'from-violet-100 to-purple-200' },
+  { title: '期中复习课', pages: 28, subject: '数学', grade: '初二', className: '3班', textbook: '人教版', lesson: '复习课', updated: '2026-05-07 11:05', status: '已同步', interact: true, gradient: 'from-sky-100 to-cyan-200' }
 ]
 
 export default function Courseware() {
   const [keyword, setKeyword] = useState('')
-  const [view, setView] = useState('list') // grid | list
+  const [view, setView] = useState('grid') // grid | list
   const [sortOrder, setSortOrder] = useState('desc')
+  const [subject, setSubject] = useState('数学')
+  const [grade, setGrade] = useState('初二')
+  const [textbook, setTextbook] = useState('人教版')
+  const [lesson, setLesson] = useState('全部')
+  const [timeRange, setTimeRange] = useState('all')
+  const [onlyInteractive, setOnlyInteractive] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [selected, setSelected] = useState(new Set())
 
   const filtered = useMemo(() => {
     let result = [...items]
     if (keyword.trim()) {
-      result = result.filter(it => it.title.includes(keyword.trim()))
+      const kw = keyword.trim()
+      result = result.filter(it => it.title.includes(kw) || it.lesson.includes(kw))
     }
+    if (subject !== '全部') result = result.filter(it => it.subject === subject)
+    if (grade !== '全部') result = result.filter(it => it.grade === grade)
+    if (textbook !== '全部') result = result.filter(it => it.textbook === textbook)
+    if (lesson !== '全部') result = result.filter(it => it.lesson === lesson)
+    if (onlyInteractive) result = result.filter(it => it.interact)
     result.sort((a, b) => {
       const tA = new Date(a.updated).getTime()
       const tB = new Date(b.updated).getTime()
-      return sortOrder === 'desc' ? tB - tA : tA - tB
+      if (sortOrder === 'timeAsc') return tA - tB
+      if (sortOrder === 'pagesDesc') return b.pages - a.pages
+      if (sortOrder === 'pagesAsc') return a.pages - b.pages
+      return tB - tA
     })
     return result
-  }, [keyword, sortOrder])
+  }, [keyword, subject, grade, textbook, lesson, onlyInteractive, sortOrder])
 
   const toggleSel = (i) => {
     const ns = new Set(selected)
@@ -41,7 +56,16 @@ export default function Courseware() {
     setSelected(ns)
   }
   const clearSel = () => setSelected(new Set())
-  const reset = () => { setKeyword(''); setSortOrder('desc') }
+  const reset = () => {
+    setKeyword('')
+    setSubject('数学')
+    setGrade('初二')
+    setTextbook('人教版')
+    setLesson('全部')
+    setTimeRange('all')
+    setOnlyInteractive(true)
+    setSortOrder('timeDesc')
+  }
 
   return (
     <div className={`p-6 gap-5 h-full ${sidebarOpen ? 'grid grid-cols-[1fr_280px]' : 'relative'}`}>
@@ -51,13 +75,41 @@ export default function Courseware() {
         <div className="flex gap-3">
           <Link to="/editor" className="btn-primary"><Plus className="w-4 h-4" /> 新建课件</Link>
           <Link to="/courseware/import" className="btn-ghost"><Upload className="w-4 h-4" /> 导入课件</Link>
-          <button className="btn-ghost"><FileText className="w-4 h-4" /> 从模板创建</button>
+          <button className="btn-ghost opacity-70 cursor-not-allowed" title="MVP 阶段不开放模板库">
+            <FileText className="w-4 h-4" /> 从模板创建 <span className="text-[10px] text-slate-400">暂不开放</span>
+          </button>
         </div>
 
         {/* 筛选区 */}
         <div className="card p-4">
+          <div className="flex items-center gap-5 mb-3">
+            <FilterSelect label="学科" value={subject} onChange={setSubject} options={['数学', '语文', '英语', '全部']} />
+            <FilterSelect label="年级" value={grade} onChange={setGrade} options={['初二', '初一', '初三', '全部']} />
+            <FilterSelect label="教材版本" value={textbook} onChange={setTextbook} options={['人教版', '北师大版', '苏教版', '全部']} />
+            <FilterSelect label="课时" value={lesson} onChange={setLesson} options={['全部', '第1课时', '第2课时', '练习课', '复习课']} />
+            <label className="flex items-center gap-2">
+              <span className="text-sm text-slate-700 whitespace-nowrap">更新时间：</span>
+              <div className="relative">
+                <select className="input h-9 pr-9" value={timeRange} onChange={e => setTimeRange(e.target.value)}>
+                  <option value="all">请选择日期</option>
+                  <option value="week">最近一周</option>
+                  <option value="month">最近一月</option>
+                </select>
+                <CalendarDays className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+              </div>
+            </label>
+            <button
+              onClick={() => setOnlyInteractive(value => !value)}
+              className="ml-auto flex items-center gap-2 text-sm text-slate-700"
+            >
+              含互动
+              <span className={`relative w-10 h-5 rounded-full transition ${onlyInteractive ? 'bg-brand-500' : 'bg-slate-300'}`}>
+                <span className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition ${onlyInteractive ? 'left-[22px]' : 'left-0.5'}`} />
+              </span>
+            </button>
+          </div>
           <div className="flex items-center gap-3">
-            <div className="relative flex-1 max-w-[320px]">
+            <div className="relative flex-1 max-w-[360px]">
               <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 className="input w-full pl-9"
@@ -73,14 +125,16 @@ export default function Courseware() {
             </div>
             <button onClick={reset} className="btn-ghost h-9"><RotateCcw className="w-3.5 h-3.5" /> 重置</button>
             <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 whitespace-nowrap">时间排序:</span>
+              <span className="text-xs text-slate-500 whitespace-nowrap">排序:</span>
               <select
                 className="input h-8 text-xs"
                 value={sortOrder}
                 onChange={e => setSortOrder(e.target.value)}
               >
-                <option value="desc">最新在前</option>
-                <option value="asc">最早在前</option>
+                <option value="timeDesc">最新在前</option>
+                <option value="timeAsc">最早在前</option>
+                <option value="pagesDesc">页数从高到低</option>
+                <option value="pagesAsc">页数从低到高</option>
               </select>
             </div>
             <div className="ml-auto flex items-center gap-2">
@@ -128,7 +182,7 @@ export default function Courseware() {
                   onClick={() => toggleSel(i)}
                 >
                   <div className={`h-32 bg-gradient-to-br ${it.gradient} relative flex items-center justify-center`}>
-                    <div className="text-slate-700/30 text-xs">{it.title}</div>
+                    <CoursewareThumb title={it.title} />
                     {it.interact ? (
                       <span className="absolute top-2 right-2 pill bg-emerald-100 text-emerald-700">含互动</span>
                     ) : (
@@ -140,7 +194,7 @@ export default function Courseware() {
                   </div>
                   <div className="p-3 space-y-1">
                     <div className="text-sm font-medium text-slate-800 truncate">{it.title}</div>
-                    <div className="text-xs text-slate-400">{it.subject}</div>
+                    <div className="text-xs text-slate-400">{it.subject}  ｜ {it.grade} ｜ {it.className}</div>
                     <div className="text-xs text-slate-400">共 {it.pages} 页</div>
                     <div className="text-xs text-slate-400">更新时间：{it.updated}</div>
                     <div className="flex items-center gap-1 text-xs text-emerald-600">
@@ -181,7 +235,7 @@ export default function Courseware() {
                         <input type="checkbox" checked={isSel} readOnly className="accent-brand-600" />
                       </td>
                       <td className="py-2 px-3 text-slate-800 font-medium">{it.title}</td>
-                      <td className="py-2 px-3 text-slate-500">{it.subject}</td>
+                      <td className="py-2 px-3 text-slate-500">{it.subject} / {it.grade} / {it.className}</td>
                       <td className="py-2 px-3 text-center text-slate-500">{it.pages}</td>
                       <td className="py-2 px-3 text-center">
                         {it.interact ? <span className="pill bg-emerald-100 text-emerald-700">含互动</span> : <span className="pill bg-slate-100 text-slate-500">无</span>}
@@ -204,7 +258,7 @@ export default function Courseware() {
 
         {/* 分页 */}
         <div className="card p-3 flex items-center justify-between text-sm shrink-0">
-          <span className="text-slate-500">已选 {selected.size} / {items.length} 个课件</span>
+          <span className="text-slate-500">共 24 个课件</span>
           <div className="flex items-center gap-1">
             <PageBtn>1</PageBtn>
             <PageBtn off>2</PageBtn>
@@ -283,6 +337,33 @@ export default function Courseware() {
         </button>
       )}
     </div>
+  )
+}
+
+function CoursewareThumb({ title }) {
+  return (
+    <div className="w-28 h-24 rounded-lg bg-white/80 border border-white/70 shadow-sm p-2 flex flex-col gap-1.5">
+      <div className="h-2 rounded bg-brand-100 w-3/4" />
+      <div className="space-y-1">
+        <div className="h-1 rounded bg-slate-200 w-full" />
+        <div className="h-1 rounded bg-slate-200 w-5/6" />
+        <div className="h-1 rounded bg-slate-200 w-2/3" />
+      </div>
+      <div className="mt-auto h-10 rounded border border-slate-100 bg-slate-50 flex items-center justify-center text-[10px] text-slate-400 text-center px-1">
+        {title.slice(0, 8)}
+      </div>
+    </div>
+  )
+}
+
+function FilterSelect({ label, value, onChange, options }) {
+  return (
+    <label className="flex items-center gap-2">
+      <span className="text-sm text-slate-700 whitespace-nowrap">{label}：</span>
+      <select className="input h-9 min-w-[104px]" value={value} onChange={event => onChange(event.target.value)}>
+        {options.map(option => <option key={option} value={option}>{option}</option>)}
+      </select>
+    </label>
   )
 }
 

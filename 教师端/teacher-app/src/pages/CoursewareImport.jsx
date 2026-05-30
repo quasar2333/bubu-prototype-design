@@ -1,6 +1,7 @@
+import { useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  ChevronRight, Cloud, UploadCloud, FileText, Image as ImageIcon, FileType2,
+  ChevronRight, Cloud, UploadCloud, FileText, FileType2,
   CheckCircle2, Edit3, AlertCircle, FilePlus
 } from 'lucide-react'
 
@@ -11,6 +12,47 @@ const steps = [
 ]
 
 export default function CoursewareImport() {
+  const [selectedFile, setSelectedFile] = useState({ name: '8.2 一元一次不等式.pptx', size: '126 MB' })
+  const [isDragging, setIsDragging] = useState(false)
+  const [error, setError] = useState('')
+  const [settings, setSettings] = useState({
+    title: '8.2 一元一次不等式 (第1课时)',
+    subject: '数学',
+    grade: '初二',
+    lesson: '第1课时',
+    textbook: '人教版（2024版）',
+    className: '初二 (3) 班',
+    autoDetectQuestions: true,
+    generateOutline: true,
+    uploadToCloud: true
+  })
+  const inputRef = useRef(null)
+  const progress = useMemo(() => selectedFile
+    ? [
+        { label: '文件上传', pct: 82, status: '上传中', icon: <UploadCloud className="w-4 h-4 text-brand-500" /> },
+        { label: '页面解析', pct: 45, status: '解析中', icon: <FileText className="w-4 h-4 text-violet-500" /> },
+        { label: '题目识别', pct: 0, status: '等待中', icon: <CheckCircle2 className="w-4 h-4 text-slate-400" />, disabled: true },
+        { label: '云端同步', pct: 0, status: '未开始', icon: <Cloud className="w-4 h-4 text-slate-400" />, disabled: true }
+      ]
+    : [
+        { label: '文件上传', pct: 0, status: '等待选择文件', icon: <UploadCloud className="w-4 h-4 text-slate-400" />, disabled: true },
+        { label: '页面解析', pct: 0, status: '未开始', icon: <FileText className="w-4 h-4 text-slate-400" />, disabled: true },
+        { label: '题目识别', pct: 0, status: '未开始', icon: <CheckCircle2 className="w-4 h-4 text-slate-400" />, disabled: true },
+        { label: '云端同步', pct: 0, status: '未开始', icon: <Cloud className="w-4 h-4 text-slate-400" />, disabled: true }
+      ], [selectedFile])
+
+  const chooseFile = file => {
+    if (!file) return
+    if (!file.name.toLowerCase().endsWith('.pptx')) {
+      setError('MVP 阶段仅支持 PPTX 文件，请重新选择')
+      return
+    }
+    setError('')
+    setSelectedFile({ name: file.name, size: `${Math.max(1, Math.round(file.size / 1024 / 1024))} MB` })
+  }
+  const updateSetting = (key, value) => setSettings(current => ({ ...current, [key]: value }))
+  const toggleSetting = key => setSettings(current => ({ ...current, [key]: !current[key] }))
+
   return (
     <div className="p-6 space-y-5">
       <div className="text-xs text-slate-500 flex items-center gap-1.5">
@@ -42,19 +84,46 @@ export default function CoursewareImport() {
       <div className="grid grid-cols-2 gap-5">
         {/* 文件上传 */}
         <div className="card p-5">
-          <div className="border-2 border-dashed border-slate-200 rounded-xl py-12 flex flex-col items-center bg-slate-50/50">
+          <div
+            className={`border-2 border-dashed rounded-xl py-10 flex flex-col items-center transition ${isDragging ? 'border-brand-400 bg-brand-50/70' : 'border-slate-200 bg-slate-50/50'}`}
+            onDragOver={event => { event.preventDefault(); setIsDragging(true) }}
+            onDragLeave={() => setIsDragging(false)}
+            onDrop={event => {
+              event.preventDefault()
+              setIsDragging(false)
+              chooseFile(event.dataTransfer.files?.[0])
+            }}
+          >
             <Cloud className="w-14 h-14 text-brand-400 mb-3" />
-            <div className="text-base text-slate-700 mb-4">拖拽 PPTX / PDF / 图片到这里</div>
-            <button className="btn-primary"><FilePlus className="w-4 h-4" /> 选择本地文件</button>
+            <div className="text-base text-slate-700 mb-2">拖拽 PPTX 到这里</div>
+            <div className="text-xs text-slate-400 mb-4">MVP 阶段仅接入 PPTX 导入与播放兼容</div>
+            <input
+              ref={inputRef}
+              type="file"
+              accept=".pptx,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+              className="hidden"
+              onChange={event => chooseFile(event.target.files?.[0])}
+            />
+            <button className="btn-primary" onClick={() => inputRef.current?.click()}><FilePlus className="w-4 h-4" /> 选择本地文件</button>
+            {selectedFile && (
+              <div className="mt-4 px-3 py-2 rounded-lg bg-white border border-brand-100 text-xs text-slate-600 flex items-center gap-2">
+                <FileType2 className="w-4 h-4 text-orange-500" />
+                <span>{selectedFile.name}</span>
+                <span className="text-slate-400">{selectedFile.size}</span>
+              </div>
+            )}
+            {error && (
+              <div className="mt-3 flex items-center gap-1.5 text-xs text-red-500">
+                <AlertCircle className="w-3.5 h-3.5" /> {error}
+              </div>
+            )}
           </div>
 
           <div className="mt-5">
             <div className="text-sm text-slate-700 font-medium mb-3">支持的文件格式</div>
-            <div className="grid grid-cols-4 gap-3 text-xs">
+            <div className="grid grid-cols-2 gap-3 text-xs">
               <FormatTag color="orange" icon={<FileType2 className="w-4 h-4" />} title="PPTX" desc="演示文稿" />
-              <FormatTag color="red" icon={<FileText className="w-4 h-4" />} title="PDF" desc="PDF 文档" />
-              <FormatTag color="emerald" icon={<ImageIcon className="w-4 h-4" />} title="PNG" desc="PNG 图片" />
-              <FormatTag color="blue" icon={<ImageIcon className="w-4 h-4" />} title="JPG" desc="JPG 图片" />
+              <FormatTag muted color="slate" icon={<FileText className="w-4 h-4" />} title="PDF/图片" desc="暂不支持" />
             </div>
             <div className="text-xs text-slate-400 mt-2">· 单个文件大小不超过 200MB</div>
           </div>
@@ -64,17 +133,18 @@ export default function CoursewareImport() {
         <div className="card p-5">
           <div className="text-sm font-semibold text-slate-800 mb-4">导入设置</div>
           <div className="grid grid-cols-2 gap-3">
-            <FormField label="课件名称" required value="8.2 一元一次不等式 (第1课时)" full />
-            <FormField label="学科" required value="数学" />
-            <FormField label="年级" required value="初二" />
-            <FormField label="教材版本" required value="人教版（2024版）" />
-            <FormField label="关联班级" required value="初二 (3) 班" />
+            <FormField label="课件名称" required value={settings.title} onChange={value => updateSetting('title', value)} full />
+            <FormField label="学科" required value={settings.subject} onChange={value => updateSetting('subject', value)} options={['数学', '语文', '英语']} />
+            <FormField label="年级" required value={settings.grade} onChange={value => updateSetting('grade', value)} options={['初二', '初一', '初三']} />
+            <FormField label="课时" required value={settings.lesson} onChange={value => updateSetting('lesson', value)} options={['第1课时', '第2课时', '练习课', '复习课']} />
+            <FormField label="教材版本" required value={settings.textbook} onChange={value => updateSetting('textbook', value)} options={['人教版（2024版）', '北师大版', '苏教版']} />
+            <FormField label="关联班级" required value={settings.className} onChange={value => updateSetting('className', value)} options={['初二 (3) 班', '初二 (1) 班', '初二 (2) 班']} />
           </div>
 
           <div className="border-t border-slate-100 mt-4 pt-4 space-y-3">
-            <ToggleRow icon={<CheckCircle2 className="w-5 h-5 text-brand-500" />} title="自动识别题目" sub="识别课件中的题目并提取知识信息" on />
-            <ToggleRow icon={<Edit3 className="w-5 h-5 text-brand-500" />} title="生成课件目录" sub="根据课件结构自动生成目录" on />
-            <ToggleRow icon={<Cloud className="w-5 h-5 text-brand-500" />} title="上传到云端资源库" sub="导入完成后保存到我的资源库" on />
+            <ToggleRow icon={<CheckCircle2 className="w-5 h-5 text-brand-500" />} title="自动识别题目" sub="识别课件中的题目并提取知识信息" on={settings.autoDetectQuestions} onToggle={() => toggleSetting('autoDetectQuestions')} />
+            <ToggleRow icon={<Edit3 className="w-5 h-5 text-brand-500" />} title="生成课件目录" sub="根据课件结构自动生成目录" on={settings.generateOutline} onToggle={() => toggleSetting('generateOutline')} />
+            <ToggleRow icon={<Cloud className="w-5 h-5 text-brand-500" />} title="上传到云端资源库" sub="导入完成后保存到我的资源库" on={settings.uploadToCloud} onToggle={() => toggleSetting('uploadToCloud')} />
           </div>
         </div>
       </div>
@@ -82,10 +152,9 @@ export default function CoursewareImport() {
       {/* 上传进度 + 解析结果预览 */}
       <div className="grid grid-cols-2 gap-5">
         <div className="card p-5 space-y-3">
-          <ProgressRow icon={<UploadCloud className="w-4 h-4 text-brand-500" />} label="文件上传" pct={82} status="上传中" />
-          <ProgressRow icon={<FileText className="w-4 h-4 text-violet-500" />} label="页面解析" pct={45} status="解析中" />
-          <ProgressRow icon={<CheckCircle2 className="w-4 h-4 text-slate-400" />} label="题目识别" pct={0} status="等待中" disabled />
-          <ProgressRow icon={<Cloud className="w-4 h-4 text-slate-400" />} label="云端同步" pct={0} status="未开始" disabled />
+          {progress.map(item => (
+            <ProgressRow key={item.label} {...item} />
+          ))}
         </div>
 
         <div className="card p-5">
@@ -118,15 +187,16 @@ export default function CoursewareImport() {
   )
 }
 
-function FormatTag({ color, icon, title, desc }) {
+function FormatTag({ color, icon, title, desc, muted }) {
   const cls = {
     orange: 'bg-orange-50 text-orange-600',
     red: 'bg-red-50 text-red-600',
     emerald: 'bg-emerald-50 text-emerald-600',
-    blue: 'bg-blue-50 text-blue-600'
+    blue: 'bg-blue-50 text-blue-600',
+    slate: 'bg-slate-100 text-slate-400'
   }[color]
   return (
-    <div className="border border-slate-100 rounded-lg p-2 flex items-center gap-2">
+    <div className={`border border-slate-100 rounded-lg p-2 flex items-center gap-2 ${muted ? 'opacity-70' : ''}`}>
       <div className={`w-7 h-7 rounded-md ${cls} flex items-center justify-center`}>{icon}</div>
       <div>
         <div className="text-slate-700 font-medium">{title}</div>
@@ -136,23 +206,34 @@ function FormatTag({ color, icon, title, desc }) {
   )
 }
 
-function FormField({ label, required, value, full }) {
+function FormField({ label, required, value, onChange, full, options }) {
   return (
     <div className={full ? 'col-span-2' : ''}>
       <div className="text-xs text-slate-500 mb-1">
         {required && <span className="text-red-500 mr-0.5">*</span>}{label}
       </div>
-      <button className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 flex items-center justify-between hover:border-brand-300">
-        {value}
-        <svg className="w-3 h-3 text-slate-400" viewBox="0 0 12 12" fill="none"><path d="M3 4.5l3 3 3-3" stroke="currentColor" strokeWidth="1.4" /></svg>
-      </button>
+      {options ? (
+        <select
+          className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 outline-none focus:border-brand-300"
+          value={value}
+          onChange={event => onChange(event.target.value)}
+        >
+          {options.map(option => <option key={option} value={option}>{option}</option>)}
+        </select>
+      ) : (
+        <input
+          className="w-full h-9 px-3 rounded-md border border-slate-200 bg-white text-sm text-slate-700 outline-none focus:border-brand-300"
+          value={value}
+          onChange={event => onChange(event.target.value)}
+        />
+      )}
     </div>
   )
 }
 
-function ToggleRow({ icon, title, sub, on }) {
+function ToggleRow({ icon, title, sub, on, onToggle }) {
   return (
-    <div className="flex items-center gap-3">
+    <button className="w-full flex items-center gap-3 text-left" onClick={onToggle}>
       {icon}
       <div className="flex-1">
         <div className="text-sm text-slate-700">{title}</div>
@@ -161,7 +242,7 @@ function ToggleRow({ icon, title, sub, on }) {
       <div className={`relative w-9 h-5 rounded-full transition ${on ? 'bg-brand-500' : 'bg-slate-300'}`}>
         <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition ${on ? 'left-[18px]' : 'left-0.5'}`} />
       </div>
-    </div>
+    </button>
   )
 }
 

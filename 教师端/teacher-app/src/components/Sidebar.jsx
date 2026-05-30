@@ -3,18 +3,21 @@ import { NavLink, useLocation } from 'react-router-dom'
 import {
   Home, BookOpen, Layers, ClipboardList, Database,
   CheckSquare, BarChart3, Archive, Settings, ChevronLeft, BookMarked,
-  ChevronDown, ChevronRight, Grid3x3
+  ChevronDown, ChevronRight, Grid3x3, Filter, Network
 } from 'lucide-react'
 
 const items = [
   { to: '/home', icon: Home, label: '首页' },
   { to: '/courseware', icon: BookOpen, label: '我的课件' },
   { to: '/quiz', icon: Layers, label: '课堂互动设计' },
-  { to: '/homework', icon: ClipboardList, label: '作业布置' },
-  { to: '/question-bank', icon: Database, label: '智能题库' },
+  { to: '/homework', icon: ClipboardList, label: '作业' },
+  // B1 智能题库独立入口：按 Plan_2 决定暂不作为独立页面（作业流程内 H3 照做）。保留注释以便甲方反馈后恢复。
+  // { to: '/question-bank', icon: Database, label: '智能题库' },
   { to: '/review', icon: CheckSquare, label: '作业批阅' },
   { to: '/analytics', icon: BarChart3, label: '学情查看' },
-  { to: '/school-resource', icon: Archive, label: '校本资源' }
+  { to: '/knowledge-graph', icon: Network, label: '知识图谱' }
+  // B7 校本资源：按 Plan_2 决定当前不做。保留注释以便后续恢复。
+  // { to: '/school-resource', icon: Archive, label: '校本资源' }
 ]
 
 const allPages = [
@@ -22,7 +25,8 @@ const allPages = [
   { code: 'T02', to: '/courseware', label: '我的课件' },
   { code: 'T03', to: '/courseware/import', label: '课件导入' },
   { code: 'T04', to: '/editor', label: '课件编辑器（全屏）' },
-  { code: 'T06', to: '/dictation', label: '听写配置' },
+  // A1 听/默写：MVP 正式主路径不出现。保留旧原型索引注释，便于回溯。
+  // { code: 'T06', to: '/dictation', label: '听写配置' },
   { code: 'T07', to: '/quiz', label: '随堂练配置' },
   { code: 'T08', to: '/static-interactive', label: '静态题互动化（全屏）' },
   { code: 'T09', to: '/homework', label: '作业布置' },
@@ -32,7 +36,8 @@ const allPages = [
   { code: 'T13', to: '/error-analysis', label: '错因分析' },
   { code: 'T14', to: '/lecture-gen', label: '讲评材料生成' },
   { code: 'T15', to: '/analytics', label: '学情看板' },
-  { code: 'T16', to: '/school-resource', label: '校本资源' }
+  { code: 'T16', to: '/school-resource', label: '校本资源' },
+  { code: 'X1', to: '/knowledge-graph', label: '知识图谱（开发中）' }
 ]
 
 export default function Sidebar() {
@@ -81,7 +86,7 @@ export default function Sidebar() {
           className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-slate-600 hover:bg-slate-50"
         >
           <Grid3x3 className="w-[18px] h-[18px]" />
-          <span className="flex-1 text-left">全部原型 (15)</span>
+          <span className="flex-1 text-left">全部原型 (16)</span>
           {allOpen ? <ChevronDown className="w-4 h-4 text-slate-400" /> : <ChevronRight className="w-4 h-4 text-slate-400" />}
         </button>
         {allOpen && (
@@ -108,6 +113,12 @@ export default function Sidebar() {
           <Settings className="w-[18px] h-[18px]" />
           <span>设置中心</span>
         </div>
+      </div>
+
+      <div className="h-10 border-t border-slate-100 px-4 flex items-center gap-2 text-xs text-slate-500">
+        <span className="flex-1">控制台日志</span>
+        <span className="px-1.5 py-0.5 rounded bg-slate-100 text-slate-400">0</span>
+        <Filter className="w-3.5 h-3.5 text-slate-400" />
       </div>
     </aside>
   )

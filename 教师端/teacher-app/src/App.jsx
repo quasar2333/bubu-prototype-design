@@ -9,12 +9,15 @@ import QuizConfig from './pages/QuizConfig.jsx'
 import StaticToInteractive from './pages/StaticToInteractive.jsx'
 import Homework from './pages/Homework.jsx'
 import HomeworkLayered from './pages/HomeworkLayered.jsx'
+import HomeworkLayoutPending from './pages/HomeworkLayoutPending.jsx'
+import HomeworkSelect from './pages/HomeworkSelect.jsx'
 import QuestionBank from './pages/QuestionBank.jsx'
 import HomeworkReview from './pages/HomeworkReview.jsx'
 import ErrorAnalysis from './pages/ErrorAnalysis.jsx'
 import LectureGen from './pages/LectureGen.jsx'
 import Analytics from './pages/Analytics.jsx'
 import SchoolResource from './pages/SchoolResource.jsx'
+import KnowledgeGraph from './pages/KnowledgeGraph.jsx'
 
 export default function App() {
   return (
@@ -33,6 +36,8 @@ export default function App() {
         <Route path="/dictation" element={<DictationConfig />} />
         <Route path="/quiz" element={<QuizConfig />} />
         <Route path="/homework" element={<Homework />} />
+        <Route path="/homework/select" element={<HomeworkSelect />} />
+        <Route path="/homework/layout" element={<HomeworkLayoutPending />} />
         <Route path="/homework/layered" element={<HomeworkLayered />} />
         <Route path="/question-bank" element={<QuestionBank />} />
         <Route path="/review" element={<HomeworkReview />} />
@@ -40,6 +45,7 @@ export default function App() {
         <Route path="/lecture-gen" element={<LectureGen />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/school-resource" element={<SchoolResource />} />
+        <Route path="/knowledge-graph" element={<KnowledgeGraph />} />
       </Route>
     </Routes>
   )

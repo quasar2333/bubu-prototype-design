@@ -60,7 +60,7 @@ export default function QuizConfig() {
             <div className="flex gap-2 flex-wrap">
               {[
                 { icon: <Database className="w-4 h-4" />, label: '题库', t: '智能题库' },
-                { icon: <Upload className="w-4 h-4" />, label: '上传', t: '上传本地题目' },
+                { icon: <Upload className="w-4 h-4" />, label: '学科网', t: '学科网API' },
                 { icon: <FileText className="w-4 h-4" />, label: '课件', t: '从课件圈选' },
                 { icon: <Bot className="w-4 h-4" />, label: 'AI', t: 'AI 生成' },
                 { icon: <Edit3 className="w-4 h-4" />, label: '手动', t: '手动录入' }

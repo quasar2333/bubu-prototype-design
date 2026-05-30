@@ -12,10 +12,10 @@ import {
 } from 'lucide-react'
 
 export const iconOptions = [
-  { value: 'home', label: '主页' },
-  { value: 'folder', label: '文件' },
-  { value: 'material', label: '素材' },
-  { value: 'classroom', label: '课堂' },
+  { value: 'home', label: '打开课件' },
+  { value: 'folder', label: '上一页' },
+  { value: 'material', label: '下一页' },
+  { value: 'classroom', label: '全屏' },
   { value: 'property', label: '属性' },
   { value: 'component', label: '组件' },
   { value: 'copy', label: '复制' },
@@ -26,17 +26,17 @@ export const iconOptions = [
 ]
 
 export const defaultFloatingActions = [
-  { id: 'home', label: '主页', icon: 'home', variant: 'labeled' },
-  { id: 'files', label: '文件', icon: 'folder', variant: 'labeled' },
-  { id: 'assets', label: '素材', icon: 'material', variant: 'labeled' },
-  { id: 'lesson', label: '课堂', icon: 'classroom', variant: 'labeled' },
-  { id: 'props', label: '属性', icon: 'property', variant: 'labeled' },
-  { id: 'components', label: '组件', icon: 'component', variant: 'labeled' },
-  { id: 'duplicate', label: '复制', icon: 'copy', variant: 'icon' },
-  { id: 'tiles', label: '视图', icon: 'grid', variant: 'icon' },
+  { id: 'open-cloud', label: '打开课件', icon: 'home', variant: 'labeled' },
+  { id: 'prev-page', label: '上一页', icon: 'folder', variant: 'labeled' },
+  { id: 'next-page', label: '下一页', icon: 'material', variant: 'labeled' },
+  { id: 'fullscreen', label: '全屏', icon: 'classroom', variant: 'labeled' },
+  { id: 'annotation', label: '批注', icon: 'property', variant: 'labeled' },
+  { id: 'laser', label: '激光笔', icon: 'component', variant: 'labeled' },
+  { id: 'magnifier', label: '放大镜', icon: 'copy', variant: 'icon' },
+  { id: 'thumbnails', label: '缩略图', icon: 'grid', variant: 'icon' },
   { id: 'draw', label: '画笔', icon: 'pencil', variant: 'icon' },
   { id: 'more', label: '更多', icon: 'more', variant: 'icon' },
-  { id: 'download', label: '下载', icon: 'download', variant: 'pill' },
+  { id: 'sync', label: '云端同步', icon: 'download', variant: 'pill' },
 ]
 
 const outlineIconMap = {

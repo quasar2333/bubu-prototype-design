@@ -7,7 +7,8 @@ const titleMap = {
   '/courseware/import': { code: 'T03', name: '课件导入' },
   '/dictation': { code: 'T06', name: '听写配置' },
   '/quiz': { code: 'T07', name: '随堂练配置' },
-  '/homework': { code: 'T09', name: '作业布置' },
+  '/homework': { code: 'T09', name: '作业' },
+  '/homework/select': { code: '', name: '作业选题' },
   '/homework/layered': { code: 'T10', name: '分层发布确认' },
   '/question-bank': { code: 'T11', name: '智能题库' },
   '/review': { code: 'T12', name: '作业批阅' },
@@ -21,6 +22,8 @@ export default function TopBar() {
   const location = useLocation()
   const navigate = useNavigate()
   const info = titleMap[location.pathname] || { code: '', name: '' }
+  const isHome = location.pathname === '/home'
+  const showContextFilters = isHome || location.pathname === '/courseware'
 
   return (
     <header className="h-16 bg-white border-b border-slate-100 flex items-center px-6 shrink-0 relative">
@@ -30,6 +33,20 @@ export default function TopBar() {
           {info.name}
         </div>
       </div>
+
+      {showContextFilters && (
+        <div className="ml-10 flex items-center gap-4">
+          {['光明中学', '初二（3）班', '数学'].map(item => (
+            <button
+              key={item}
+              className="h-9 min-w-[104px] px-4 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-700 flex items-center justify-between gap-3"
+            >
+              {item}
+              <ChevronDown className="w-4 h-4 text-slate-400" />
+            </button>
+          ))}
+        </div>
+      )}
 
       <div className="absolute left-1/2 -translate-x-1/2 w-full max-w-[420px] px-6">
         <div className="relative">

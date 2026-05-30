@@ -13,21 +13,11 @@ const uid = (prefix) => `${prefix}-${Date.now().toString(36)}-${Math.random().to
 const cx = (...classes) => classes.filter(Boolean).join(' ')
 
 const INTERACTIONS = {
-  listen: {
-    label: '听写',
-    icon: Music,
-    tone: 'blue',
-    desc: '乱序下发，OCR 自动判错，错词入复习',
-    trigger: '翻到此页自动触发',
-    collect: '实时统计',
-    track: '错词分布 / 耗时 / 修改次数',
-    layerBody: '词语、短句或概念解释下发到学生平板，提交后自动回收。'
-  },
   quiz: {
     label: '随堂练',
     icon: FileText,
     tone: 'emerald',
-    desc: '选择 / 填空 / 手写混合，支持分层推送',
+    desc: '选择 / 判断 / 填空混合，支持题源和分层推送',
     trigger: '翻页触发或教师手动',
     collect: '客观题秒批，主观题保留步骤',
     track: '正确率 / 错误选项 / 步骤卡点',
@@ -43,59 +33,30 @@ const INTERACTIONS = {
     track: '抽中分布 / 应答正确率',
     layerBody: '抽中后学生平板进入回答态，其他学生端保持旁听。'
   },
-  discuss: {
-    label: '分组讨论',
+  typical: {
+    label: '典型答案展示',
     icon: Users,
     tone: 'violet',
-    desc: '共享画板，小组结论，白板分屏展示',
-    trigger: '翻页触发或教师手动',
-    collect: '小组成果自动归档',
-    track: '组内贡献 / 讨论热度',
-    layerBody: '各组在共享画板提交结论，白板端可分屏展示。'
-  },
-  lab: {
-    label: '实验',
-    icon: FlaskConical,
-    tone: 'sky',
-    desc: '虚拟仪器或真实数据录入，全班数据成图',
-    trigger: '教师启动',
-    collect: '实验数据自动汇总',
-    track: '数据质量 / 结论表达',
-    layerBody: '学生端按步骤记录实验数据，提交后自动生成全班汇总图。'
-  },
-  circle: {
-    label: '圈选提问',
-    icon: CircleDot,
-    tone: 'rose',
-    desc: '圈选课件区域，AI 即时讲解或生成追问',
-    trigger: '教师圈选课件内容',
-    collect: '圈选内容沉淀为讲评素材',
-    track: '追问质量 / 应答情况',
-    layerBody: '教师圈选本页任意区域，AI 生成追问并可推送给全班。'
+    desc: '匿名展示优质/易错答案，支持讲评页沉淀',
+    trigger: '教师讲评时手动展示',
+    collect: '典型答案与教师点评归档',
+    track: '优秀答案 / 易错答案 / 点评记录',
+    layerBody: '从学生提交中选择典型答案，匿名展示并沉淀为讲评素材。'
   }
 }
 
 const CONFIG_FIELDS = {
-  listen: {
-    basic: [
-      { key: 'trigger', label: '触发时机', kind: 'single', options: ['翻到此页自动触发', '教师手动点击'], default: '翻到此页自动触发' },
-      { key: 'content', label: '听写内容', kind: 'text', default: '不等式、解集、移项、系数化为 1' },
-      { key: 'mode', label: '听写模式', kind: 'single', options: ['概念解释', '原文听写', '口算播报'], default: '概念解释' }
-    ],
-    advanced: [
-      { key: 'antiCheat', label: '防作弊', kind: 'multi', options: ['每台平板乱序', '全屏锁定', '禁止截图'], default: ['每台平板乱序', '全屏锁定'] },
-      { key: 'collect', label: '回收方式', kind: 'multi', options: ['实时统计', '错词入复习', '推送订正'], default: ['实时统计', '错词入复习'] }
-    ]
-  },
   quiz: {
     basic: [
-      { key: 'source', label: '题目来源', kind: 'single', options: ['当前课件题目', '智能题库', 'AI 变式', '手动录入'], default: '当前课件题目' },
-      { key: 'questionTypes', label: '题型组合', kind: 'multi', options: ['选择题', '填空题', '手写题', '判断题'], default: ['选择题', '填空题'] },
-      { key: 'count', label: '题目数量', kind: 'text', default: '3 题 · 预计 5 分钟' }
+      { key: 'source', label: '题目来源', kind: 'single', options: ['老师手动录入', '智能题库', '学科网API', '从课件圈选'], default: '智能题库' },
+      { key: 'questionTypes', label: '题型组合', kind: 'multi', options: ['选择题', '判断题', '填空题'], default: ['选择题', '判断题'] },
+      { key: 'count', label: '题目数量', kind: 'text', default: '10 题' },
+      { key: 'duration', label: '预计时长', kind: 'text', default: '8 分钟' }
     ],
     advanced: [
       { key: 'delivery', label: '分层下发', kind: 'single', options: ['全班同题', '按学情分 3 档', '只发需关注学生'], default: '全班同题' },
-      { key: 'afterSubmit', label: '提交后', kind: 'multi', options: ['公布统计', '允许看解析', '收集学情'], default: ['公布统计', '收集学情'] }
+      { key: 'afterSubmit', label: '提交后', kind: 'multi', options: ['公布统计', '允许看解析', '收集学情'], default: ['公布统计', '允许看解析', '收集学情'] },
+      { key: 'pushMode', label: '推送方式', kind: 'single', options: ['手动点击触发', '翻到本页自动提示', '翻到本页自动下发'], default: '手动点击触发' }
     ]
   },
   pick: {
@@ -108,33 +69,14 @@ const CONFIG_FIELDS = {
       { key: 'protect', label: '保护机制', kind: 'multi', options: ['允许求助同桌', '跳过一次', '老师确认后公布'], default: ['允许求助同桌'] }
     ]
   },
-  discuss: {
+  typical: {
     basic: [
-      { key: 'grouping', label: '分组方式', kind: 'single', options: ['沿用课堂小组', '按学情混合', '随机分组'], default: '沿用课堂小组' },
-      { key: 'topic', label: '讨论主题', kind: 'text', default: '不等式两边同乘负数时，符号为什么要改变？' }
+      { key: 'source', label: '答案来源', kind: 'single', options: ['随堂练提交', '老师手动选择', 'AI 推荐'], default: '随堂练提交' },
+      { key: 'displayMode', label: '展示方式', kind: 'single', options: ['匿名展示', '经老师确认后实名', '仅教师端预览'], default: '匿名展示' },
+      { key: 'count', label: '展示数量', kind: 'text', default: '3 份典型答案' }
     ],
     advanced: [
-      { key: 'output', label: '成果形式', kind: 'multi', options: ['小组画板', '一句话结论', '拍照上传'], default: ['小组画板', '一句话结论'] },
-      { key: 'display', label: '白板展示', kind: 'single', options: ['四组分屏', '只展示已提交', '老师推荐 1 组分享'], default: '四组分屏' }
-    ]
-  },
-  lab: {
-    basic: [
-      { key: 'type', label: '实验类型', kind: 'single', options: ['虚拟仪器', '真实数据录入', '拍照记录'], default: '虚拟仪器' },
-      { key: 'fields', label: '数据字段', kind: 'text', default: '次数、测量值、观察现象、结论' }
-    ],
-    advanced: [
-      { key: 'safety', label: '安全设置', kind: 'multi', options: ['只允许教师启动', '学生端步骤锁定', '异常数据提醒'], default: ['只允许教师启动', '学生端步骤锁定'] },
-      { key: 'summary', label: '汇总方式', kind: 'single', options: ['全班数据自动成图', '导出表格', '生成实验结论页'], default: '全班数据自动成图' }
-    ]
-  },
-  circle: {
-    basic: [
-      { key: 'target', label: '圈选对象', kind: 'single', options: ['课件任意区域', '题干', '图片', '学生答案'], default: '课件任意区域' },
-      { key: 'aiAction', label: 'AI 动作', kind: 'multi', options: ['生成追问', '即时讲解', '生成同类题'], default: ['生成追问', '即时讲解'] }
-    ],
-    advanced: [
-      { key: 'audience', label: '下发范围', kind: 'single', options: ['白板展示', '推给全班', '只推给错答学生'], default: '白板展示' },
+      { key: 'categories', label: '答案类型', kind: 'multi', options: ['优秀答案', '易错答案', '创新解法'], default: ['优秀答案', '易错答案'] },
       { key: 'saveTo', label: '保存去向', kind: 'multi', options: ['加入课件页', '沉淀为讲评素材', '入校本资源'], default: ['加入课件页', '沉淀为讲评素材'] }
     ]
   }
@@ -220,7 +162,7 @@ const initialSlides = [
       ['乘正数', '方向不变'],
       ['乘负数', '方向改变']
     ],
-    caption: '本页是高风险概念页，适合插入圈选提问或随堂练。'
+      caption: '本页是高风险概念页，适合插入随堂练或典型答案展示。'
   },
   {
     id: 'slide-example',
@@ -353,6 +295,7 @@ export default function CoursewareEditor() {
   const [activeSlideId, setActiveSlideId] = useState(initialSlides[0].id)
   const [activeTool, setActiveTool] = useState('select')
   const [rightTab, setRightTab] = useState('interact')
+  const [interactionPanelOpen, setInteractionPanelOpen] = useState(true)
   const [configTab, setConfigTab] = useState('basic')
   const [selectedLayerId, setSelectedLayerId] = useState(null)
   const [interactionConfigs, setInteractionConfigs] = useState(makeInitialConfig)
@@ -519,7 +462,7 @@ export default function CoursewareEditor() {
       chart: { kind: 'media', title: '图表占位', body: '作答统计或函数图像。' },
       table: { kind: 'media', title: '表格占位', body: '步骤、结论或分层名单。' },
       audio: { kind: 'media', title: '音频占位', body: '听力、口令或朗读材料。' },
-      video: { kind: 'media', title: '视频占位', body: '情境导入或实验视频。' },
+      video: { kind: 'media', title: '视频占位', body: '情境导入或课堂素材视频。' },
       mind: { kind: 'mind', title: '知识结构', body: '不等式|性质|解集|数轴' }
     }
     const base = layerMap[kind]
@@ -819,7 +762,7 @@ export default function CoursewareEditor() {
         updatedAt: Date.now()
       }))
     } catch {}
-    showToast('已发送到白板')
+    showToast('已保存到本地草稿，并上传云端后发送到白板')
   }
 
   return (
@@ -844,8 +787,8 @@ export default function CoursewareEditor() {
       <div className="h-11 bg-white border-b border-slate-100 flex items-center px-4 gap-5 text-sm">
         <button className="text-slate-700 hover:text-brand-600">文件</button>
         <button className="text-slate-700 hover:text-brand-600">插入</button>
-        <button className="text-slate-700 hover:text-brand-600" onClick={() => setRightTab('interact')}>互动</button>
-        <button className="text-slate-700 hover:text-brand-600" onClick={() => setRightTab('subject')}>学科工具</button>
+        <button className="text-slate-700 hover:text-brand-600" onClick={() => { setRightTab('interact'); setInteractionPanelOpen(true) }}>互动</button>
+        <button className="text-slate-700 hover:text-brand-600" onClick={() => { setRightTab('subject'); setInteractionPanelOpen(true) }}>学科工具</button>
         <button className="w-8 h-8 rounded-md hover:bg-slate-100 flex items-center justify-center" onClick={() => showToast('已撤销上一步')}>
           <Undo2 className="w-4 h-4 text-slate-500" />
         </button>
@@ -896,8 +839,8 @@ export default function CoursewareEditor() {
         )}
       </div>
 
-      <div className="flex-1 grid grid-cols-[240px_minmax(640px,1fr)_330px] min-h-0">
-        <aside className="bg-white border-r border-slate-100 flex flex-col min-h-0">
+      <div className={cx('flex-1 grid min-h-0', interactionPanelOpen ? 'grid-cols-[240px_330px_minmax(640px,1fr)]' : 'grid-cols-[240px_52px_minmax(640px,1fr)]')}>
+        <aside className="order-1 bg-white border-r border-slate-100 flex flex-col min-h-0">
           <div className="p-4 border-b border-slate-100">
             <div className="flex items-center justify-between">
               <div className="font-semibold text-sm">课堂流程</div>
@@ -955,7 +898,7 @@ export default function CoursewareEditor() {
           </div>
         </aside>
 
-        <main className="min-w-0 flex flex-col bg-slate-100">
+        <main className="order-3 min-w-0 flex flex-col bg-slate-100">
           <div className="h-10 bg-white border-b border-slate-100 flex items-center px-4 text-xs">
             <Layers3 className="w-3.5 h-3.5 text-slate-500 mr-1.5" />
             <span className="font-semibold text-slate-700">第 {activeIndex + 1} 页 · {activeSlide.name}</span>
@@ -1033,14 +976,31 @@ export default function CoursewareEditor() {
           </div>
         </main>
 
-        <aside className="bg-white border-l border-slate-100 flex flex-col min-h-0">
+        <aside className="order-2 bg-white border-r border-slate-100 flex flex-col min-h-0">
+          {!interactionPanelOpen ? (
+            <button
+              onClick={() => setInteractionPanelOpen(true)}
+              className="h-full w-full flex flex-col items-center justify-start gap-3 pt-4 text-brand-600 hover:bg-brand-50"
+              title="展开互动组件面板"
+            >
+              <Sparkles className="w-5 h-5" />
+              <span className="[writing-mode:vertical-rl] text-xs font-semibold tracking-widest">互动组件面板</span>
+            </button>
+          ) : (
+            <>
           <div className="p-3 border-b border-slate-100 flex-none">
             <div className="flex items-center justify-between">
               <div>
-                <div className="font-semibold text-sm">互动与学科工具</div>
-                <div className="mt-1 text-[11px] text-slate-500">画布放模块，缩略图放整页</div>
+                <div className="font-semibold text-sm">互动组件面板</div>
+                <div className="mt-1 text-[11px] text-slate-500">可收缩；拖拽组件到画布中</div>
               </div>
-              <Sparkles className="w-4 h-4 text-brand-500" />
+              <button
+                onClick={() => setInteractionPanelOpen(false)}
+                className="w-7 h-7 rounded-md hover:bg-slate-100 flex items-center justify-center"
+                title="收起互动组件面板"
+              >
+                <X className="w-3.5 h-3.5 text-slate-400" />
+              </button>
             </div>
           </div>
 
@@ -1081,7 +1041,7 @@ export default function CoursewareEditor() {
                           <div className="min-w-0 flex-1">
                             <div className="flex items-center gap-2">
                               <span className="text-sm font-semibold text-slate-800">{item.label}</span>
-                              {(type === 'quiz' || type === 'listen') && <span className="pill bg-emerald-100 text-emerald-700">高频</span>}
+                              {type === 'quiz' && <span className="pill bg-emerald-100 text-emerald-700">高频</span>}
                             </div>
                             <div className="text-xs text-slate-500 leading-5 mt-0.5">{item.desc}</div>
                           </div>
@@ -1125,6 +1085,8 @@ export default function CoursewareEditor() {
               </div>
             )}
           </div>
+            </>
+          )}
         </aside>
       </div>
 

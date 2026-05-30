@@ -179,41 +179,61 @@ export default function HomeworkReview() {
                 <button className="w-8 h-8 hover:bg-slate-50 flex items-center justify-center"><RotateCw className="w-4 h-4" /></button>
                 <button className="w-8 h-8 hover:bg-slate-50 flex items-center justify-center"><FileText className="w-4 h-4" /></button>
               </div>
-              <div className="absolute right-2 bottom-2 text-[10px] text-slate-400">书写区域识别率：92%</div>
+              <div className="absolute right-2 bottom-2 text-[10px] text-slate-400">手写清晰度：中等</div>
             </div>
 
-            {/* OCR 识别 */}
+            {/* 手写过程缩略图 */}
             <details open className="border border-slate-100 rounded p-3 text-xs">
               <summary className="text-slate-600 cursor-pointer flex items-center justify-between">
-                <span>OCR 识别结果 <span className="ml-2 text-slate-400">置信度: 88%</span></span>
+                <span>手写过程缩略图 <span className="ml-2 text-slate-400">仅作老师手动批阅参考</span></span>
               </summary>
-              <pre className="text-slate-600 mt-2 whitespace-pre-wrap font-mono leading-snug">{`ax² − 4x + 3 > 0
-Δ = b² − 4ac = 16 − 12a
-① 当 a > 4/3, Δ < 0, 二次函数开口向上, 与 x 轴无交点, 故 ax² − 4x + 3 > 0 恒成立。
-② 当 a = 4/3, Δ = 0, ax² − 4x + 3 = (x − a/2)², 故 ax² − 4x + 3 ≥ 0 恒成立。
-③ 当 a < 4/3, Δ > 0, x₁ = (1−√(1−3a))/a, x₂ = (1+√(1−3a))/a, 由图像可知不等式的解集为 (−∞,x₁) ∪ (x₂,+∞)。`}</pre>
+              <div className="mt-2 grid grid-cols-4 gap-2">
+                {['判别式', '分类讨论', '求根公式', '区间结论'].map((step, index) => (
+                  <div key={step} className="rounded border border-slate-100 bg-slate-50 p-2">
+                    <div className="text-[10px] text-slate-400">步骤 {index + 1}</div>
+                    <div className="mt-1 h-10 rounded bg-white border border-slate-100 flex items-center justify-center font-serif text-slate-600">{step}</div>
+                  </div>
+                ))}
+              </div>
             </details>
 
             {/* 标准答案 */}
-            <details className="border border-slate-100 rounded p-3 text-xs">
+            <details open className="border border-slate-100 rounded p-3 text-xs">
               <summary className="text-slate-600 cursor-pointer flex items-center justify-between">
-                <span>标准答案 (参考)</span>
+                <span>客观题自动批改结果 + 标准答案 (参考)</span>
                 <span className="text-brand-600 hover:underline">展开全部 ›</span>
               </summary>
+              <div className="mt-2 grid grid-cols-[120px_1fr] gap-3">
+                <div className="rounded-lg bg-emerald-50 border border-emerald-100 p-2 text-emerald-700">
+                  <div className="font-semibold">客观题正确</div>
+                  <div className="text-[11px] mt-1">选择题 1/1，系统已判定</div>
+                </div>
+                <div className="rounded-lg bg-slate-50 border border-slate-100 p-2 text-slate-600 leading-5">
+                  参考：先按判别式 Δ=16−12a 分类，再分别讨论 Δ&lt;0、Δ=0、Δ&gt;0 时二次函数与 x 轴关系，最后写出解集区间。
+                </div>
+              </div>
             </details>
+
+            <div className="border border-brand-100 rounded p-3 text-xs bg-brand-50/40">
+              <div className="text-slate-700 font-medium mb-2">主观题手写批改区</div>
+              <textarea
+                className="input w-full !h-16 py-2 bg-white"
+                defaultValue="老师手动标注：分类讨论基本完整，结论区间端点需提醒学生复查。"
+              />
+            </div>
           </div>
 
-          {/* 笔迹回放 + 操作 */}
+          {/* 手写过程查看 + 操作 */}
           <div className="border-t border-slate-100 pt-3 mt-3 space-y-2">
             <div className="flex items-center gap-3 text-xs text-slate-500">
-              <span>笔迹回放</span>
+              <span>手写过程</span>
               <SkipBack className="w-3.5 h-3.5" />
               <Play className="w-3.5 h-3.5 text-brand-600" />
               <Pause className="w-3.5 h-3.5" />
               <SkipForward className="w-3.5 h-3.5" />
               <div className="flex-1 h-1 bg-slate-100 rounded-full"><div className="h-full bg-brand-500 rounded-full w-1/3" /></div>
               <span>1.0x</span>
-              <span>00:00 / 03:21</span>
+              <span>4 个缩略步骤</span>
             </div>
             <div className="grid grid-cols-4 gap-2">
               <button onClick={goPrev} disabled={activeIdx <= 0} className="btn-ghost h-8 text-xs disabled:opacity-40 disabled:cursor-not-allowed"><ChevronLeft className="w-3 h-3" /> 上一人</button>
@@ -244,6 +264,17 @@ export default function HomeworkReview() {
               <button onClick={() => setScore(s => Math.min(10, s + 1))} className="w-8 h-9 text-slate-500 hover:bg-slate-50">+</button>
             </div>
             <span className="text-sm text-slate-500">/10 分</span>
+          </div>
+
+          <div className="mb-4">
+            <div className="text-sm font-medium text-slate-700 mb-2">批改工具</div>
+            <div className="grid grid-cols-3 gap-2 text-xs">
+              {['对', '半对', '错'].map(label => (
+                <button key={label} className={`h-8 rounded-md border ${label === '半对' ? 'border-amber-200 bg-amber-50 text-amber-700' : label === '对' ? 'border-emerald-200 bg-emerald-50 text-emerald-700' : 'border-rose-200 bg-rose-50 text-rose-700'}`}>
+                  {label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="text-sm font-medium text-slate-700 mb-2 flex items-center justify-between">
@@ -278,22 +309,22 @@ export default function HomeworkReview() {
           <div className="text-[10px] text-slate-400 mb-2">已选 {totalRubric} / 4 项量规</div>
 
           <div className="text-sm font-medium text-slate-700 mb-2 flex items-center justify-between">
-            OCR 识别提醒 <span className="text-xs text-brand-600 hover:underline">查看详情</span>
+            手动批阅提示 <span className="text-xs text-slate-400">OCR/步骤批改暂不启用</span>
           </div>
           <div className="text-xs space-y-1 border border-slate-100 rounded p-2 bg-slate-50/60 mb-3">
-            <div className="flex items-center justify-between"><span className="text-slate-500">整体识别率</span><span className="text-emerald-600 font-medium">88%</span></div>
-            <div className="flex items-center justify-between"><span className="text-slate-500">可疑区域</span><span className="text-slate-700">1 处</span></div>
-            <div className="flex items-center justify-between"><span className="text-slate-500">手写清晰度</span><span className="text-slate-700">中等</span></div>
+            <div className="flex items-center justify-between"><span className="text-slate-500">主观题批改</span><span className="text-slate-700">老师手动</span></div>
+            <div className="flex items-center justify-between"><span className="text-slate-500">过程缩略图</span><span className="text-emerald-600 font-medium">已展示</span></div>
+            <div className="flex items-center justify-between"><span className="text-slate-500">客观题判分</span><span className="text-slate-700">自动判定</span></div>
           </div>
 
           <div className="border border-amber-100 bg-amber-50 rounded-lg p-3 text-xs">
             <div className="flex items-center gap-1.5 text-amber-700 font-medium mb-1">
-              <AlertCircle className="w-3.5 h-3.5" /> 可疑步骤提醒 (1处) <span className="ml-auto text-brand-600 hover:underline">查看标注</span>
+              <AlertCircle className="w-3.5 h-3.5" /> 复核提醒 <span className="ml-auto text-brand-600 hover:underline">查看批注</span>
             </div>
-            <div className="text-slate-600 leading-snug">第3步：解集区间端点书写存在可疑标记，建议结合图像或结合下文确认。</div>
+            <div className="text-slate-600 leading-snug">结论区间端点容易混淆，建议老师在手写区加一句批注后保存。</div>
           </div>
 
-          <button className="btn-primary mt-4 mb-2">保存批阅</button>
+          <button className="btn-primary mt-4 mb-2">提交批改</button>
           <div className="text-xs text-emerald-600 text-center">✓ 自动保存已开启</div>
         </div>
       </div>
