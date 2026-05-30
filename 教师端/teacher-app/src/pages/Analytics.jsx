@@ -18,10 +18,10 @@ export default function Analytics() {
   return (
     <div className="p-6 space-y-5">
       <div className="grid grid-cols-4 gap-4">
-        <StatCard color="brand" icon={<CheckCircle2 className="w-7 h-7" />} title="本周正确率" value="78%" delta="↑ 6.2%" deltaColor="text-emerald-600" desc="较上周" />
-        <StatCard color="emerald" icon={<ClipboardCheck className="w-7 h-7" />} title="作业完成率" value="91%" delta="↑ 4.5%" deltaColor="text-emerald-600" desc="较上周" />
-        <StatCard color="amber" icon={<Users className="w-7 h-7" />} title="课堂参与率" value="86%" delta="↑ 3.1%" deltaColor="text-emerald-600" desc="较上周" />
-        <StatCard color="red" icon={<AlertCircle className="w-7 h-7" />} title="薄弱知识点" value="5个" delta="↑ 1个" deltaColor="text-red-500" desc="较上周" />
+        <StatCard color="brand" icon={<CheckCircle2 className="w-6 h-6" />} title="本周正确率" value="78%" delta="↑ 6.2%" deltaColor="text-emerald-600" desc="较上周" ring={78} />
+        <StatCard color="emerald" icon={<ClipboardCheck className="w-6 h-6" />} title="作业完成率" value="91%" delta="↑ 4.5%" deltaColor="text-emerald-600" desc="较上周" ring={91} />
+        <StatCard color="amber" icon={<Users className="w-6 h-6" />} title="课堂参与率" value="86%" delta="↑ 3.1%" deltaColor="text-emerald-600" desc="较上周" ring={86} />
+        <StatCard color="red" icon={<AlertCircle className="w-6 h-6" />} title="薄弱知识点" value="5个" delta="↑ 1个" deltaColor="text-red-500" desc="较上周" ring={100} />
       </div>
 
       <div className="grid grid-cols-[1fr_1fr_280px] gap-4">
@@ -54,25 +54,32 @@ export default function Analytics() {
         <div className="card p-5">
           <div className="font-semibold text-slate-800 mb-4">学情提醒</div>
           <div className="mb-4">
-            <div className="text-sm text-slate-700 mb-2 font-medium">共性薄弱点 <span className="text-slate-400 font-normal">5</span></div>
+            <div className="text-sm text-brand-600 mb-2 font-semibold">共性薄弱点 <span className="text-brand-600 font-normal">5</span></div>
             <WeakItem rank={1} text="一元一次不等式应用" pct="68%" />
             <WeakItem rank={2} text="函数图像的性质" pct="63%" />
             <WeakItem rank={3} text="一元一次方程应用" pct="71%" />
             <a className="text-xs text-brand-600 hover:underline">查看全部 ›</a>
           </div>
           <div className="mb-4 border-t border-slate-100 pt-3">
-            <div className="text-sm text-slate-700 mb-2 font-medium">高错题 TOP3</div>
+            <div className="text-sm text-brand-600 mb-2 font-semibold">高错题 TOP3</div>
             <ErrItem rank={1} text="一元一次不等式解集" pct="错误率 62%" />
             <ErrItem rank={2} text="函数图像的平移" pct="错误率 58%" />
             <ErrItem rank={3} text="方程应用 - 行程问题" pct="错误率 55%" />
             <a className="text-xs text-brand-600 hover:underline">查看全部 ›</a>
           </div>
-          <div className="border-t border-slate-100 pt-3">
-            <div className="text-sm text-slate-700 mb-2 font-medium">未提交学生 <span className="text-red-500 font-normal">3</span></div>
+          <div className="mb-4 border-t border-slate-100 pt-3">
+            <div className="text-sm text-brand-600 mb-2 font-semibold">未提交学生 <span className="text-red-500 font-normal">3</span></div>
             <div className="text-xs text-slate-500">刘子涵 - 未提交 2 份作业</div>
             <div className="text-xs text-slate-500">杨雨晨 - 未提交 1 份作业</div>
             <div className="text-xs text-slate-500">陈浩宇 - 未提交 1 份作业</div>
             <a className="text-xs text-brand-600 hover:underline mt-1 inline-block">查看全部 ›</a>
+          </div>
+          <div className="border-t border-slate-100 pt-3">
+            <div className="text-sm text-brand-600 mb-2 font-semibold">建议复习任务</div>
+            <div className="text-xs text-slate-600 py-0.5">1. 一元一次不等式专项训练 <span className="text-slate-400">(10题)</span></div>
+            <div className="text-xs text-slate-600 py-0.5">2. 函数图像性质巩固练习 <span className="text-slate-400">(8题)</span></div>
+            <div className="text-xs text-slate-600 py-0.5">3. 一元一次方程提升训练 <span className="text-slate-400">(12题)</span></div>
+            <a className="text-xs text-brand-600 hover:underline mt-1 inline-block">一键布置 ›</a>
           </div>
         </div>
       </div>
@@ -154,8 +161,8 @@ export default function Analytics() {
             <button className="btn-primary h-8 text-xs"><Users className="w-3 h-3" /> 查看学生详情</button>
           </div>
         </div>
-        <div className="grid grid-cols-[120px_1fr] gap-4">
-          <div className="space-y-1.5 text-sm">
+        <div className="grid grid-cols-[120px_1fr_36px] gap-4 items-center">
+          <div className="space-y-1.5 text-sm self-start">
             <button className="w-full text-left px-3 py-2 rounded-md bg-brand-50 text-brand-700 font-medium">推荐素材</button>
             <button className="w-full text-left px-3 py-2 rounded-md text-slate-600 hover:bg-slate-50">我的素材</button>
             <button className="w-full text-left px-3 py-2 rounded-md text-slate-600 hover:bg-slate-50">收藏素材</button>
@@ -166,20 +173,24 @@ export default function Analytics() {
             <MatCard tag="拓展模块" title="行程问题中的方程应用" desc="适用：初二 · 数学" used="112 次" gradient="from-emerald-100 to-teal-200" />
             <MatCard tag="基础巩固" title="一元一次方程知识梳理" desc="适用：初二 · 数学" used="89 次" gradient="from-amber-100 to-orange-200" />
           </div>
+          <button className="w-9 h-9 rounded-full border border-slate-200 text-slate-400 hover:bg-slate-50 flex items-center justify-center">›</button>
         </div>
       </div>
     </div>
   )
 }
 
-function StatCard({ color, icon, title, value, delta, deltaColor, desc }) {
+function StatCard({ color, icon, title, value, delta, deltaColor, desc, ring = 0 }) {
   const map = {
-    brand: 'from-brand-500 to-brand-600 text-brand-500 bg-brand-50',
-    emerald: 'from-emerald-500 to-emerald-600 text-emerald-500 bg-emerald-50',
-    amber: 'from-amber-400 to-amber-500 text-amber-500 bg-amber-50',
-    red: 'from-red-400 to-red-500 text-red-500 bg-red-50'
+    brand: { text: 'text-brand-500', stroke: '#3B82F6', track: '#DBEAFE' },
+    emerald: { text: 'text-emerald-500', stroke: '#10B981', track: '#D1FAE5' },
+    amber: { text: 'text-amber-500', stroke: '#F59E0B', track: '#FEF3C7' },
+    red: { text: 'text-red-500', stroke: '#EF4444', track: '#FEE2E2' }
   }
-  const [_, __, textCls, bgCls] = map[color].split(' ')
+  const c = map[color]
+  const R = 26
+  const CIRC = 2 * Math.PI * R
+  const offset = CIRC * (1 - Math.min(ring, 100) / 100)
   return (
     <div className="card p-5 flex items-center gap-4">
       <div className="flex-1">
@@ -187,8 +198,12 @@ function StatCard({ color, icon, title, value, delta, deltaColor, desc }) {
         <div className="text-3xl font-bold text-slate-800 mt-1">{value}</div>
         <div className="text-xs text-slate-400 mt-1">{desc} <span className={deltaColor}>{delta}</span></div>
       </div>
-      <div className={`w-14 h-14 rounded-full ${bgCls} ${textCls} flex items-center justify-center`}>
-        {icon}
+      <div className="relative w-16 h-16 shrink-0">
+        <svg viewBox="0 0 64 64" className="w-16 h-16 -rotate-90">
+          <circle cx="32" cy="32" r={R} fill="none" stroke={c.track} strokeWidth="6" />
+          <circle cx="32" cy="32" r={R} fill="none" stroke={c.stroke} strokeWidth="6" strokeLinecap="round" strokeDasharray={CIRC} strokeDashoffset={offset} />
+        </svg>
+        <div className={`absolute inset-0 flex items-center justify-center ${c.text}`}>{icon}</div>
       </div>
     </div>
   )

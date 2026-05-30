@@ -1,4 +1,5 @@
-﻿import { Link } from 'react-router-dom'
+﻿import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import {
   ChevronRight, ChevronDown, Plus, Upload, Edit3, Trash2, Volume2,
   Send, Save, HelpCircle
@@ -21,6 +22,8 @@ const errorWords = [
 ]
 
 export default function DictationConfig() {
+  const [mode, setMode] = useState('拼音模式')
+  const [delivery, setDelivery] = useState('白板手动下发')
   return (
     <div className="p-6 space-y-4">
       <div className="text-xs text-slate-500 flex items-center gap-1.5">
@@ -44,8 +47,8 @@ export default function DictationConfig() {
           {/* 听写模式 */}
           <Section title="听写模式">
             <div className="flex gap-2">
-              {['拼音模式', '汉义模式', '原意模式', '教师朗读', '系统朗读'].map((m, i) => (
-                <button key={i} className={`px-4 py-2 rounded-md text-sm border ${i === 0 ? 'border-brand-500 bg-brand-50 text-brand-600 font-medium' : 'border-slate-200 bg-white text-slate-600'}`}>
+              {['拼音模式', '汉义模式', '原意模式', '教师朗读', '系统朗读'].map((m) => (
+                <button key={m} onClick={() => setMode(m)} className={`px-4 py-2 rounded-md text-sm border transition ${mode === m ? 'border-brand-500 bg-brand-50 text-brand-600 font-medium' : 'border-slate-200 bg-white text-slate-600 hover:border-brand-300'}`}>
                   {m}
                 </button>
               ))}
@@ -117,10 +120,10 @@ export default function DictationConfig() {
         {/* 右侧配置 */}
         <div className="space-y-4">
           <Section title="下发设置" extra={<button className="btn-ghost h-7 text-xs"><HelpCircle className="w-3 h-3" /> 使用帮助</button>}>
-            <RadioRow label="白板手动下发" sub="教师在白板上手动点击下发，学生端开始作答" on />
-            <RadioRow label="翻页后提示" sub="切换到下一页时，提示是否下发作答" />
-            <RadioRow label="指定学生" sub="仅下发给选中的学生" />
-            <RadioRow label="全班" sub="下发给全班学生" />
+            <RadioRow label="白板手动下发" sub="教师在白板上手动点击下发，学生端开始作答" on={delivery === '白板手动下发'} onClick={() => setDelivery('白板手动下发')} />
+            <RadioRow label="翻页后提示" sub="切换到下一页时，提示是否下发作答" on={delivery === '翻页后提示'} onClick={() => setDelivery('翻页后提示')} />
+            <RadioRow label="指定学生" sub="仅下发给选中的学生" on={delivery === '指定学生'} onClick={() => setDelivery('指定学生')} />
+            <RadioRow label="全班" sub="下发给全班学生" on={delivery === '全班'} onClick={() => setDelivery('全班')} />
           </Section>
 
           <Section title="回收设置">
@@ -228,9 +231,9 @@ function NumField({ label, value, unit }) {
   )
 }
 
-function RadioRow({ label, sub, on }) {
+function RadioRow({ label, sub, on, onClick }) {
   return (
-    <label className="flex items-start gap-2 py-1.5 cursor-pointer">
+    <label onClick={onClick} className="flex items-start gap-2 py-1.5 cursor-pointer">
       <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 mt-0.5 ${on ? 'border-brand-500' : 'border-slate-300'}`}>
         {on && <div className="w-2 h-2 rounded-full bg-brand-500 m-0.5" />}
       </div>

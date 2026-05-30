@@ -18,7 +18,7 @@ const layerColors = {
 export default function QuizConfig() {
   const [source, setSource] = useState('题库')
   const [types, setTypes] = useState({ '单选题': true, '多选题': true, '判断题': false, '填空题': false, '手写题': false, '主观题': false })
-  const [options, setOptions] = useState(['x ≥ 5', 'x ≥ 4', 'x < 5', 'x ≤ 5'])
+  const [options, setOptions] = useState(['x > 5', 'x ≥ 5', 'x < 5', 'x ≤ 5'])
   const [answer, setAnswer] = useState(0)
   const [layered, setLayered] = useState(true)
   const [collect, setCollect] = useState({ '实时回收进度': true, '典型答案展示（匿名）': true, '正确率统计': true, '课后进入作业池': true, '错误选项分布': true })
@@ -60,7 +60,7 @@ export default function QuizConfig() {
             <div className="flex gap-2 flex-wrap">
               {[
                 { icon: <Database className="w-4 h-4" />, label: '题库', t: '智能题库' },
-                { icon: <Upload className="w-4 h-4" />, label: '学科网', t: '学科网API' },
+                { icon: <Upload className="w-4 h-4" />, label: '上传', t: '上传本地题目' },
                 { icon: <FileText className="w-4 h-4" />, label: '课件', t: '从课件圈选' },
                 { icon: <Bot className="w-4 h-4" />, label: 'AI', t: 'AI 生成' },
                 { icon: <Edit3 className="w-4 h-4" />, label: '手动', t: '手动录入' }
@@ -94,7 +94,7 @@ export default function QuizConfig() {
             <div className="space-y-3">
               <div>
                 <div className="text-xs text-slate-500 mb-1"><span className="text-red-500 mr-0.5">*</span>题干</div>
-                <input className="input w-full" defaultValue="不等式 3x − 1 ≥ 2x + 4 的解集是（    ）" />
+                <input className="input w-full" defaultValue="不等式 3x − 1 > 2x + 4 的解集是（    ）" />
               </div>
 
               {options.map((opt, i) => (
@@ -141,7 +141,7 @@ export default function QuizConfig() {
               <div className="grid grid-cols-[80px_1fr] gap-3">
                 <span className="text-xs text-slate-500 pt-2">解析</span>
                 <div>
-                  <textarea className="input w-full !h-20 py-2" defaultValue="解：3x − 1 ≥ 2x + 4 ⇒ 3x − 2x ≥ 4 + 1，移项: 3x − 2x ≥ 4 + 1，得 x ≥ 5。" />
+                  <textarea className="input w-full !h-20 py-2" defaultValue="解：3x − 1 > 2x + 4，移项：3x − 2x > 4 + 1，得 x > 5。" />
                 </div>
               </div>
 
@@ -161,7 +161,7 @@ export default function QuizConfig() {
                 <span>1 / 10　 单选题</span>
                 <span className="text-orange-500">⏱ 60秒</span>
               </div>
-              <div className="text-slate-800 mb-3">不等式 3x − 1 ≥ 2x + 4 的解集是（    ）</div>
+              <div className="text-slate-800 mb-3">{'不等式 3x − 1 > 2x + 4 的解集是（    ）'}</div>
               {options.map((opt, i) => (
                 <label key={i} className="flex items-center gap-2 py-1.5 cursor-pointer">
                   <input type="radio" name="prev" checked={answer === i} onChange={() => setAnswer(i)} className="accent-brand-600" />
