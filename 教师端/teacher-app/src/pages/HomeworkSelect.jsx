@@ -4,14 +4,14 @@ import {
   ChevronLeft, Pencil, Search, Sparkles, Check, Clock
 } from 'lucide-react'
 import StepBar from '../components/StepBar.jsx'
-import ChapterTree from '../components/ChapterTree.jsx'
+import ChapterTree, { inChapter } from '../components/ChapterTree.jsx'
 import QuestionCart from '../components/QuestionCart.jsx'
 import { chapterTree, questions, diffStyle, TEXTBOOK } from '../data/questionBank.js'
 
 const SCENES = ['全部', '作业', '课后练习', '单元测']
 const TYPES = ['全部', '选择题', '填空题', '判断题', '计算题', '解答题']
 const DIFFS = ['全部', '容易', '适中', '困难']
-const SOURCES = ['校本题库', '近三年', '本学期']
+const SOURCES = ['全部来源', '校本题库', '近三年', '本学期']
 
 // 试题栏分组用：解答题 -> 解决问题
 const CART_TYPE = { 解答题: '解决问题' }
@@ -32,16 +32,18 @@ export default function HomeworkSelect() {
   const [name, setName] = useState(state?.name || '五年级小数除法巩固练习')
   const [editing, setEditing] = useState(false)
 
+  const [chapter, setChapter] = useState(null)
   const [scene, setScene] = useState('作业')
   const [type, setType] = useState('全部')
   const [diff, setDiff] = useState('全部')
-  const [source, setSource] = useState('校本题库')
+  const [source, setSource] = useState('全部来源')
   const [onlyNew, setOnlyNew] = useState(false)
   const [keyword, setKeyword] = useState('')
   const [sort, setSort] = useState('综合')
 
-  const [selected, setSelected] = useState(() => new Set([1, 2, 3]))
+  const [selected, setSelected] = useState(() => new Set(getInitialSelectedIds(state)))
   const [cartOpen, setCartOpen] = useState(false)
+  const [toast, setToast] = useState('')
 
   const toggle = (id) =>
     setSelected(prev => {
@@ -50,13 +52,23 @@ export default function HomeworkSelect() {
       return next
     })
 
-  const filtered = useMemo(() =>
-    questions.filter(q => {
+  const filtered = useMemo(() => {
+    const result = questions.filter(q => {
+      if (!inChapter(q, chapter)) return false
+      if (scene !== '全部' && !matchesScene(q, scene)) return false
       if (type !== '全部' && q.type !== type) return false
       if (diff !== '全部' && q.diff !== diff) return false
+      if (source !== '全部来源' && !matchesSource(q, source)) return false
+      if (onlyNew && !isNewQuestion(q)) return false
       if (keyword.trim() && !q.stem.includes(keyword.trim()) && !q.kp.includes(keyword.trim())) return false
       return true
-    }), [type, diff, keyword])
+    })
+
+    if (sort === '最新') {
+      return [...result].sort((a, b) => Number(isNewQuestion(b)) - Number(isNewQuestion(a)) || b.id - a.id)
+    }
+    return result
+  }, [chapter, scene, type, diff, source, onlyNew, keyword, sort])
 
   const selectedQuestions = questions.filter(q => selected.has(q.id))
   const groups = groupForCart(selectedQuestions)
@@ -64,7 +76,28 @@ export default function HomeworkSelect() {
 
   const removeFromCart = (ids) => setSelected(prev => { const n = new Set(prev); ids.forEach(i => n.delete(i)); return n })
   const clearCart = () => setSelected(new Set())
-  const goLayout = () => navigate('/homework/layout', { state: { name } })
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 1800) }
+  const recommend = () => {
+    const candidates = filtered.filter(q => !selected.has(q.id)).slice(0, 3)
+    if (candidates.length === 0) {
+      showToast('当前条件下没有可追加的推荐题')
+      return
+    }
+    setSelected(prev => {
+      const next = new Set(prev)
+      candidates.forEach(q => next.add(q.id))
+      return next
+    })
+    showToast(`已智能加入 ${candidates.length} 道题`)
+  }
+  const goLayout = () => navigate('/homework/layout', {
+    state: {
+      id: state?.id,
+      name: name.trim() || '未命名作业',
+      selectedIds: [...selected],
+      items: selectedQuestions
+    }
+  })
 
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col bg-slate-50">
@@ -100,7 +133,7 @@ export default function HomeworkSelect() {
             </div>
           </div>
           <div className="flex-1 overflow-y-auto p-2">
-            <ChapterTree nodes={chapterTree} />
+            <ChapterTree nodes={chapterTree} value={chapter} onChange={setChapter} />
           </div>
         </div>
 
@@ -140,7 +173,7 @@ export default function HomeworkSelect() {
                 ))}
                 <span className="text-slate-400 text-xs">题量 {filtered.length} 道</span>
               </div>
-              <button className="text-brand-600 text-sm flex items-center gap-1 hover:underline"><Sparkles className="w-3.5 h-3.5" /> 智能推荐</button>
+              <button onClick={recommend} className="text-brand-600 text-sm flex items-center gap-1 hover:underline"><Sparkles className="w-3.5 h-3.5" /> 智能推荐</button>
             </div>
 
             <div className="flex-1 overflow-y-auto divide-y divide-slate-50">
@@ -204,8 +237,36 @@ export default function HomeworkSelect() {
           </button>
         }
       />
+
+      {toast && (
+        <div className="fixed left-1/2 top-16 z-[60] -translate-x-1/2 rounded-full bg-slate-900 px-4 py-2 text-sm text-white shadow-lg">✓ {toast}</div>
+      )}
     </div>
   )
+}
+
+function getInitialSelectedIds(state) {
+  if (Array.isArray(state?.items)) return state.items.map(item => item.id).filter(Boolean)
+  if (Array.isArray(state?.selectedIds)) return state.selectedIds
+  return [1, 2, 3]
+}
+
+function isNewQuestion(q) {
+  return q.source.includes('2024-2025') || q.source.includes('本学期') || q.id >= 6
+}
+
+function matchesSource(q, source) {
+  if (source === '校本题库') return q.source.includes('校本')
+  if (source === '本学期') return q.source.includes('本学期') || q.source.includes('2024-2025')
+  if (source === '近三年') return /2023|2024|2025|真题|期中|期末|单元测/.test(q.source)
+  return true
+}
+
+function matchesScene(q, scene) {
+  if (scene === '作业') return true
+  if (scene === '课后练习') return q.diff !== '困难'
+  if (scene === '单元测') return q.source.includes('单元测') || q.source.includes('期中') || q.source.includes('期末') || q.diff !== '容易'
+  return true
 }
 
 function FilterRow({ label, options, value, onChange }) {

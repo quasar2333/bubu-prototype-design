@@ -38,8 +38,11 @@ export default function App() {
         <Route path="/homework/layout" element={<HomeworkLayout />} />
         <Route path="/question-bank" element={<QuestionBank />} />
         <Route path="/review" element={<HomeworkReview />} />
+        <Route path="/review/:pubId" element={<HomeworkReview />} />
         <Route path="/error-analysis" element={<ErrorAnalysis />} />
+        <Route path="/error-analysis/:pubId" element={<ErrorAnalysis />} />
         <Route path="/lecture-gen" element={<LectureGen />} />
+        <Route path="/lecture-gen/:pubId" element={<LectureGen />} />
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/school-resource" element={<SchoolResource />} />
       </Route>

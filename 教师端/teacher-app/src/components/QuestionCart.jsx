@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ClipboardList, X, Trash2, GripVertical, CheckSquare, Square } from 'lucide-react'
 
 const CN_NUM = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十']
@@ -17,7 +17,17 @@ export default function QuestionCart({
 }) {
   const allItems = groups.flatMap(g => g.items)
   const count = allItems.length
+  const availableKey = allItems.map(item => item.id).join('|')
   const [checked, setChecked] = useState(() => new Set())
+
+  useEffect(() => {
+    const available = new Set(allItems.map(item => item.id))
+    setChecked(prev => {
+      const next = new Set([...prev].filter(id => available.has(id)))
+      if (next.size === prev.size && [...next].every(id => prev.has(id))) return prev
+      return next
+    })
+  }, [availableKey])
 
   const toggle = (id) =>
     setChecked(prev => {
@@ -80,7 +90,7 @@ export default function QuestionCart({
                     key={g.type}
                     className="inline-flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full bg-brand-50 text-brand-600 text-xs"
                   >
-                    {g.type} {g.items.length}/{g.items.length}
+                    {g.type} {g.items.length} 题
                     <button
                       onClick={() => onRemove?.(g.items.map(i => i.id))}
                       className="w-4 h-4 rounded-full hover:bg-brand-100 flex items-center justify-center"
@@ -106,7 +116,7 @@ export default function QuestionCart({
               {groups.map((g, gi) => (
                 <div key={g.type}>
                   <div className="text-sm font-semibold text-slate-700 mb-2">
-                    {CN_NUM[gi]}、{g.type}
+                    {CN_NUM[gi] || gi + 1}、{g.type}
                   </div>
                   <div className="space-y-2">
                     {g.items.map((q, qi) => (

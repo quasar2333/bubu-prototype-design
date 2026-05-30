@@ -1,42 +1,53 @@
-﻿import { Link } from 'react-router-dom'
+﻿import { Link, useParams } from 'react-router-dom'
 import {
   ChevronRight, Sparkles, RefreshCw, Save, Download, Send, Plus, Search,
-  FileText, Layers, AlertCircle, BookOpen, ChevronDown, Edit3
+  ClipboardList, ChevronDown, Edit3, BarChart3
 } from 'lucide-react'
+import { getReviewContext, getErrorAnalysis } from '../data/homeworkStore.js'
 
-const sections = [
-  { idx: '1', title: '错因分析概述', sub: '基于错因聚类的教学要点', active: true },
-  { idx: '2', title: '典型错答展示', sub: '4 道典型错题、含解析' },
-  { idx: '3', title: '专项讲解', sub: '不等式两边乘除负数' },
-  { idx: '4', title: '巩固练习', sub: '10 道分层练习' },
-  { idx: '5', title: '课后小结', sub: '关键概念回顾' }
-]
-
-const slides = [
-  { n: 1, title: '错因分析概述' },
-  { n: 2, title: '典型错答 (1)' },
-  { n: 3, title: '典型错答 (2)' },
-  { n: 4, title: '专项讲解' },
-  { n: 5, title: '巩固练习' },
-  { n: 6, title: '课后小结' }
-]
-
-const errorPills = [
-  { name: '概念混淆', n: 23, color: 'rose' },
-  { name: '计算错误', n: 18, color: 'amber' },
-  { name: '解集表示错误', n: 15, color: 'amber' },
-  { name: '移项方向错误', n: 9, color: 'sky' },
-  { name: '审题遗漏', n: 7, color: 'slate' }
-]
+const CAUSE_COLORS = ['rose', 'amber', 'amber', 'sky', 'slate']
+const pillClass = (color) => color === 'rose' ? 'bg-rose-50 text-rose-600'
+  : color === 'amber' ? 'bg-amber-50 text-amber-700'
+  : color === 'sky' ? 'bg-sky-50 text-sky-600' : 'bg-slate-100 text-slate-500'
 
 export default function LectureGen() {
+  const { pubId } = useParams()
+  const ctx = pubId ? getReviewContext(pubId) : null
+  const analysis = pubId ? getErrorAnalysis(pubId) : null
+
+  if (!ctx || !analysis) {
+    return (
+      <div className="h-[calc(100vh-64px)] flex flex-col items-center justify-center text-center">
+        <ClipboardList className="w-12 h-12 text-slate-300 mb-3" />
+        <div className="text-slate-700 font-medium">请从作业列表进入讲评</div>
+        <div className="text-xs text-slate-400 mt-1">在「作业 · 待讲评」中点击某个班级的「讲评」</div>
+        <Link to="/homework" className="btn-primary h-9 px-5 mt-4">去作业列表</Link>
+      </div>
+    )
+  }
+
+  const topCauses = analysis.causes.slice(0, 5).map((c, i) => ({ ...c, color: CAUSE_COLORS[i] || 'slate' }))
+  const hardQuestions = [...analysis.byQuestion].sort((a, b) => a.accuracy - b.accuracy).slice(0, 3)
+  const sections = [
+    { idx: '1', title: '错因分析概述', sub: `班级正确率 ${analysis.correctRate}%`, active: true },
+    { idx: '2', title: '典型错题展示', sub: `${hardQuestions.length} 道高频错题、含解析` },
+    { idx: '3', title: '专项讲解', sub: topCauses[0]?.name || '核心知识点' },
+    { idx: '4', title: '巩固练习', sub: '10 道分层练习' },
+    { idx: '5', title: '课后小结', sub: '关键概念回顾' }
+  ]
+  const slides = sections.map((s, i) => ({ n: i + 1, title: s.title }))
+    .concat({ n: sections.length + 1, title: '分层任务' })
+
   return (
     <div className="p-6 space-y-4">
       <div className="flex items-center justify-between">
         <div className="text-xs text-slate-500 flex items-center gap-1.5">
-          <Link to="/error-analysis" className="hover:text-brand-600">错因分析</Link>
+          <Link to="/homework" className="hover:text-brand-600">作业</Link>
           <ChevronRight className="w-3 h-3" />
-          <span className="text-slate-700">讲评材料生成</span>
+          <span className="text-slate-700">讲评生成 · {ctx.name} · {ctx.className}</span>
+          <Link to={`/error-analysis/${pubId}`} className="ml-3 text-brand-600 hover:underline flex items-center gap-1">
+            <BarChart3 className="w-3.5 h-3.5" /> 查看错因分析
+          </Link>
         </div>
         <div className="flex gap-2">
           <button className="btn-ghost h-8"><Save className="w-3 h-3" /> 保存草稿</button>
@@ -70,9 +81,9 @@ export default function LectureGen() {
 
           <div className="mt-4 border-t border-slate-100 pt-3">
             <div className="text-xs text-slate-500 mb-2">数据源 (4)</div>
-            <SourceTag icon="📊" label="错因分析报告" sub="·数据·" />
-            <SourceTag icon="📋" label="本次作业题目" sub="·题库·" />
-            <SourceTag icon="📚" label="校本资源 - 不等式" sub="·课件·" />
+            <SourceTag icon="📊" label={`错因分析 · ${ctx.className}`} sub="·数据·" />
+            <SourceTag icon="📋" label={`本次作业 · ${ctx.name}`} sub="·题库·" />
+            <SourceTag icon="📚" label="校本资源 - 小数除法" sub="·课件·" />
             <SourceTag icon="📝" label="教研组共享 - 讲解" sub="·素材·" />
           </div>
         </div>
@@ -86,42 +97,40 @@ export default function LectureGen() {
               <button className="hover:text-brand-600 italic">I</button>
               <button className="hover:text-brand-600 underline">U</button>
               <button className="hover:text-brand-600">∑</button>
-              <button className="hover:text-brand-600">🖼</button>
               <button className="hover:text-brand-600">≡</button>
-              <button className="hover:text-brand-600">↺</button>
-              <button className="hover:text-brand-600">↻</button>
             </div>
           </div>
 
           <div className="bg-slate-50 rounded-lg border border-slate-100 p-6 flex-1 overflow-y-auto">
             <div className="bg-white rounded-md shadow-soft p-6 max-w-[640px] mx-auto">
-              <h2 className="text-xl font-bold text-slate-800 mb-3">错因分析概述</h2>
-              <p className="text-sm text-slate-700 mb-3">本次作业班级正确率为 <strong className="text-brand-600">62%</strong>，主要错因如下：</p>
+              <h2 className="text-xl font-bold text-slate-800 mb-1">{ctx.name} · 错因分析概述</h2>
+              <div className="text-xs text-slate-400 mb-3">{ctx.className} · 提交 {analysis.submitted}/{ctx.roster} 人</div>
+              <p className="text-sm text-slate-700 mb-3">本次作业班级正确率为 <strong className="text-brand-600">{analysis.correctRate}%</strong>，主要错因如下：</p>
               <div className="flex flex-wrap gap-1.5 mb-3">
-                {errorPills.map((p, i) => (
-                  <span key={i} className={`pill ${p.color === 'rose' ? 'bg-rose-50 text-rose-600' : p.color === 'amber' ? 'bg-amber-50 text-amber-700' : p.color === 'sky' ? 'bg-sky-50 text-sky-600' : 'bg-slate-100 text-slate-500'}`}>
-                    {p.name} ({p.n}人)
-                  </span>
+                {topCauses.length === 0 && <span className="text-xs text-slate-400">暂无错误数据</span>}
+                {topCauses.map((p, i) => (
+                  <span key={i} className={`pill ${pillClass(p.color)}`}>{p.name} ({p.n}人)</span>
                 ))}
               </div>
 
               <h3 className="text-base font-semibold text-slate-800 mt-4 mb-2">关键问题点</h3>
               <ol className="text-sm text-slate-700 space-y-1.5 list-decimal pl-5">
-                <li>对不等式两边同时除以负数变号问题理解不到位 (51%)</li>
-                <li>解集表示规范化不够 (33%)</li>
-                <li>计算粗心，移项符号错误 (40%)</li>
+                {topCauses.slice(0, 3).map((c, i) => (
+                  <li key={i}>{c.name}（{c.pct}% 的提交学生出现）</li>
+                ))}
+                {topCauses.length === 0 && <li>本次作业整体掌握良好，无显著共性错误。</li>}
               </ol>
 
-              <h3 className="text-base font-semibold text-slate-800 mt-4 mb-2">本节讲评目标</h3>
+              <h3 className="text-base font-semibold text-slate-800 mt-4 mb-2">高频错题</h3>
               <ul className="text-sm text-slate-700 space-y-1.5 list-disc pl-5">
-                <li>明晰不等式两边变号原则</li>
-                <li>规范解集表达方式</li>
-                <li>培养计算检验习惯</li>
+                {hardQuestions.map((q, i) => (
+                  <li key={i}>第{analysis.byQuestion.findIndex(x => x.id === q.id) + 1}题（{q.kp}）：正确率 {q.accuracy}%</li>
+                ))}
               </ul>
 
               <div className="mt-5 border-t border-slate-100 pt-3">
                 <span className="pill bg-violet-50 text-violet-600">AI 建议</span>
-                <span className="text-xs text-slate-500 ml-2">建议在此处插入数轴动画，帮助学生直观理解...</span>
+                <span className="text-xs text-slate-500 ml-2">建议针对「{topCauses[0]?.name || '核心知识点'}」插入竖式分步动画，帮助学生直观理解。</span>
               </div>
             </div>
           </div>
@@ -161,7 +170,8 @@ export default function LectureGen() {
               针对错因 <button className="text-xs text-brand-600 hover:underline flex items-center gap-1"><Search className="w-3 h-3" /> 关联错因卡</button>
             </div>
             <div className="space-y-1.5 text-xs">
-              {errorPills.map((p, i) => (
+              {topCauses.length === 0 && <div className="text-slate-400">本次作业暂无共性错因</div>}
+              {topCauses.map((p, i) => (
                 <label key={i} className="flex items-center gap-2 cursor-pointer">
                   <input type="checkbox" defaultChecked={i < 3} className="accent-brand-600" />
                   <span className="text-slate-700 flex-1">{p.name}</span>

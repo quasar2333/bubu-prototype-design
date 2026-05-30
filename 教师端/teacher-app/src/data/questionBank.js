@@ -42,19 +42,19 @@ export const diffStyle = {
 // 题目库（多行公式用数组渲染）
 export const questions = [
   {
-    id: 1, no: 1, type: '计算题', diff: '适中', minutes: 5, kp: '小数除法',
+    id: 1, no: 1, type: '计算题', diff: '适中', minutes: 5, kp: '小数除法', chapterId: 'c3',
     stem: '脱式计算，能用简便方法的用简便方法计算。',
     lines: ['1.6×9.8 + 1.6×0.2          12.5×13×8', '(14.6 − 2) ÷ 0.28          20.9 + 10.5 ÷ (5.5 − 4.8)'],
     source: '2024-2025学年湖南省益阳市期中试卷', score: 8
   },
   {
-    id: 2, no: 2, type: '计算题', diff: '适中', minutes: 5, kp: '小数除法',
+    id: 2, no: 2, type: '计算题', diff: '适中', minutes: 5, kp: '小数除法', chapterId: 'c3',
     stem: '直接写出得数。',
     lines: ['1.25×8 =      0.15×60 =      20.5÷5 =      3.6÷4 =', '0.36 + 1.54 =      0÷1.9 =      0.02×0.5 =      0.72÷0.3 ='],
     source: '本学期 · 单元测', score: 8
   },
   {
-    id: 3, no: 3, type: '解答题', diff: '适中', minutes: 5, kp: '小数除法',
+    id: 3, no: 3, type: '解答题', diff: '适中', minutes: 5, kp: '小数除法', chapterId: 'c3',
     stem: '青青草原上，大灰狼把小羊关在狼堡的密室里，快来破解狼堡入口的密码和密室的密码救小羊出去吧！',
     lines: [
       '(1) 进入狼堡的密码是按下面流程图计算后的结果。',
@@ -65,27 +65,27 @@ export const questions = [
     source: '2023-2024学年江苏省苏州市单元测', score: 10
   },
   {
-    id: 4, no: 4, type: '解答题', diff: '适中', minutes: 4, kp: '小数除法的应用',
+    id: 4, no: 4, type: '解答题', diff: '适中', minutes: 4, kp: '小数除法的应用', chapterId: 'c3-2',
     stem: '超市促销活动，某商品原价 48.6 元，现打八折出售，现价是多少元？',
     lines: [], source: '校本题库', score: 6
   },
   {
-    id: 5, no: 5, type: '解答题', diff: '困难', minutes: 6, kp: '小数除法的应用',
+    id: 5, no: 5, type: '解答题', diff: '困难', minutes: 6, kp: '小数除法的应用', chapterId: 'c3-2',
     stem: '工程队修一条长 3.25 千米的道路，已经修了 1.75 千米，剩下的要 5 天修完，平均每天修多少千米？',
     lines: [], source: '近三年真题', score: 8
   },
   {
-    id: 6, no: 6, type: '填空题', diff: '容易', minutes: 2, kp: '循环小数',
+    id: 6, no: 6, type: '填空题', diff: '容易', minutes: 2, kp: '循环小数', chapterId: 'c3-4',
     stem: '3.6 ÷ 4.5 的商用循环小数简便记法表示是（  ）。',
     lines: [], source: '2023-2024学年苏州市期末', score: 3
   },
   {
-    id: 7, no: 7, type: '选择题', diff: '容易', minutes: 2, kp: '被除数和商的大小关系',
+    id: 7, no: 7, type: '选择题', diff: '容易', minutes: 2, kp: '被除数和商的大小关系', chapterId: 'c3-2-3',
     stem: '一个数（0 除外）除以小于 1 的数，所得的商（  ）。 A. 比原数大　B. 比原数小　C. 与原数相等　D. 无法确定',
     lines: [], source: '校本题库', score: 3
   },
   {
-    id: 8, no: 8, type: '判断题', diff: '容易', minutes: 1, kp: '小数除法',
+    id: 8, no: 8, type: '判断题', diff: '容易', minutes: 1, kp: '小数除法', chapterId: 'c3',
     stem: '在小数除法中，商一定小于被除数。（  ）',
     lines: [], source: '本学期 · 随堂练', score: 2
   }

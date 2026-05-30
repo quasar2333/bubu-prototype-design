@@ -4,7 +4,7 @@ import {
   Search, ChevronDown, Sparkles, Star, Check, Clock, Copy, AlertCircle, Eye,
   RotateCw, LayoutGrid, Wand2, Hand, Upload, Bookmark
 } from 'lucide-react'
-import ChapterTree from '../components/ChapterTree.jsx'
+import ChapterTree, { inChapter } from '../components/ChapterTree.jsx'
 import QuestionCart from '../components/QuestionCart.jsx'
 import { chapterTree, questions, diffStyle, TEXTBOOK } from '../data/questionBank.js'
 
@@ -23,41 +23,83 @@ function groupByType(items) {
   return order.map(t => ({ type: t, items: map[t] }))
 }
 
+function matchScene(q, scene) {
+  if (scene === '全部' || scene === '作业') return true
+  if (scene === '预习') return q.diff === '容易'
+  if (scene === '单元测') return q.source.includes('单元测') || q.source.includes('本学期')
+  if (scene === '阶段检测') return q.diff !== '容易'
+  if (scene === '期中') return q.source.includes('期中')
+  if (scene === '期末') return q.source.includes('期末')
+  if (scene === '真题') return q.source.includes('真题') || /20\d\d/.test(q.source)
+  if (scene === '模拟') return q.diff === '困难'
+  return true
+}
+
 export default function QuestionBank() {
   const navigate = useNavigate()
   const [purpose, setPurpose] = useState('作业')
   const [treeTab, setTreeTab] = useState('章节目录')
+  const [chapter, setChapter] = useState(null)
   const [scene, setScene] = useState('全部')
   const [type, setType] = useState('全部')
   const [diff, setDiff] = useState('全部')
-  const [multi, setMulti] = useState(false)
   const [keyword, setKeyword] = useState('')
   const [sort, setSort] = useState('综合')
   const [recOpen, setRecOpen] = useState(false)
   const [template, setTemplate] = useState('作业排版')
+  const [toast, setToast] = useState('')
 
-  const [selected, setSelected] = useState(() => new Set(questions.map(q => q.id)))
+  const [selected, setSelected] = useState(() => new Set())
   const [favorites, setFavorites] = useState(() => new Set([3]))
   const [cartOpen, setCartOpen] = useState(false)
 
-  const filtered = useMemo(() =>
-    questions.filter(q => {
+  const filtered = useMemo(() => {
+    const result = questions.filter(q => {
+      if (!inChapter(q, chapter)) return false
+      if (scene !== '全部' && !matchScene(q, scene)) return false
       if (type !== '全部' && q.type !== type) return false
       if (diff !== '全部' && q.diff !== diff) return false
       if (keyword.trim() && !q.stem.includes(keyword.trim()) && !q.kp.includes(keyword.trim())) return false
       return true
-    }), [type, diff, keyword])
+    })
+    if (sort === '最新') return [...result].sort((a, b) => b.id - a.id)
+    if (sort === '热门') return [...result].sort((a, b) => b.score - a.score)
+    return result
+  }, [chapter, scene, type, diff, keyword, sort])
 
   const toggle = (id) => setSelected(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   const toggleFav = (id) => setFavorites(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
   const removeFromCart = (ids) => setSelected(prev => { const n = new Set(prev); ids.forEach(i => n.delete(i)); return n })
   const clearCart = () => setSelected(new Set())
+  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 1800) }
+  const applyRecommend = (mode) => {
+    setRecOpen(false)
+    const pool = filtered.length ? filtered : questions
+    let picked
+    if (mode === '按难度进阶') {
+      const order = { 容易: 0, 适中: 1, 困难: 2 }
+      picked = [...pool].sort((a, b) => order[a.diff] - order[b.diff])
+    } else if (mode === '按章节均衡') {
+      const seen = new Set()
+      picked = pool.filter(q => (seen.has(q.kp) ? false : seen.add(q.kp)))
+    } else {
+      picked = [...pool]
+    }
+    setSelected(new Set(picked.slice(0, 6).map(q => q.id)))
+    showToast(`已按「${mode}」推荐 ${Math.min(6, picked.length)} 道题`)
+  }
 
   const selectedQuestions = questions.filter(q => selected.has(q.id))
   const groups = groupByType(selectedQuestions)
   const totalMinutes = selectedQuestions.reduce((s, q) => s + q.minutes, 0)
   const totalScore = selectedQuestions.reduce((s, q) => s + q.score, 0)
-  const goLayout = () => navigate('/homework/layout', { state: { name: '智能组卷 · ' + TEXTBOOK.grade } })
+  const goLayout = () => navigate('/homework/layout', {
+    state: {
+      name: '智能组卷 · ' + TEXTBOOK.grade,
+      selectedIds: selectedQuestions.map(q => q.id),
+      items: selectedQuestions
+    }
+  })
 
   return (
     <div className="h-[calc(100vh-64px)] flex flex-col bg-slate-50">
@@ -90,7 +132,7 @@ export default function QuestionBank() {
             ))}
           </div>
           <div className="flex-1 overflow-y-auto p-2">
-            <ChapterTree nodes={chapterTree} />
+            <ChapterTree nodes={chapterTree} value={chapter} onChange={setChapter} />
           </div>
         </div>
 
@@ -111,9 +153,6 @@ export default function QuestionBank() {
                         {m} <ChevronDown className="w-3 h-3" />
                       </button>
                     ))}
-                    <label className="flex items-center gap-1 text-xs text-slate-500 cursor-pointer ml-1">
-                      <input type="checkbox" checked={multi} onChange={e => setMulti(e.target.checked)} className="accent-brand-600" /> 多选
-                    </label>
                   </div>
                 </div>
               </div>
@@ -131,14 +170,14 @@ export default function QuestionBank() {
                 {['综合', '最新', '热门'].map(s => (
                   <button key={s} onClick={() => setSort(s)} className={sort === s ? 'text-brand-600 font-medium' : 'text-slate-500 hover:text-slate-700'}>{s}</button>
                 ))}
-                <span className="text-slate-400 text-xs">共 13,408 道试题</span>
+                <span className="text-slate-400 text-xs">当前 {filtered.length} 道 · 题库总量 13,408</span>
               </div>
               <div className="relative">
                 <button onClick={() => setRecOpen(o => !o)} className="text-brand-600 text-sm flex items-center gap-1 hover:underline"><Sparkles className="w-3.5 h-3.5" /> 智能推荐 <ChevronDown className="w-3 h-3" /></button>
                 {recOpen && (
                   <div className="absolute right-0 top-8 z-20 w-40 card p-1 shadow-xl animate-[fadeUp_.15s_ease-out]">
                     {RECOMMEND.map(r => (
-                      <button key={r} onClick={() => setRecOpen(false)} className="w-full text-left px-3 py-2 rounded-md text-sm text-slate-600 hover:bg-brand-50 hover:text-brand-600">{r}</button>
+                      <button key={r} onClick={() => applyRecommend(r)} className="w-full text-left px-3 py-2 rounded-md text-sm text-slate-600 hover:bg-brand-50 hover:text-brand-600">{r}</button>
                     ))}
                   </div>
                 )}
@@ -225,6 +264,10 @@ export default function QuestionBank() {
           </div>
         }
       />
+
+      {toast && (
+        <div className="fixed left-1/2 top-16 z-[60] -translate-x-1/2 rounded-full bg-slate-900 px-4 py-2 text-sm text-white shadow-lg">✓ {toast}</div>
+      )}
     </div>
   )
 }

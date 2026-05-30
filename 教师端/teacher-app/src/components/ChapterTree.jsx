@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { ChevronRight } from 'lucide-react'
 
 // 递归的教材章节 / 知识点目录树
@@ -18,7 +18,7 @@ function TreeNode({ node, depth, openSet, toggleOpen, selectedId, onSelect }) {
   return (
     <div>
       <div
-        onClick={() => (hasChildren ? toggleOpen(node.id) : onSelect(node.id))}
+        onClick={() => { onSelect(node.id); if (hasChildren) toggleOpen(node.id) }}
         className={`flex items-center gap-1 py-1.5 pr-2 rounded-md cursor-pointer text-[13px] transition ${
           selected ? 'bg-brand-50 text-brand-700 font-medium' : 'text-slate-600 hover:bg-slate-50'
         }`}
@@ -50,18 +50,27 @@ function TreeNode({ node, depth, openSet, toggleOpen, selectedId, onSelect }) {
   )
 }
 
-export default function ChapterTree({ nodes }) {
+export default function ChapterTree({ nodes, value, onChange }) {
   const [openSet, setOpenSet] = useState(() => {
     const set = new Set()
     const selectedRef = { id: null }
     collectInitial(nodes, set, selectedRef)
     return set
   })
-  const [selectedId, setSelectedId] = useState(() => {
+  const [internalSel, setInternalSel] = useState(() => {
     const selectedRef = { id: null }
     collectInitial(nodes, new Set(), selectedRef)
     return selectedRef.id
   })
+  const selectedId = value !== undefined ? value : internalSel
+
+  // 挂载时把初始选中章节同步给父组件，使列表从一开始就按章节过滤
+  useEffect(() => { onChange?.(internalSel) }, [])
+
+  const handleSelect = (id) => {
+    setInternalSel(id)
+    onChange?.(id)
+  }
 
   const toggleOpen = (id) =>
     setOpenSet(prev => {
@@ -80,9 +89,17 @@ export default function ChapterTree({ nodes }) {
           openSet={openSet}
           toggleOpen={toggleOpen}
           selectedId={selectedId}
-          onSelect={setSelectedId}
+          onSelect={handleSelect}
         />
       ))}
     </div>
   )
+}
+
+// 题目是否属于所选章节（前缀匹配：选父章节含全部子节点题目）
+export function inChapter(question, chapterId) {
+  if (!chapterId) return true
+  const c = question.chapterId
+  if (!c) return false
+  return c === chapterId || c.startsWith(chapterId) || chapterId.startsWith(c)
 }

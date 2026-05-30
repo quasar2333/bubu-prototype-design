@@ -1,9 +1,16 @@
-import { useState, useMemo } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
-  Plus, FileText, Send, ChevronDown, Search, SlidersHorizontal, RotateCw, X,
-  Trash2, Eye, ClipboardCheck, MessageSquareText, ClipboardList, ChevronUp
+  ChevronDown, ChevronUp, ClipboardCheck, ClipboardList, Eye, FileText,
+  MessageSquareText, Plus, RotateCw, Search, Send, Trash2, X
 } from 'lucide-react'
+import {
+  deleteDraftFromStore,
+  publishDraftFromStore,
+  getHomeworkListData,
+  getHomeworkItems,
+  CLASS_NAMES
+} from '../data/homeworkStore.js'
 
 const TABS = [
   { key: '未发布', label: '未发布' },
@@ -11,25 +18,9 @@ const TABS = [
   { key: '待讲评', label: '待讲评' }
 ]
 
-const CLASSES = ['全部班级', '五 (1) 班', '五 (2) 班', '五 (3) 班']
-
-const initialData = {
-  未发布: [
-    { id: 'd1', name: '五年级小数除法巩固练习', klass: '五 (1) 班', count: 12, deadline: '未设置', created: '2026-05-30 15:30' },
-    { id: 'd2', name: '分数加减法基础练习', klass: '待选班级', count: 8, deadline: '未设置', created: '2026-05-29 10:12' },
-    { id: 'd3', name: '多边形面积单元预习', klass: '五 (2) 班', count: 10, deadline: '未设置', created: '2026-05-28 09:40' }
-  ],
-  待批阅: [
-    { id: 'p1', name: '小数乘法每日一练', klass: '五 (1) 班', count: 15, deadline: '2026-05-28 23:59', submit: 38, total: 45, graded: 12, state: '待批阅' },
-    { id: 'p2', name: '位置与方向课后练', klass: '五 (2) 班', count: 10, deadline: '2026-05-27 23:59', submit: 45, total: 45, graded: 0, state: '待批阅' },
-    { id: 'p3', name: '小数除法随堂检测', klass: '五 (1) 班', count: 18, deadline: '2026-05-26 23:59', submit: 40, total: 45, graded: 25, state: '批阅中' }
-  ],
-  待讲评: [
-    { id: 'r1', name: '期中复习卷', klass: '五 (1) 班', count: 26, deadline: '2026-05-20 已截止', submit: 45, total: 45, graded: 45 },
-    { id: 'r2', name: '小数乘法单元测', klass: '五 (2) 班', count: 20, deadline: '2026-05-18 已截止', submit: 43, total: 43, graded: 43 },
-    { id: 'r3', name: '简易方程基础练', klass: '五 (1) 班', count: 16, deadline: '2026-05-15 已截止', submit: 45, total: 45, graded: 45 }
-  ]
-}
+const CLASSES = ['全部班级', ...CLASS_NAMES]
+const PUBLISH_CLASSES = [...CLASS_NAMES]
+const PAGE_SIZE = 8
 
 const FLOW = [
   { n: 1, title: '命名作业', sub: '填写作业名称和说明' },
@@ -47,30 +38,97 @@ const stateBg = {
 
 export default function Homework() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [tab, setTab] = useState('未发布')
-  const [data, setData] = useState(initialData)
+  const [data, setData] = useState(() => getHomeworkListData())
+  const [page, setPage] = useState(1)
+  const [confirmDelete, setConfirmDelete] = useState(null)
+  const [viewingRow, setViewingRow] = useState(null)
   const [keyword, setKeyword] = useState('')
   const [klass, setKlass] = useState('全部班级')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
   const [showCreate, setShowCreate] = useState(false)
   const [name, setName] = useState('五年级小数除法巩固练习')
   const [flowOpen, setFlowOpen] = useState(true)
+  const [selectedClassByRow, setSelectedClassByRow] = useState({})
+  const [publishingDraft, setPublishingDraft] = useState(null)
+  const [publishClasses, setPublishClasses] = useState(() => new Set())
+  const [publishDeadline, setPublishDeadline] = useState('2026-06-02T23:59')
   const [toast, setToast] = useState('')
 
-  const rows = useMemo(() =>
-    data[tab].filter(r =>
-      (!keyword.trim() || r.name.includes(keyword.trim())) &&
-      (klass === '全部班级' || r.klass === klass)
-    ), [data, tab, keyword, klass])
+  useEffect(() => {
+    setData(getHomeworkListData())
+    if (location.state?.toast) showToast(location.state.toast)
+  }, [location.state])
 
-  const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(''), 2200) }
-  const deleteDraft = (id) => setData(d => ({ ...d, 未发布: d.未发布.filter(r => r.id !== id) }))
-  const editDraft = (r) => navigate('/homework/select', { state: { name: r.name } })
-  const goSelect = () => { setShowCreate(false); navigate('/homework/select', { state: { name } }) }
+  const rows = useMemo(() =>
+    data[tab].filter(row =>
+      (!keyword.trim() || row.name.includes(keyword.trim())) &&
+      hasClass(row, klass) &&
+      inDateRange(row, startDate, endDate)
+    ), [data, tab, keyword, klass, startDate, endDate])
+
+  const pageCount = Math.max(1, Math.ceil(rows.length / PAGE_SIZE))
+  const pageRows = rows.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  useEffect(() => { setPage(1) }, [tab, keyword, klass, startDate, endDate])
+  useEffect(() => { if (page > pageCount) setPage(pageCount) }, [page, pageCount])
+
+  const showToast = (msg) => {
+    setToast(msg)
+    setTimeout(() => setToast(''), 2200)
+  }
+
+  const deleteDraft = (id) => { setData(deleteDraftFromStore(id)); setConfirmDelete(null) }
+
+  const editDraft = (row) => {
+    const items = row.items?.length ? row.items : getHomeworkItems(row.id)
+    navigate('/homework/select', { state: { id: row.id, name: row.name, selectedIds: items.map(q => q.id), items } })
+  }
+
+  const startPublishDraft = (row) => {
+    setPublishingDraft(row)
+    setPublishClasses(new Set(splitClasses(row.klass)))
+    setPublishDeadline('2026-06-02T23:59')
+  }
+
+  const confirmPublishDraft = () => {
+    if (!publishingDraft) return
+    if (publishClasses.size === 0) {
+      showToast('请选择发布班级')
+      return
+    }
+
+    setData(publishDraftFromStore(publishingDraft, [...publishClasses], publishDeadline))
+    setPublishingDraft(null)
+    setTab('待批阅')
+    showToast('已发布作业，已通知学生')
+  }
+
+  const togglePublishClass = (className) => {
+    setPublishClasses(prev => {
+      const next = new Set(prev)
+      next.has(className) ? next.delete(className) : next.add(className)
+      return next
+    })
+  }
+
+  const goSelect = () => {
+    setShowCreate(false)
+    navigate('/homework/select', { state: { name: name.trim(), selectedIds: [] } })
+  }
+
+  const resetFilters = () => {
+    setKeyword('')
+    setKlass('全部班级')
+    setStartDate('')
+    setEndDate('')
+  }
 
   return (
     <div className="p-6 grid grid-cols-[1fr_300px] gap-5">
       <div className="space-y-4 min-w-0">
-        {/* 工具栏 */}
         <div className="flex items-center gap-3 flex-wrap">
           <button onClick={() => setShowCreate(true)} className="btn-primary h-9">
             <Plus className="w-4 h-4" /> 新建作业
@@ -82,21 +140,19 @@ export default function Homework() {
               </select>
               <ChevronDown className="w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
             </div>
-            <input type="date" className="input w-[140px] text-slate-500" />
+            <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="input w-[140px] text-slate-500" />
             <span className="text-slate-300">–</span>
-            <input type="date" className="input w-[140px] text-slate-500" />
+            <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="input w-[140px] text-slate-500" />
             <div className="relative">
               <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input value={keyword} onChange={e => setKeyword(e.target.value)} className="input pl-8 w-[180px]" placeholder="搜索作业名称" />
             </div>
-            <button className="btn-ghost h-9 px-3"><SlidersHorizontal className="w-3.5 h-3.5" /> 筛选</button>
-            <button onClick={() => { setKeyword(''); setKlass('全部班级') }} className="w-9 h-9 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-slate-50">
+            <button onClick={resetFilters} title="重置筛选" className="w-9 h-9 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-slate-50">
               <RotateCw className="w-4 h-4" />
             </button>
           </div>
         </div>
 
-        {/* 列表卡片 */}
         <div className="card overflow-hidden">
           <div className="px-5 pt-4 flex items-center gap-6 border-b border-slate-100">
             {TABS.map(t => (
@@ -115,7 +171,7 @@ export default function Homework() {
               <thead>
                 <tr className="text-xs text-slate-500 border-b border-slate-100">
                   <th className="text-left py-3 px-5 font-normal">作业名称</th>
-                  <th className="text-left py-3 font-normal">班级</th>
+                  <th className="text-left py-3 font-normal">当前班级</th>
                   <th className="text-left py-3 font-normal">题量</th>
                   <th className="text-left py-3 font-normal">截止时间</th>
                   <th className="text-left py-3 font-normal">{tab === '未发布' ? '保存进度' : tab === '待批阅' ? '提交 / 批阅进度' : '批阅进度'}</th>
@@ -124,27 +180,20 @@ export default function Homework() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map(r => (
-                  <tr key={r.id} className="border-b border-slate-50 hover:bg-slate-50/40">
-                    <td className="py-3 px-5">
-                      <div className="flex items-center gap-2">
-                        <FileText className="w-4 h-4 text-brand-500" />
-                        <span className="text-slate-800">{r.name}</span>
-                      </div>
-                      {r.created && <div className="text-xs text-slate-400 mt-1 pl-6">创建于 {r.created}</div>}
-                    </td>
-                    <td className="text-slate-600">{r.klass}</td>
-                    <td className="text-slate-600">{r.count} 题</td>
-                    <td className="text-slate-600 text-xs">{r.deadline}</td>
-                    <td className="pr-4"><ProgressCell tab={tab} row={r} /></td>
-                    <td><span className={`pill ${stateBg[tab === '未发布' ? '草稿' : tab === '待讲评' ? '待讲评' : r.state]}`}>{tab === '未发布' ? '草稿' : tab === '待讲评' ? '待讲评' : r.state}</span></td>
-                    <td className="text-right pr-5">
-                      <RowActions tab={tab} row={r} onEdit={editDraft} onDelete={deleteDraft}
-                        onPublish={() => showToast('已发布作业，已通知学生')}
-                        onReview={() => navigate('/review')}
-                        onLecture={() => navigate('/lecture-gen')} />
-                    </td>
-                  </tr>
+                {pageRows.map(row => (
+                  <HomeworkRow
+                    key={row.id}
+                    row={row}
+                    tab={tab}
+                    selectedClassName={selectedClassByRow[row.id]}
+                    onSelectClass={(className) => setSelectedClassByRow(prev => ({ ...prev, [row.id]: className }))}
+                    onEdit={editDraft}
+                    onDelete={() => setConfirmDelete(row)}
+                    onView={() => setViewingRow(row)}
+                    onPublish={() => startPublishDraft(row)}
+                    onReview={(target) => target?.pubId && navigate(`/review/${target.pubId}`)}
+                    onLecture={(target) => target?.pubId && navigate(`/lecture-gen/${target.pubId}`)}
+                  />
                 ))}
               </tbody>
             </table>
@@ -152,18 +201,19 @@ export default function Homework() {
 
           {rows.length > 0 && (
             <div className="px-5 py-3 flex items-center justify-between text-sm border-t border-slate-50">
-              <span className="text-slate-500">共 {rows.length} 条</span>
+              <span className="text-slate-500">共 {rows.length} 条，第 {page}/{pageCount} 页</span>
               <div className="flex items-center gap-1">
-                <button className="w-8 h-8 rounded-md text-slate-500 hover:bg-slate-100">‹</button>
-                <button className="w-8 h-8 rounded-md bg-brand-500 text-white">1</button>
-                <button className="w-8 h-8 rounded-md text-slate-500 hover:bg-slate-100">›</button>
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page <= 1} className="w-8 h-8 rounded-md text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent">‹</button>
+                {Array.from({ length: pageCount }, (_, i) => i + 1).map(p => (
+                  <button key={p} onClick={() => setPage(p)} className={`w-8 h-8 rounded-md ${p === page ? 'bg-brand-500 text-white' : 'text-slate-500 hover:bg-slate-100'}`}>{p}</button>
+                ))}
+                <button onClick={() => setPage(p => Math.min(pageCount, p + 1))} disabled={page >= pageCount} className="w-8 h-8 rounded-md text-slate-500 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent">›</button>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* 右侧：作业流程 */}
       <div className="space-y-4">
         <div className="card p-4">
           <div className="flex items-center justify-between">
@@ -194,7 +244,6 @@ export default function Homework() {
         </div>
       </div>
 
-      {/* 新建作业弹窗 */}
       {showCreate && (
         <div className="fixed inset-0 z-50 bg-slate-900/30 flex items-center justify-center" onClick={() => setShowCreate(false)}>
           <div className="w-[440px] bg-white rounded-xl shadow-2xl p-6 animate-[fadeUp_.2s_ease-out]" onClick={e => e.stopPropagation()}>
@@ -222,6 +271,86 @@ export default function Homework() {
         </div>
       )}
 
+      {publishingDraft && (
+        <div className="fixed inset-0 z-50 bg-slate-900/30 flex items-center justify-center" onClick={() => setPublishingDraft(null)}>
+          <div className="w-[460px] bg-white rounded-xl shadow-2xl p-6 animate-[fadeUp_.2s_ease-out]" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-5">
+              <div>
+                <div className="text-base font-semibold text-slate-800">发布作业</div>
+                <div className="text-xs text-slate-400 mt-1">{publishingDraft.name}</div>
+              </div>
+              <button onClick={() => setPublishingDraft(null)} className="w-7 h-7 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+
+            <div className="text-sm text-slate-600 mb-2"><span className="text-rose-500">*</span> 选择班级</div>
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {PUBLISH_CLASSES.map(className => (
+                <button
+                  key={className}
+                  onClick={() => togglePublishClass(className)}
+                  className={`h-10 rounded-lg border text-sm transition ${publishClasses.has(className) ? 'border-brand-500 bg-brand-50 text-brand-700 font-medium' : 'border-slate-200 text-slate-600 hover:border-brand-300'}`}
+                >
+                  {className}
+                </button>
+              ))}
+            </div>
+
+            <div className="text-sm text-slate-600 mb-1.5">截止时间</div>
+            <input type="datetime-local" value={publishDeadline} onChange={e => setPublishDeadline(e.target.value)} className="input w-full" />
+
+            <div className="flex justify-end gap-2 mt-6">
+              <button onClick={() => setPublishingDraft(null)} className="btn-ghost h-9 px-5">取消</button>
+              <button onClick={confirmPublishDraft} disabled={publishClasses.size === 0} className="btn-primary h-9 px-5 disabled:opacity-40">确认发布</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 bg-slate-900/30 flex items-center justify-center" onClick={() => setConfirmDelete(null)}>
+          <div className="w-[380px] bg-white rounded-xl shadow-2xl p-6 animate-[fadeUp_.2s_ease-out]" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center gap-3 mb-3">
+              <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center"><Trash2 className="w-5 h-5 text-rose-500" /></div>
+              <div className="text-base font-semibold text-slate-800">删除草稿</div>
+            </div>
+            <div className="text-sm text-slate-600 leading-relaxed">确定删除草稿「{confirmDelete.name}」吗？此操作不可撤销。</div>
+            <div className="flex justify-end gap-2 mt-6">
+              <button onClick={() => setConfirmDelete(null)} className="btn-ghost h-9 px-5">取消</button>
+              <button onClick={() => deleteDraft(confirmDelete.id)} className="btn h-9 px-5 bg-rose-500 hover:bg-rose-600 text-white">删除</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {viewingRow && (
+        <div className="fixed inset-0 z-50 bg-slate-900/30 flex items-center justify-center" onClick={() => setViewingRow(null)}>
+          <div className="w-[560px] max-h-[80vh] bg-white rounded-xl shadow-2xl flex flex-col animate-[fadeUp_.2s_ease-out]" onClick={e => e.stopPropagation()}>
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div className="min-w-0">
+                <div className="text-base font-semibold text-slate-800 truncate">{viewingRow.name}</div>
+                <div className="text-xs text-slate-400 mt-1">{viewingRow.klass || '待选班级'} · 共 {viewingRow.count} 题</div>
+              </div>
+              <button onClick={() => setViewingRow(null)} className="w-7 h-7 rounded-md hover:bg-slate-100 flex items-center justify-center text-slate-400"><X className="w-4 h-4" /></button>
+            </div>
+            <div className="flex-1 overflow-y-auto px-6 py-4 space-y-3">
+              {(viewingRow.items?.length ? viewingRow.items : getHomeworkItems(viewingRow.id)).map((q, i) => (
+                <div key={q.id} className="border border-slate-100 rounded-lg p-3">
+                  <div className="text-sm text-slate-800 leading-relaxed">
+                    <span className="font-medium text-slate-500 mr-1">{i + 1}.</span>{q.stem}
+                    <span className="text-xs text-slate-400 ml-2">（{q.score} 分）</span>
+                  </div>
+                  {q.lines?.map((l, li) => <div key={li} className="text-[13px] text-slate-500 mt-1 font-mono whitespace-pre-wrap">{l}</div>)}
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    <span className="pill bg-slate-100 text-slate-500">{q.type}</span>
+                    <span className="pill bg-slate-100 text-slate-500">{q.kp}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {toast && (
         <div className="fixed left-1/2 top-16 z-[60] -translate-x-1/2 rounded-full bg-slate-900 px-4 py-2 text-sm text-white shadow-lg">✓ {toast}</div>
       )}
@@ -229,8 +358,71 @@ export default function Homework() {
   )
 }
 
-function ProgressCell({ tab, row }) {
+function HomeworkRow({ row, tab, selectedClassName, onSelectClass, onEdit, onDelete, onView, onPublish, onReview, onLecture }) {
+  const target = getSelectedTarget(row, selectedClassName)
+  const state = tab === '未发布' ? '草稿' : tab === '待讲评' ? '待讲评' : target?.state || row.state
+
+  return (
+    <tr className="border-b border-slate-50 hover:bg-slate-50/40">
+      <td className="py-3 px-5">
+        <div className="flex items-center gap-2">
+          <FileText className="w-4 h-4 text-brand-500" />
+          <span className="text-slate-800">{row.name}</span>
+        </div>
+        {row.created && <div className="text-xs text-slate-400 mt-1 pl-6">创建于 {row.created}</div>}
+        {tab !== '未发布' && (
+          <ClassTargetButtons row={row} activeClassName={target?.name} onSelect={onSelectClass} />
+        )}
+      </td>
+      <td className="text-slate-600">
+        {tab === '未发布' ? row.klass : (
+          <div>
+            <div>{target?.name || '未选班级'}</div>
+            <div className="text-[11px] text-slate-400 mt-1">共 {row.classTargets?.length || 0} 个班级</div>
+          </div>
+        )}
+      </td>
+      <td className="text-slate-600">{row.count} 题</td>
+      <td className="text-slate-600 text-xs">{row.deadline}</td>
+      <td className="pr-4"><ProgressCell tab={tab} row={row} target={target} /></td>
+      <td><span className={`pill ${stateBg[state]}`}>{state}</span></td>
+      <td className="text-right pr-5">
+        <RowActions
+          tab={tab}
+          row={row}
+          target={target}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onView={onView}
+          onPublish={onPublish}
+          onReview={onReview}
+          onLecture={onLecture}
+        />
+      </td>
+    </tr>
+  )
+}
+
+function ClassTargetButtons({ row, activeClassName, onSelect }) {
+  return (
+    <div className="mt-2 pl-6 flex flex-wrap gap-1.5">
+      {row.classTargets.map(target => (
+        <button
+          key={target.name}
+          onClick={() => onSelect(target.name)}
+          className={`px-2 py-1 rounded-md text-[11px] border transition ${activeClassName === target.name ? 'border-brand-300 bg-brand-50 text-brand-700' : 'border-slate-200 bg-white text-slate-500 hover:border-brand-200'}`}
+        >
+          {target.name} · 已批 {target.graded}/{target.submit}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function ProgressCell({ tab, row, target }) {
   if (tab === '未发布') return <span className="text-xs text-slate-400">草稿待完善</span>
+
+  const progress = target || row
   if (tab === '待讲评') {
     return (
       <div className="flex items-center gap-2 max-w-[150px]">
@@ -239,40 +431,41 @@ function ProgressCell({ tab, row }) {
       </div>
     )
   }
-  const pct = Math.round((row.submit / row.total) * 100)
+
+  const pct = progress.total ? Math.round((progress.submit / progress.total) * 100) : 0
   return (
     <div className="max-w-[160px]">
       <div className="flex items-center gap-2">
         <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden"><div className={`h-full ${pct >= 80 ? 'bg-emerald-500' : 'bg-brand-500'}`} style={{ width: `${pct}%` }} /></div>
-        <span className="text-xs text-slate-500">{row.submit}/{row.total}</span>
+        <span className="text-xs text-slate-500">{progress.submit}/{progress.total}</span>
       </div>
-      <div className="text-[11px] text-slate-400 mt-1">已批 {row.graded}/{row.submit}</div>
+      <div className="text-[11px] text-slate-400 mt-1">已批 {progress.graded}/{progress.submit}</div>
     </div>
   )
 }
 
-function RowActions({ tab, row, onEdit, onDelete, onPublish, onReview, onLecture }) {
+function RowActions({ tab, row, target, onEdit, onDelete, onView, onPublish, onReview, onLecture }) {
   if (tab === '未发布') {
     return (
       <div className="flex items-center justify-end gap-3 text-xs">
         <button onClick={() => onEdit(row)} className="text-brand-600 hover:underline">继续编辑</button>
         <button onClick={onPublish} className="text-slate-500 hover:text-brand-600">发布</button>
-        <button onClick={() => onDelete(row.id)} className="text-slate-400 hover:text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
+        <button onClick={onDelete} className="text-slate-400 hover:text-rose-500"><Trash2 className="w-3.5 h-3.5" /></button>
       </div>
     )
   }
   if (tab === '待批阅') {
     return (
       <div className="flex items-center justify-end gap-3 text-xs">
-        <button onClick={onReview} className="text-brand-600 font-medium hover:underline flex items-center gap-1"><ClipboardCheck className="w-3.5 h-3.5" /> 批阅</button>
-        <button className="text-slate-500 hover:text-brand-600 flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> 查看</button>
+        <button onClick={() => onReview(target)} className="text-brand-600 font-medium hover:underline flex items-center gap-1"><ClipboardCheck className="w-3.5 h-3.5" /> 批阅</button>
+        <button onClick={() => onView?.(row)} className="text-slate-500 hover:text-brand-600 flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> 查看</button>
       </div>
     )
   }
   return (
     <div className="flex items-center justify-end gap-3 text-xs">
-      <button onClick={onLecture} className="text-violet-600 font-medium hover:underline flex items-center gap-1"><MessageSquareText className="w-3.5 h-3.5" /> 讲评</button>
-      <button className="text-slate-500 hover:text-brand-600 flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> 查看</button>
+      <button onClick={() => onLecture(target)} className="text-violet-600 font-medium hover:underline flex items-center gap-1"><MessageSquareText className="w-3.5 h-3.5" /> 讲评</button>
+      <button onClick={() => onView?.(row)} className="text-slate-500 hover:text-brand-600 flex items-center gap-1"><Eye className="w-3.5 h-3.5" /> 查看</button>
     </div>
   )
 }
@@ -298,4 +491,39 @@ function EmptyState({ tab, onCreate }) {
       )}
     </div>
   )
+}
+
+function getSelectedTarget(row, selectedClassName) {
+  const targets = row.classTargets || []
+  if (targets.length === 0) return null
+  return targets.find(target => target.name === selectedClassName) || targets[0]
+}
+
+function getRowDate(row) {
+  const value = row.created || row.deadline || ''
+  const match = value.match(/\d{4}-\d{2}-\d{2}/)
+  return match?.[0] || ''
+}
+
+function inDateRange(row, startDate, endDate) {
+  const rowDate = getRowDate(row)
+  if (!rowDate) return !startDate && !endDate
+  if (startDate && rowDate < startDate) return false
+  if (endDate && rowDate > endDate) return false
+  return true
+}
+
+function splitClasses(klass) {
+  return String(klass || '')
+    .split('、')
+    .map(item => item.trim())
+    .filter(item => item && item !== '待选班级')
+}
+
+function hasClass(row, klass) {
+  if (klass === '全部班级') return true
+  if (Array.isArray(row.classTargets) && row.classTargets.length) {
+    return row.classTargets.some(target => target.name === klass)
+  }
+  return row.klass === klass
 }

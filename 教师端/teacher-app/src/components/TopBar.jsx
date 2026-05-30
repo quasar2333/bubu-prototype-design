@@ -11,17 +11,26 @@ const titleMap = {
   '/homework/select': { code: '', name: '作业 / 选题' },
   '/homework/layout': { code: '', name: '作业 / 排版' },
   '/question-bank': { code: 'T11', name: '智能题库' },
-  '/review': { code: 'T12', name: '作业批阅' },
-  '/error-analysis': { code: 'T13', name: '错因分析' },
-  '/lecture-gen': { code: 'T14', name: '讲评材料生成' },
+  '/review': { code: 'T12', name: '作业 / 批阅' },
+  '/error-analysis': { code: 'T13', name: '作业 / 错因分析' },
+  '/lecture-gen': { code: 'T14', name: '作业 / 讲评生成' },
   '/analytics': { code: 'T15', name: '学情看板' },
   '/school-resource': { code: 'T16', name: '校本资源' }
+}
+
+function lookupTitle(pathname) {
+  if (titleMap[pathname]) return titleMap[pathname]
+  // 带参数路由（如 /review/:pubId）按前缀匹配
+  const prefix = Object.keys(titleMap)
+    .filter(key => pathname.startsWith(key + '/'))
+    .sort((a, b) => b.length - a.length)[0]
+  return prefix ? titleMap[prefix] : { code: '', name: '' }
 }
 
 export default function TopBar() {
   const location = useLocation()
   const navigate = useNavigate()
-  const info = titleMap[location.pathname] || { code: '', name: '' }
+  const info = lookupTitle(location.pathname)
 
   return (
     <header className="h-16 bg-white border-b border-slate-100 flex items-center px-6 shrink-0 relative">
