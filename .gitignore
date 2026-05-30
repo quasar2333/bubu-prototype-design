@@ -8,3 +8,5 @@ node_modules/
 # Build outputs
 build/
 dist/
+release/
+**/release/
