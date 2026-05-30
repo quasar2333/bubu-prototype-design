@@ -1,15 +1,14 @@
 import { NavLink } from 'react-router-dom'
 import {
   Home, BookOpen, ClipboardList, Database,
-  CheckSquare, BarChart3, Archive, Settings, BookMarked
+  BarChart3, Archive, Settings, BookMarked
 } from 'lucide-react'
 
 const items = [
   { to: '/home', icon: Home, label: '首页' },
   { to: '/courseware', icon: BookOpen, label: '我的课件' },
-  { to: '/homework', icon: ClipboardList, label: '作业布置' },
+  { to: '/homework', icon: ClipboardList, label: '作业' },
   { to: '/question-bank', icon: Database, label: '智能题库' },
-  { to: '/review', icon: CheckSquare, label: '作业批阅' },
   { to: '/analytics', icon: BarChart3, label: '学情查看' },
   { to: '/school-resource', icon: Archive, label: '校本资源' }
 ]

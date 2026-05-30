@@ -8,7 +8,8 @@ import DictationConfig from './pages/DictationConfig.jsx'
 import QuizConfig from './pages/QuizConfig.jsx'
 import StaticToInteractive from './pages/StaticToInteractive.jsx'
 import Homework from './pages/Homework.jsx'
-import HomeworkLayered from './pages/HomeworkLayered.jsx'
+import HomeworkSelect from './pages/HomeworkSelect.jsx'
+import HomeworkLayout from './pages/HomeworkLayout.jsx'
 import QuestionBank from './pages/QuestionBank.jsx'
 import HomeworkReview from './pages/HomeworkReview.jsx'
 import ErrorAnalysis from './pages/ErrorAnalysis.jsx'
@@ -33,7 +34,8 @@ export default function App() {
         <Route path="/dictation" element={<DictationConfig />} />
         <Route path="/quiz" element={<QuizConfig />} />
         <Route path="/homework" element={<Homework />} />
-        <Route path="/homework/layered" element={<HomeworkLayered />} />
+        <Route path="/homework/select" element={<HomeworkSelect />} />
+        <Route path="/homework/layout" element={<HomeworkLayout />} />
         <Route path="/question-bank" element={<QuestionBank />} />
         <Route path="/review" element={<HomeworkReview />} />
         <Route path="/error-analysis" element={<ErrorAnalysis />} />

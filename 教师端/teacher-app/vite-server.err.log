@@ -1,0 +1,330 @@
+[2m22:02:45[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+[2m22:02:45[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+[2m22:03:08[22m [31m[1m[vite][22m[39m Pre-transform error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?
+[2m22:03:08[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:03:08[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:03:33[22m [31m[1m[vite][22m[39m Pre-transform error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?
+[2m22:03:33[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:04:42[22m [31m[1m[vite][22m[39m Pre-transform error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?
+[2m22:04:42[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:04:43[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:05:05[22m [31m[1m[vite][22m[39m Pre-transform error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?
+[2m22:05:05[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:05:05[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:05:43[22m [31m[1m[vite][22m[39m Pre-transform error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?
+[2m22:05:43[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:05:43[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:06:53[22m [31m[1m[vite][22m[39m Pre-transform error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?
+[2m22:06:53[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:06:53[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:07:18[22m [31m[1m[vite][22m[39m Pre-transform error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?
+[2m22:07:18[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:11:40[22m [31m[1m[vite][22m[39m Pre-transform error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?
+[2m22:11:40[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkSelect.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:11:27
+[33m  25 |  import StaticToInteractive from "./pages/StaticToInteractive.jsx";
+  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+     |                              ^
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 13)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:14:17[22m [31m[1m[vite][22m[39m Pre-transform error: Failed to resolve import "./pages/HomeworkLayout.jsx" from "src/App.jsx". Does the file exist?
+[2m22:14:17[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkLayout.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:12:27
+[33m  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+     |                              ^
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";
+  30 |  import HomeworkReview from "./pages/HomeworkReview.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 14)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)
+[2m22:14:18[22m [31m[1m[vite][22m[39m [31mInternal server error: Failed to resolve import "./pages/HomeworkLayout.jsx" from "src/App.jsx". Does the file exist?[39m
+  Plugin: [35mvite:import-analysis[39m
+  File: [36mD:/project/步步原型设计/教师端/teacher-app/src/App.jsx[39m:12:27
+[33m  26 |  import Homework from "./pages/Homework.jsx";
+  27 |  import HomeworkSelect from "./pages/HomeworkSelect.jsx";
+  28 |  import HomeworkLayout from "./pages/HomeworkLayout.jsx";
+     |                              ^
+  29 |  import QuestionBank from "./pages/QuestionBank.jsx";
+  30 |  import HomeworkReview from "./pages/HomeworkReview.jsx";[39m
+      at TransformPluginContext._formatError (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49258:41)
+      at TransformPluginContext.error (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49253:16)
+      at normalizeUrl (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64307:23)
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+      at async file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64439:39
+      at async Promise.all (index 14)
+      at async TransformPluginContext.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:64366:7)
+      at async PluginContainer.transform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:49099:18)
+      at async loadAndTransform (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:51978:27)
+      at async viteTransformMiddleware (file:///D:/project/%E6%AD%A5%E6%AD%A5%E5%8E%9F%E5%9E%8B%E8%AE%BE%E8%AE%A1/%E6%95%99%E5%B8%88%E7%AB%AF/teacher-app/node_modules/vite/dist/node/chunks/dep-BK3b2jBa.js:62106:24)

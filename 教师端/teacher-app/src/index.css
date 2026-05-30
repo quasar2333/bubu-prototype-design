@@ -45,6 +45,15 @@
   }
 }
 
+@keyframes slideIn {
+  from { transform: translateX(100%); opacity: .4; }
+  to { transform: translateX(0); opacity: 1; }
+}
+@keyframes fadeUp {
+  from { transform: translateY(8px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
 /* 自定义滚动条 */
 ::-webkit-scrollbar {
   width: 6px;
